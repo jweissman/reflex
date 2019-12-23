@@ -1,0 +1,83 @@
+Reflex {
+    Program
+      = ListOf<Stmt, delim> delim*
+    
+    Stmt
+      = Expr
+      
+    Expr
+      = SendMessageEq
+      | SendMessage
+      | Defun
+      | StringLit
+      | Invocation
+      
+    Invocation
+      = Funcall
+      | Bareword
+
+    Defun
+      = FunctionName Params Block
+
+    FunctionName
+      = ident
+ 
+    SendMessageEq
+      = Receiver "." Message "=" Expr -- other
+      | Message "=" Expr -- self
+    SendMessage
+      = Receiver "." Message Args -- call
+      | Receiver "." Message -- attr
+    
+    Funcall
+      = Message Args
+    
+    Receiver
+      = //SendMessage
+      | Funcall
+      | SendMessage
+      | Bareword
+
+    Message
+      = ident
+
+    Bareword
+      = ident
+   
+    Args
+      = "(" ListOf<Expr, ","> ")"
+
+    Params
+      = "(" ListOf<Bareword, ","> ")"
+
+    Block
+      = "{" Program "}"
+    
+    StringLit
+      = "'" #singleStringCharacter* "'"
+      | "\"" #doubleStringCharacter* "\""
+
+    singleStringCharacter
+      = ~("\'" | "\\" | "\n") sourceCharacter -- non_escaped
+    //   | "\\" unicodeLiteral                   -- escaped
+   
+    doubleStringCharacter
+      = ~("\"" | "\\" | "\n") sourceCharacter -- non_escaped
+    //   | "\\" unicodeLiteral                   -- escaped
+    
+    sourceCharacter = any
+    
+    // unicodeLiteral
+    //   = "u" hexDigit hexDigit hexDigit hexDigit
+
+    ident
+      = letter alnum*
+    
+    delim
+      = ";"
+      | lineTerminator
+    
+    lineTerminator
+      = "\n"
+      | "\r"
+}
