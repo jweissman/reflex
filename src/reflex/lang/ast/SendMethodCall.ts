@@ -1,18 +1,20 @@
 import Tree from "./Tree";
 import { Code } from "../../vm/Instruction";
+import { Sequence } from "./Sequence";
 export class SendMethodCall extends Tree {
-    constructor(public receiver: Tree, public message: Tree, public params: Tree) {
+    constructor(public receiver: Tree, public message: Tree, public args: Tree) {
         super();
     }
     get code(): Code {
+        let args = this.args as Sequence
         return [
-            ...this.params.code,
+            ...args.reverse().code,
             ...this.receiver.code,
             ...this.message.code,
             ['call', null],
-            ['invoke', null],
+            ['invoke', args.length],
         ];
     }
 
-    inspect() { return [this.receiver.inspect(),this.message.inspect()].join(".") + this.params.inspect()}
+    inspect() { return [this.receiver.inspect(),this.message.inspect()].join(".") + this.args.inspect()}
 }

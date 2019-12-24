@@ -1,12 +1,13 @@
 import chalk from 'chalk';
 import assertNever from 'assert-never'
-import { Value, Instruction, Code } from "./Instruction";
+import { Value, Instruction, Code, prettyCode, prettyInstruct } from "./Instruction";
 import ReflexObject from './types/ReflexObject';
 import main from './Bootstrap';
 import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
-import Reflex from '../Reflex';
 import Tree from '../lang/ast/Tree';
 import { Defun } from '../lang/ast/Defun';
+import { FunctionLiteral } from '../lang/ast/FunctionLiteral';
+import { log } from './Log';
 
 interface Frame {
     ip: number;
@@ -14,12 +15,6 @@ interface Frame {
 }
 
 type Stack = Value[]
-
-function log(message: string) {
-    if (Reflex.trace) {
-        console.log(chalk.green(message));
-    }
-}
 
 function fail(err: string) {
     throw new Error("Machine failure: " + err)
@@ -52,81 +47,91 @@ const indexForLabel = (code: Code, label: string) => {
     }
 }
 
-function invoke(stack: Stack, frames: Frame[], code: Code) {
+function invoke(arity: number, stack: Stack, frames: Frame[], code: Code) {
     let top= stack[stack.length - 1];
+    stack.pop();
     if (top instanceof WrappedFunction) {
-        stack.pop();
-        let arity = top.impl.length
+        // let arity = top.impl.length
         let args = []
-        log(`INVOKE ${top.name} -- ${arity} -- ${stack.length}`)
+        log("INVOKE wrapped function " + top.name + " with arity " + arity)
         for (let i = 0; i < arity; i++) {
             let newTop = stack[stack.length - 1]
             args.push(newTop);
             stack.pop();
         }
+        // let fn = top;
+        // stack.pop()
         let result = top.impl(...args)
         stack.push(result)
     } else if (top instanceof ReflexFunction) {
-        // fail("invoke -- not impl for reflex fn")
         let newFrame: Frame = {
             ip: indexForLabel(code, top.label),
             self: frames[frames.length - 1].self,
         }
+        // stack.pop()
         frames.push(newFrame)
     } else {
-        fail("invoke -- top wasn't reflex fn!")
+        fail("invoke -- top wasn't reflex or wrapped fn!")
     }
 }
 
 function compile(ast: Tree, stack: Stack, meta: Machine) { 
-    if (ast instanceof Tree) {
+    if (ast instanceof Defun || ast instanceof FunctionLiteral) {
+        let label = `lambda-${lambdaCount++}`
+        let name = label
         if (ast instanceof Defun) {
-            let label = `lambda-${lambdaCount++}`
-            let code: Code = [
-                ['label', label],
-                ...ast.shell
-            ]
-            console.log("AT COMPILE", { code })
-            meta.install(code)
-            let name = ast.name.key
-            let fn = (new ReflexFunction(name, label))
-            stack.push(fn)
-        } else {
-            fail('compile not reall impl for trees');
+            name = ast.name.key
         }
+        let code: Code = [
+            ['label', label],
+            ...ast.shell,
+        ]
+        meta.install(code)
+        let fn = new ReflexFunction(name, label)
+        stack.push(fn)
     } else {
-        fail('compile only impl for trees');
+        fail('compile only impl for defun/fun lit');
     }
 }
 
-// const dump = (stack: Stack) => stack.map(it => 
-//     it ? ((it instanceof ReflexObject || it instanceof Tree) ? it.inspect() : it)
-//        : 'null'
-// )
+const dump = (stack: Stack) => stack.map(it =>
+    it ? ((it instanceof ReflexObject || it instanceof Tree) ? chalk.blue(it.inspect()) : chalk.blueBright(it.toString()))
+        : 'null'
+)
 
 let lambdaCount = 0;
+let lastSelf: ReflexObject = main;
+let lastStack: Stack = [];
+const trace = (message: string, instruction: Instruction, frame: Frame, stack: Stack) => {
+    let self = frame.self;
+    let msg = [
+        ...(message ? [chalk.yellow(message)] : []),
+        prettyInstruct(instruction),
+        ...(self !== lastSelf ? [chalk.gray("self: ") + frame.self.inspect()] : []),
+        ...(stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
+    ].join("\n")
+    lastSelf = self;
+    lastStack = [...stack];
+    log(msg);
+}
+
 interface State { stack: Stack, frames: Frame[], meta: Machine }
 const update: (state: State, instruction: Instruction, code: Code) => State = (state, instruction, code) => {
     let [op, value] = instruction;
     let { meta, stack, frames } = state
     let frame = frames[frames.length - 1]
-    // let {self} = frame
-    // log(op + " -- " + value);
     switch (op) {
         case 'push': stack.push(value); break;
         case 'pop': stack.pop(); break;
-        case 'load': fail('load not impl'); break;
-        case 'store': fail('store not impl'); break;
         case 'call': call(stack, frames); break;
         case 'ret': frames.pop(); break;
-        case 'jump': fail('jump not impl'); break;
-        case 'label': log(`@ label: ${value}`); break;
+        case 'label': break;
         case 'halt': break;
-        case 'invoke': invoke(stack, frames, code); break;
+        case 'invoke': invoke(value as number, stack, frames, code); break;
         case 'compile': compile(value as Tree, stack, meta); break;
         case 'send':
             let result = frame.self.send(value as string);
-            stack.push(result)
+            stack.push(result);
             break;
         case 'send_eq':
             // log('stack: ' + dump(stack))
@@ -158,20 +163,28 @@ export default class Machine {
     get currentInstruction() { return this.currentProgram[this.ip]; }
 
     install(code: Code) {
-        log("INSTALL CODE")
+        log("INSTALL CODE: " + prettyCode(code))
+        let stripped = 0;
         const stripMain = (code: Code) => code.flatMap(i => {
             let [op,value] = i
             if (op === 'label' && value === '.main') {
+                stripped++
                 return []
             }
             return [i];
         })
-        this.frame.ip--;
-        this.currentProgram = [ ...stripMain(this.currentProgram), ['label','.main'], ...code, ['halt', null] ]
+        let oldCode = stripMain(this.currentProgram)
+        this.frame.ip-=stripped;
+        this.currentProgram = [
+            ...oldCode,
+            ['label','.main'],
+            ...code,
+            ['halt', null]
+        ]
     }
 
     run(code: Instruction[]) {
-        // log("RUN CODE")
+        // log("RUN CODE: " + prettyCode(code))
         this.install(code);
         this.initiateExecution('.main');
     }
@@ -183,7 +196,7 @@ export default class Machine {
             let labelIndex = indexForLabel(code, label)
             // if (labelIndex !== -1) {
             this.frame.ip = labelIndex
-            log(`init execution @${label}, ip = ${this.ip}`)
+            log(chalk.yellow(`init execution @${label}, ip = ${this.ip}`))
             this.executeLoop();
             // }
         } else {
@@ -206,10 +219,11 @@ export default class Machine {
     }
 
     execute(instruction: Instruction) {
-        // let [op,value] = instruction;
-        // log("EXEC " + op + " -- " + value);
+        let { stack, frames } = this.state
+        let frame = frames[frames.length - 1]
+        trace(`exec @${this.ip}`, instruction, frame, stack)
         update(this.state, instruction, this.currentProgram)
     }
 
-    get state() { return { stack: this.stack, frames: this.frames, meta: this }}
+    get state() { return { stack: this.stack, frames: this.frames, meta: this } }
 }

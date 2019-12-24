@@ -1,45 +1,56 @@
 import ReflexObject from "./ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
+import { log } from "../Log";
 
 export default class ReflexClass extends ReflexObject {
-    static klass = new ReflexClass("Class");
-
-    static makeClassInstance = (klass: ReflexClass, name: string = 'Anonymous') => {
-        // console.log("!!! told to make class instance...")
-        let mu = ReflexClass.assemble(name, klass);
-        // mu.set("super", klass)
-        // mu.set("class", ReflexClass.klass)
-        return mu;
-    }
+    static klass = ReflexClass.makeClass("Class", ReflexClass.klass);
 
     static makeInstance = (klass: ReflexClass) => {
-        // console.log("MAKE INSTANCE", { klass })
         let mu = new ReflexObject()
         if (klass === ReflexClass.klass) {
-            throw new Error("call makeClassInstance instead")
-        } else {
-            // console.log("told to make normal object instance...")
+            // ReflexClass.makeClass() 
+            throw new Error("call makeClass instead")
+            // mu = makeClass()
         }
         mu.set("class", klass);
-        // console.log("MADE INSTANCE", { mu: mu.inspect() })
-        // mu.send(initialize)...
         return mu
     }
 
-    static assemble(name: string, superclass: ReflexClass = ReflexObject.klass) {
+    static makeClass(name: string, superclass: ReflexClass = ReflexObject.klass) {
+        log("MAKE CLASS " + name + " SUBCLASS OF " + superclass)
         let klass = new ReflexClass(name);
         klass.set("super", superclass);
         klass.set("class", ReflexClass.klass);
-        klass.set("new", new WrappedFunction(`${name}.new`, () => ReflexClass.makeInstance(klass)));
+        klass.set("instance_methods", new ReflexObject());
+
+        let newFn: Function = () => ReflexClass.makeInstance(klass);
+        if (name === 'Class') {
+            newFn = (name: string, customSuper?: ReflexClass) =>
+                ReflexClass.makeClass(
+                    name || 'Anonymous',
+                    customSuper || ReflexObject.klass
+                );
+        }
+        klass.set("new", new WrappedFunction(name + '.new', newFn));
+
+        klass.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
+            (name: string, fn: ReflexFunction) => ReflexClass.defineInstanceMethod(klass, fn, name)
+        ));
         return klass;
     }
 
-    constructor(public name: string = 'Anonymous', public theSuper: ReflexClass = ReflexObject.klass) {
-        super();
-        this.set("build", new WrappedFunction(`${name}.build`, (name?: string) => ReflexClass.makeClassInstance(this, name)));
+    static defineInstanceMethod = (klass: ReflexClass, fn: ReflexFunction, name: string) => {
+        fn.name = `${klass.name}.${name}`
+        log("DEFINE INSTANCE METHOD "+ name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
+        let methods = klass.get("instance_methods") || new ReflexObject();
+        methods.set(name, fn);
+        klass.set("instance_methods", methods)
+        return fn
     }
 
-    protected get superclass(): ReflexClass { return this.get("super") as ReflexClass }
-    // inspect() { return this.displayName }
+    private constructor(public name: string) { super(); } 
+    get superclass(): ReflexClass { return this.get("super") as ReflexClass }
+    get ancestors(): ReflexClass[] { return this.name === 'Object' ? [] : [ this.superclass, ...this.superclass.ancestors]}
+    protected get instanceMethods(): ReflexObject { return this.get("instance_methods") as ReflexObject }
     get displayName() { return `Class(${this.name})` }
 }

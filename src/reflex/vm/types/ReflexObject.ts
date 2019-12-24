@@ -1,28 +1,31 @@
 import ReflexClass from "./ReflexClass";
+import { log } from "../Log";
 class MethodMissing extends Error {}
 type Store = {[key: string]: ReflexObject} 
 export default class ReflexObject {
     static klass: ReflexClass; // = new ReflexClass("Object");
     protected members: Store = {}
 
-    get klass() { return this.members['class']; }
-    // get super() { return this.members['super']; }
-    set(k: string,v: ReflexObject) {
-        // try {console.log("MEMBER SET", { k,v,self:this.displayName})} catch(e) {}
-        this.members[k] = v
-    }
+    get klass(): ReflexClass { return this.get('class') as ReflexClass }
+    get superclass(): ReflexClass { return this.klass.get('super') as ReflexClass }
+
+    get ancestors(): ReflexClass[] { return [ this.klass, ...this.klass.ancestors]}
+
+    set(k: string,v: ReflexObject) { this.members[k] = v }
     get(k: string): ReflexObject { return this.members[k] }
 
     send(message: string): ReflexObject {
-        // console.log("ReflexObject.send -- " + message + " -- to self: " + this.inspect());
-        // let shared: Store = this.klass
-        // let meta: Store = this.super.members
+        log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
+        let shared = this.klass.get("instance_methods")
+        let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
         if (message === 'self') {
             return this;
         } else if (this.get(message)) {
             return this.get(message)
-        // } else if (shared.get(message)) {
-            // return shared.get(message)
+        } else if (shared && shared.get(message)) {
+            return shared.get(message)
+        } else if (supershared && supershared.get(message)) {
+            return supershared.get(message)
         } else {
             return this.methodMissing(message);
         }

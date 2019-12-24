@@ -10,6 +10,7 @@ Reflex {
       | SendMessage
       | Defun
       | StringLit
+      | FunctionLit
       | Invocation
       
     Invocation
@@ -25,6 +26,7 @@ Reflex {
     SendMessageEq
       = Receiver "." Message "=" Expr -- other
       | Message "=" Expr -- self
+
     SendMessage
       = Receiver "." Message Args -- call
       | Receiver "." Message -- attr
@@ -52,6 +54,9 @@ Reflex {
 
     Block
       = "{" Program "}"
+
+    FunctionLit
+      = Params "=>" Block
     
     StringLit
       = "'" #singleStringCharacter* "'"

@@ -8,6 +8,6 @@ export class StringLiteral extends Tree {
     get code(): Code {
         return [['push', this.literal]]
     }
-    inspect() { return this.literal}
+    inspect() { return '"' + this.literal + '"'; }
 
 }

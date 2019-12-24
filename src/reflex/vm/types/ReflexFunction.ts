@@ -4,7 +4,7 @@ export class ReflexFunction extends ReflexObject {
         super();
     }
     inspect() { return this.displayName; }
-    get displayName() { return `Function(${this.name}@${this.label})`; }
+    get displayName() { return `Function(${this.name})`; }
 }
 
 export class WrappedFunction extends ReflexObject {
