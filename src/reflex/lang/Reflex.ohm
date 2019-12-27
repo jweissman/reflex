@@ -9,6 +9,7 @@ Reflex {
       = SendMessageEq
       | SendMessage
       | Defun
+      | Defclass
       | StringLit
       | FunctionLit
       | Invocation
@@ -16,6 +17,13 @@ Reflex {
     Invocation
       = Funcall
       | Bareword
+
+    Defclass
+      = Class ClassName Block
+    
+    Class = "class"
+
+    ClassName = ident
 
     Defun
       = FunctionName Params Block

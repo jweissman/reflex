@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import assertNever from 'assert-never'
-import { Value, Instruction, Code, prettyCode, prettyInstruct } from "./Instruction";
+import { Value, Instruction, Code, prettyCode, prettyInstruct, Stone } from "./Instruction";
 import ReflexObject from './types/ReflexObject';
 import main from './Bootstrap';
 import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
@@ -25,6 +25,7 @@ function call(stack: Stack, frames: Frame[]) {
         stack[stack.length - 2],
         stack[stack.length - 1]
     ];
+    log("CALL -- top: " + top + " second: " + (second) + "(" + typeof second + ")");
     if (second && second instanceof ReflexObject && top && typeof top === 'string') {
         stack.pop();
         stack.pop();
@@ -36,6 +37,7 @@ function call(stack: Stack, frames: Frame[]) {
         }
         stack.push(result)
     } else {
+        dump(stack);
         throw new Error("call expects top to be message, second to be recv")
     }
 }
@@ -128,6 +130,19 @@ const update: (state: State, instruction: Instruction, code: Code) => State = (s
     switch (op) {
         case 'push': stack.push(value); break;
         case 'pop': stack.pop(); break;
+        case 'mark': stack.push(new Stone(value as string)); break;
+        case 'sweep': 
+            while (stack.length > 0) {
+                let top = stack[stack.length - 1]
+                stack.pop();
+                if (top instanceof Stone) {
+                    if (top.name === value) {
+                        break;
+                    }
+                }
+            }
+            break;
+            // stack.push(new Stone(value as string)); break;
         case 'call': call(stack, frames); break;
         case 'ret': frames.pop(); break;
         case 'label': break;

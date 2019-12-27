@@ -141,6 +141,8 @@ describe(Reflex, () => {
                 expect(evaluate("o.yep")).toEqual("Function(Object.yep)")
                 evaluate("o.yep()")
                 expect(evaluate("o.kind")).toEqual("Class(Function)")
+                // doesn't exist on new objects (i.e., those that haven't called .yep() yet)
+                expect(() => evaluate("Object.new().kind")).toThrow()
             })
 
             xit('initializes', () => {
@@ -152,7 +154,23 @@ describe(Reflex, () => {
                 expect(evaluate("baz2.value")).toEqual("Class(Quux)")
             })
         })
+
+        describe('class literal notation', () => {
+            it('defines a class', () => {
+                expect(evaluate("class Quux {}")).toEqual("Class(Quux)")
+                expect(evaluate("Quux.new()")).toEqual("Quux")
+                expect(evaluate("Quux.new().class")).toEqual("Class(Quux)")
+            })
+
+            it('defines an instance method', () => {
+                expect(evaluate("class Foo { banana() { Function }}")).toEqual("Class(Foo)")
+                expect(evaluate("Foo.new()")).toEqual("Foo")
+                expect(evaluate("Foo.new().banana")).toEqual("Function(Foo.banana)")
+                expect(evaluate("Foo.new().banana()")).toEqual("Class(Function)")
+            })
+        })
     });
+
     describe('Function', () => {
         it('is the class of Functions', () => {
             expect(evaluate("Function")).toEqual("Class(Function)")

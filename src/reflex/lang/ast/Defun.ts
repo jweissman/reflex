@@ -1,9 +1,10 @@
 import Tree from "./Tree";
-import { Code } from "../../vm/Instruction";
+import { Code, Instruction } from "../../vm/Instruction";
 import { Message } from "./Message";
 
 // type Function
 export class Defun extends Tree {
+    compileOnly: boolean = false;
     constructor(public name: Message, public args: Tree, public block: Tree) { super(); }
     inspect(): string {
         return `defun(${this.name.inspect()}, ${this.args.inspect()} => ${this.block.inspect()})`;
@@ -11,9 +12,11 @@ export class Defun extends Tree {
     get code(): Code {
         // compile block
         // throw new Error("Defun.code -- Method not implemented.");
+        let compile: Instruction = ['compile', this];
+        let send: Code = this.compileOnly ? [] : [['send_eq', this.name.key]];
         return [
-            ['compile', this],
-            ['send_eq', this.name.key]
+            compile,
+            ...send
         ]
     }
 

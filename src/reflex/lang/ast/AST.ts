@@ -10,6 +10,7 @@ import { StringLiteral } from "./StringLit";
 import SendMessageEq from "./SendMessageEq";
 import { Defun } from "./Defun";
 import { FunctionLiteral } from "./FunctionLiteral";
+import { Defclass } from "./Defclass";
 
 const self = new Bareword('self')
 
@@ -18,6 +19,9 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
       new Program(list.tree),
     Funcall: (message: Node, args: Node) =>
         new SendMethodCall(self, message.tree, args.tree),
+    Defclass: (_class: Node, name: Node, block: Node) =>
+      new Defclass(name.tree, block.tree),
+    ClassName: (id: Node) => new Message(id.sourceString),
     Defun: (name: Node, args: Node, block: Node) =>
       new Defun(name.tree, args.tree, block.tree),
     FunctionName: (id: Node) => new Message(id.sourceString),

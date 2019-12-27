@@ -40,8 +40,8 @@ export default class ReflexClass extends ReflexObject {
     }
 
     static defineInstanceMethod = (klass: ReflexClass, fn: ReflexFunction, name: string) => {
+        log("DEFINE INSTANCE METHOD name="+ name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
         fn.name = `${klass.name}.${name}`
-        log("DEFINE INSTANCE METHOD "+ name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
         let methods = klass.get("instance_methods") || new ReflexObject();
         methods.set(name, fn);
         klass.set("instance_methods", methods)

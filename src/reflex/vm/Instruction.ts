@@ -15,9 +15,12 @@ export type Op
   | 'send_eq'
   | 'invoke'
   | 'compile' 
-  // | 'mark'
-  // | 'sweep'
-export class Stone { constructor(public name: string) {}}
+  | 'mark'
+  | 'sweep'
+export class Stone {
+  constructor(public name: string) {}
+  toString() { return `__${this.name}__`; }
+}
 export type Value = null | string | number | ReflexObject | Tree | Stone
 export const prettyValue = (v: Value) => {
   if (v === null) { return ''; }
