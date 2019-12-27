@@ -31,6 +31,9 @@ function call(stack: Stack, frames: Frame[]) {
         let receiver = second;
         let method = top;
         let result = receiver.send(method);
+        if (result instanceof ReflexFunction) {
+            result.self = receiver;
+        }
         stack.push(result)
     } else {
         throw new Error("call expects top to be message, second to be recv")
@@ -48,27 +51,27 @@ const indexForLabel = (code: Code, label: string) => {
 }
 
 function invoke(arity: number, stack: Stack, frames: Frame[], code: Code) {
-    let top= stack[stack.length - 1];
+    let top = stack[stack.length - 1];
     stack.pop();
     if (top instanceof WrappedFunction) {
-        // let arity = top.impl.length
         let args = []
-        log("INVOKE wrapped function " + top.name + " with arity " + arity)
+        // log("INVOKE wrapped function " + top.name + " with arity " + arity)
         for (let i = 0; i < arity; i++) {
             let newTop = stack[stack.length - 1]
             args.push(newTop);
             stack.pop();
         }
-        // let fn = top;
-        // stack.pop()
         let result = top.impl(...args)
         stack.push(result)
     } else if (top instanceof ReflexFunction) {
+        let self = frames[frames.length - 1].self;
+        if (top.self) {
+            self = top.self.within(self);
+        }
         let newFrame: Frame = {
             ip: indexForLabel(code, top.label),
-            self: frames[frames.length - 1].self,
+            self,
         }
-        // stack.pop()
         frames.push(newFrame)
     } else {
         fail("invoke -- top wasn't reflex or wrapped fn!")
@@ -107,7 +110,9 @@ const trace = (message: string, instruction: Instruction, frame: Frame, stack: S
     let msg = [
         ...(message ? [chalk.yellow(message)] : []),
         prettyInstruct(instruction),
-        ...(self !== lastSelf ? [chalk.gray("self: ") + frame.self.inspect()] : []),
+        // ...(self !== lastSelf ? [
+            chalk.gray("self: ") + frame.self.inspect(),
+        // ] : []),
         ...(stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
     ].join("\n")
     lastSelf = self;

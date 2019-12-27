@@ -14,6 +14,9 @@ export default class ReflexObject {
     set(k: string,v: ReflexObject) { this.members[k] = v }
     get(k: string): ReflexObject { return this.members[k] }
 
+    private surroundingObject: ReflexObject | null = null;
+    within(obj: ReflexObject) { this.surroundingObject = obj; return this; }
+
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
         let shared = this.klass.get("instance_methods")
@@ -27,7 +30,12 @@ export default class ReflexObject {
         } else if (supershared && supershared.get(message)) {
             return supershared.get(message)
         } else {
-            return this.methodMissing(message);
+            // send lower self?
+            if (this.surroundingObject) {
+                return this.surroundingObject.send(message);
+            } else {
+                return this.methodMissing(message);
+            }
         }
     }
 

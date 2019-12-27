@@ -1,6 +1,7 @@
 import Tree from "./Tree";
 import { Code } from "../../vm/Instruction";
 import { Sequence } from "./Sequence";
+
 export class SendMethodCall extends Tree {
     constructor(public receiver: Tree, public message: Tree, public args: Tree) {
         super();

@@ -135,17 +135,16 @@ describe(Reflex, () => {
                 expect(evaluate('baz.quux()')).toEqual('Class(Function)')
             })
 
-            xit('may set a value', () => {
+            it('may set a value', () => {
                 expect(evaluate("Object.defineMethod('yep', () => { kind = Function })")).toEqual("Function(Object.yep)")
                 evaluate("o=Object.new()")
                 expect(evaluate("o.yep")).toEqual("Function(Object.yep)")
                 evaluate("o.yep()")
-                // todo change that self
                 expect(evaluate("o.kind")).toEqual("Class(Function)")
             })
 
             xit('initializes', () => {
-                expect(evaluate("Baz = Class.new('Bar').build('Baz')")).toEqual("Class(Baz)")
+                expect(evaluate("Baz = Class.new('Bar', Baz)")).toEqual("Class(Baz)")
                 expect(evaluate("Baz.setInitializer((value) => { self.value = value })")).toEqual("Function(Baz.initialize)")
                 expect(evaluate("baz = Baz.new(Object.new())")).toEqual("Baz")
                 expect(evaluate("baz.value")).toEqual("Object")
