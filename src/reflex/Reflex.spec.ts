@@ -130,11 +130,13 @@ describe(Reflex, () => {
                 expect(evaluate("Object.defineMethod('quux', () => { Function })")).toEqual("Function(Object.quux)")
                 expect(evaluate('o.quux')).toEqual('Function(Object.quux)')
                 expect(evaluate('o.quux()')).toEqual('Class(Function)')
+
                 expect(evaluate("Bar=Class.new('Bar')")).toEqual("Class(Bar)")
                 expect(evaluate("Bar.super")).toEqual("Class(Object)")
                 expect(evaluate('bar=Bar.new()')).toEqual('Bar')
                 expect(evaluate('bar.quux')).toEqual('Function(Object.quux)')
                 expect(evaluate('bar.quux()')).toEqual('Class(Function)')
+
                 expect(evaluate("Baz=Class.new('Baz', Bar)")).toEqual("Class(Baz)")
                 expect(evaluate("Baz.super")).toEqual("Class(Bar)")
                 expect(evaluate('baz=Baz.new()')).toEqual('Baz')
@@ -182,7 +184,7 @@ describe(Reflex, () => {
                 expect(evaluate("Foo.new().banana()")).toEqual("Class(Function)")
             })
 
-            xit("extends Object", () => {
+            it("extends Object", () => {
                 expect(evaluate("class Object { foo() { self.class } }")).toEqual("Class(Object)")
                 expect(evaluate("Object.new().foo()")).toEqual("Class(Object)")
                 expect(evaluate("Function.new(()=>{}).foo()")).toEqual("Class(Function)")
@@ -221,6 +223,12 @@ describe(Reflex, () => {
                 expect(evaluate("fn.class")).toMatch("Class(Function)")
                 expect(evaluate("fn()")).toMatch("Class(Class)")
             })
+        })
+        xit('binds self', () => {
+            expect(evaluate("class Baz{bar(){b=self;()=>{b}}}")).toEqual("Class(Baz)")
+            expect(evaluate("baz=Baz.new()")).toEqual("Baz")
+            expect(evaluate("fn=baz.bar()")).toMatch("Function")
+            expect(evaluate("fn()")).toMatch("Baz")
         })
     })
 

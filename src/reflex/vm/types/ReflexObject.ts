@@ -1,5 +1,5 @@
 import ReflexClass from "./ReflexClass";
-import { log } from "../log";
+import { log } from "../util/log";
 class MethodMissing extends Error {}
 type Store = {[key: string]: ReflexObject} 
 export default class ReflexObject {
@@ -86,16 +86,16 @@ export default class ReflexObject {
     get displayName(): string { return this.className }
 
     inspect(deep: boolean=false): string {
-        let display = (v: ReflexObject) => {
-            try {
-                if (deep) {
-                    return v === this ? this.displayName : v.inspect(false)
-                } else {
-                    return v.displayName
-                }
-            } catch { return "..." }
-        }
-        let members: string = Object.entries(this.members).map(([k,v]) => `${k}:${display(v)}`).join(", ")
+        // let display = (v: ReflexObject) => {
+        //     try {
+        //         if (deep) {
+        //             return v === this ? this.displayName : v.inspect(false)
+        //         } else {
+        //             return v.displayName
+        //         }
+        //     } catch { return "..." }
+        // }
+        // let members: string = Object.entries(this.members).map(([k,v]) => `${k}:${display(v)}`).join(", ")
         return this.displayName //+ "(" + members + ")"
     }
 

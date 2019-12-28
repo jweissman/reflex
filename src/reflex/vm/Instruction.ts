@@ -16,6 +16,7 @@ export type Op
   | 'halt'
   | 'send'
   | 'send_eq'
+  | 'send_or_eq'
   | 'invoke'
   | 'compile' 
   | 'mark'
@@ -43,5 +44,14 @@ export const prettyInstruct = (inst: Instruction) => {
 }
 export type Code = Instruction[]
 export const prettyCode = (code: Code) => {
-  return "\n\n" + code.map(prettyInstruct).join("\n") + chalk.white("\n---\n")
+  return "\n\n" + code.map((line,i) => `${i}. ${prettyInstruct(line)}`).join("\n") + chalk.white("\n---\n")
+}
+export const labelStep = (code: Code, label: string) => code.find(([op, val]) => op === 'label' && val === label)
+export const indexForLabel = (code: Code, label: string) => {
+    let step = labelStep(code, label) 
+    if (step) {
+        return code.indexOf(step)
+    } else {
+        throw new Error("no such label found: " + label)
+    }
 }

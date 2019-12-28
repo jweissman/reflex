@@ -16,7 +16,7 @@ export default class Parser {
         let ast = this.tree(input);
         let code = ast.code //inspect()
         if (this.trace) {
-            console.debug("AST ANALYZE", input, "=>", chalk.yellow(ast.inspect()))
+            console.debug("AST ANALYZE", input, "=>", chalk.blue(ast.inspect()))
         }
         return code
     }

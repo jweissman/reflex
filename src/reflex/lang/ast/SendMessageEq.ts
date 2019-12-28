@@ -15,3 +15,16 @@ export default class SendMessageEq extends Tree {
 
     inspect() { return ['self',this.message].join(".") + "=" + this.expr.inspect()}
 }
+
+export class SendMessageOrEq extends SendMessageEq {
+    // constructor(public receiver: Tree, public message: Message, public expr: Tree) { super(); }
+    get code(): Code {
+        return [
+            ...this.expr.code,
+            ...this.receiver.code,
+            ["send_or_eq",this.message.key],
+        ]
+    }
+
+    inspect() { return ['self',this.message].join(".") + "||=" + this.expr.inspect()}
+}

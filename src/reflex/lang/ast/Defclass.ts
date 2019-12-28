@@ -4,7 +4,7 @@ import { Bareword } from "./Bareword";
 import { Sequence } from "./Sequence";
 import { SendMethodCall } from "./SendMethodCall";
 import { Message } from "./Message";
-import SendMessageEq from "./SendMessageEq";
+import SendMessageEq, { SendMessageOrEq } from "./SendMessageEq";
 import { Code } from "../../vm/Instruction";
 import { Defun } from "./Defun";
 import { SendMessage } from "./SendMessage";
@@ -17,9 +17,10 @@ export class Defclass extends Tree {
     return `class ${this.name.inspect()} ${this.body.inspect()}`;
   }
   get structure() {
-      let defClass = new SendMessageEq(
+      let defClass = new SendMessageOrEq(
           new Bareword("self"),
-          this.name, new SendMethodCall(new Bareword("Class"), new Message("new"), new Sequence([this.name]))
+          this.name,
+          new SendMethodCall(new Bareword("Class"), new Message("new"), new Sequence([this.name]))
       );
       let defMethods = ((this.body as Program).lines as Sequence).map((methodDef) => {
             let defun = methodDef as Defun;
@@ -28,6 +29,7 @@ export class Defclass extends Tree {
         })
         return new Program(
             new Sequence([
+                // ['construct_or_update']
                 defClass,
                 ...defMethods,
             ])
