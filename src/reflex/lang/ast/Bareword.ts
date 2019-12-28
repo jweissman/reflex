@@ -8,5 +8,5 @@ export class Bareword extends Tree {
     get code(): Code {
         return [['send', this.word]]
     }
-    inspect() { return '(bareword)'+this.word}
+    inspect() { return `${this.word}<bare>` }
 }

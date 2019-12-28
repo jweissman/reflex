@@ -1,13 +1,14 @@
 import Tree from "./Tree";
 import { Code, Instruction } from "../../vm/Instruction";
 import { Message } from "./Message";
+import { Sequence } from "./Sequence";
 
 // type Function
 export class Defun extends Tree {
     compileOnly: boolean = false;
-    constructor(public name: Message, public args: Tree, public block: Tree) { super(); }
+    constructor(public name: Message, public params: Sequence, public block: Tree) { super(); }
     inspect(): string {
-        return `defun(${this.name.inspect()}, ${this.args.inspect()} => ${this.block.inspect()})`;
+        return `defun(${this.name.inspect()}, ${this.params.inspect()} => ${this.block.inspect()})`;
     }
     get code(): Code {
         // compile block
@@ -22,7 +23,7 @@ export class Defun extends Tree {
 
     get shell(): Code {
         return [
-            // load args
+            // load params??
             // ['label', this.name.key],
             ...this.block.code,
             ['ret', null],

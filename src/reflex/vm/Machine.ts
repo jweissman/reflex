@@ -7,17 +7,23 @@ import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
 import Tree from '../lang/ast/Tree';
 import { Defun } from '../lang/ast/Defun';
 import { FunctionLiteral } from '../lang/ast/FunctionLiteral';
-import { log } from './Log';
+import { log } from './log';
+import { Frame } from './Frame';
+import { Stack } from './Stack';
+import { fail } from './fail';
+import ReflexClass from './types/ReflexClass';
+import { Bareword } from '../lang/ast/Bareword';
 
-interface Frame {
-    ip: number;
-    self: ReflexObject;
+function zip(a: any[], b: any[]) {
+    return a.map((value, index) => [value, b[index]])
 }
 
-type Stack = Value[]
-
-function fail(err: string) {
-    throw new Error("Machine failure: " + err)
+function pop(stack: Stack) {
+    if (stack.length > 0) {
+        stack.pop()
+    } else {
+        throw new Error("Stack was empty, could not pop!")
+    }
 }
 
 function call(stack: Stack, frames: Frame[]) {
@@ -27,8 +33,10 @@ function call(stack: Stack, frames: Frame[]) {
     ];
     log("CALL -- top: " + top + " second: " + (second) + "(" + typeof second + ")");
     if (second && second instanceof ReflexObject && top && typeof top === 'string') {
-        stack.pop();
-        stack.pop();
+        pop(stack);
+        pop(stack);
+        // stack.pop();
+        // stack.pop();
         let receiver = second;
         let method = top;
         let result = receiver.send(method);
@@ -52,30 +60,40 @@ const indexForLabel = (code: Code, label: string) => {
     }
 }
 
-function invoke(arity: number, stack: Stack, frames: Frame[], code: Code) {
+function invoke(arity: number, stack: Stack, frames: Frame[], code: Code, meta: Machine, ensureReturns?: ReflexObject) {
     let top = stack[stack.length - 1];
-    stack.pop();
+    pop(stack);
+    // stack.pop();
+    let args = []
+    // log("INVOKE wrapped function " + top.name + " with arity " + arity)
+    for (let i = 0; i < arity; i++) {
+        let newTop = stack[stack.length - 1]
+        args.push(newTop);
+        pop(stack);
+        // stack.pop();
+    }
     if (top instanceof WrappedFunction) {
-        let args = []
-        // log("INVOKE wrapped function " + top.name + " with arity " + arity)
-        for (let i = 0; i < arity; i++) {
-            let newTop = stack[stack.length - 1]
-            args.push(newTop);
-            stack.pop();
-        }
-        let result = top.impl(...args)
+        let result = top.impl(meta, ...args)
         stack.push(result)
     } else if (top instanceof ReflexFunction) {
-        let self = frames[frames.length - 1].self;
+        let oldFrame = frames[frames.length - 1]
+        let self = oldFrame.self;
         if (top.self) {
             self = top.self.within(self);
         }
+        log("INVOKE reflex fn " + top.name + " with arity " + arity + " -- params = " + top.params + " / args = " + args);
+        let locals = { ...oldFrame.locals, ...Object.fromEntries(zip(top.params, args)) }
+        // top.
         let newFrame: Frame = {
             ip: indexForLabel(code, top.label),
             self,
+            locals,
+            ...(ensureReturns ? { retValue: ensureReturns } : {}),
         }
+        log("INVOKE push frame with locals: " + Object.keys(locals))
         frames.push(newFrame)
     } else {
+        console.log("TOP: " + top + "(" + typeof top + ")");
         fail("invoke -- top wasn't reflex or wrapped fn!")
     }
 }
@@ -84,6 +102,7 @@ function compile(ast: Tree, stack: Stack, meta: Machine) {
     if (ast instanceof Defun || ast instanceof FunctionLiteral) {
         let label = `lambda-${lambdaCount++}`
         let name = label
+        let arity = ast.params.length
         if (ast instanceof Defun) {
             name = ast.name.key
         }
@@ -92,7 +111,11 @@ function compile(ast: Tree, stack: Stack, meta: Machine) {
             ...ast.shell,
         ]
         meta.install(code)
-        let fn = new ReflexFunction(name, label)
+        let fn = ReflexClass.makeInstance(meta, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
+        fn.name = name;
+        fn.label = label;
+        fn.arity = arity;
+        fn.params = ast.params.map(param => (param as Bareword).word)
         stack.push(fn)
     } else {
         fail('compile only impl for defun/fun lit');
@@ -129,12 +152,13 @@ const update: (state: State, instruction: Instruction, code: Code) => State = (s
     let frame = frames[frames.length - 1]
     switch (op) {
         case 'push': stack.push(value); break;
-        case 'pop': stack.pop(); break;
+        case 'pop': pop(stack); break;
         case 'mark': stack.push(new Stone(value as string)); break;
         case 'sweep': 
             while (stack.length > 0) {
                 let top = stack[stack.length - 1]
-                stack.pop();
+                pop(stack);
+                // stack.pop();
                 if (top instanceof Stone) {
                     if (top.name === value) {
                         break;
@@ -144,22 +168,35 @@ const update: (state: State, instruction: Instruction, code: Code) => State = (s
             break;
             // stack.push(new Stone(value as string)); break;
         case 'call': call(stack, frames); break;
-        case 'ret': frames.pop(); break;
+        case 'ret':
+            frame = frames[frames.length - 1];
+            frames.pop();
+            if (frame.retValue) {
+                stack.push(frame.retValue);
+            }
+            break;
         case 'label': break;
         case 'halt': break;
-        case 'invoke': invoke(value as number, stack, frames, code); break;
+        case 'invoke': invoke(value as number, stack, frames, code, meta); break;
         case 'compile': compile(value as Tree, stack, meta); break;
         case 'send':
-            let result = frame.self.send(value as string);
-            stack.push(result);
+            let val: string = value as string;
+            if (Object.keys(frame.locals).includes(val)) {
+                stack.push(frame.locals[val])
+            } else {
+                let result = frame.self.send(val);
+                stack.push(result);
+            }
             break;
         case 'send_eq':
             // log('stack: ' + dump(stack))
             let key = value as string;
             let top = stack[stack.length - 1];
             if (top instanceof ReflexObject) {
+                // stack.pop()
                 log(`SEND EQ ${key}=${top.inspect()}`)
                 frame.self.set(key, top);
+                // stack.push(key)
             } else {
                 fail("send_eq expects top is be reflex obj to assign")
             }
@@ -172,7 +209,7 @@ const update: (state: State, instruction: Instruction, code: Code) => State = (s
 export default class Machine {
     // ip: number = 0;
     stack: Value[] = []
-    frames: Frame[] = [{ ip: 0, self: main }];
+    frames: Frame[] = [{ ip: 0, self: main, locals: {} }];
 
     get top() { return this.stack[this.stack.length - 1] }
     get frame() { return this.frames[this.frames.length - 1] }
@@ -243,6 +280,17 @@ export default class Machine {
         let frame = frames[frames.length - 1]
         trace(`exec @${this.ip}`, instruction, frame, stack)
         update(this.state, instruction, this.currentProgram)
+        // trace(`(after)`, instruction, frame, stack)
+    }
+
+    doInvoke(ret: ReflexObject | undefined, fn: ReflexFunction, ...args: ReflexObject[]) {
+        log("doInvoke: " + fn.inspect() + " -- args=" + args)
+        // push args manually here...??
+        args.forEach(arg => this.stack.push(arg))
+        this.stack.push(fn)
+        invoke(fn.arity, this.stack, this.frames, this.currentProgram, this, ret);
+        // exec until ret??
+        // call(this.stack, this.frames)
     }
 
     get state() { return { stack: this.stack, frames: this.frames, meta: this } }

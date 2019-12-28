@@ -1,14 +1,16 @@
 import Tree from "./Tree";
 import { Code } from "../../vm/Instruction";
+import { Sequence } from "./Sequence";
 export class FunctionLiteral extends Tree {
-  constructor(public params: Tree, public body: Tree) { super(); }
+  constructor(public params: Sequence, public body: Tree) { super(); }
   inspect(): string {
-    return `(${this.params.inspect()}) => {${this.body.inspect()}}`;
+    return `FN(${this.params.inspect()})[arity:${this.params.length}] => {${this.body.inspect()}}`;
     // throw new Error("FnLit.inspect -- Method not implemented.");
   }
 
   get shell(): Code {
       return [
+        // load params?
           ...this.body.code,
           ['ret', null]
       ]

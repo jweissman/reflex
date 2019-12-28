@@ -1,13 +1,12 @@
 import Reflex from "./Reflex"
 
-let reflex: Reflex = new Reflex()
-const evaluate = (input: string) => reflex.evaluate(input).toString()
 // const expectReflexEquals = (input: string, expected: string) =>
     // expect(evaluate(input)).toEqual(expected)
 
+
 describe(Reflex, () => {
-    beforeEach(() => reflex.machine.stack = [])
-    afterEach(() => expect(reflex.machine.stack.length).toEqual(0))
+    let reflex: Reflex = new Reflex()
+    const evaluate = (input: string) => reflex.evaluate(input).toString()
     describe('Object', () => {
         it('is a class', () => {
             expect(evaluate("Object.class")).toEqual("Class(Class)")
@@ -31,13 +30,17 @@ describe(Reflex, () => {
             it('constructed objects have a class that is a class', () => {
                 expect(evaluate("Object.new().class.class")).toEqual("Class(Class)")
             })
+            // it('wraps the argument if given one', () => {
+            //     expect(evaluate("Object.new(Object)")).toEqual("Object")
+            //     expect(evaluate("Object.new(()=>{Class})")).toEqual("Function")
+            //     expect(evaluate("Object.new(Class.new('Bar'))")).toEqual("Class(Bar)")
+            // })
         });
-        describe('member attrs', () => {
-            xit('send equals', () => {
-                evaluate("o=Object.new()")
-                expect(evaluate("o.x=Function")).toEqual('Class(Function)')
-                expect(evaluate("o.x")).toEqual('Class(Function)')
-            })
+        describe('#methods()', () => {
+            test.todo("once we have lists...")
+            // xit('reports instance member variables that are callable', () => {
+                // expect(evaluate("Object.new().methods()")).toMatch(/\[.+\]/)
+            // })
         })
     });
 
@@ -67,20 +70,20 @@ describe(Reflex, () => {
             })
 
             describe('subclassing', () => {
-                it('news a class', () => {
+                it('builds a class', () => {
                     expect(evaluate("Class.new('Bar').class")).toEqual("Class(Class)")
                 })
-                it('news a class by name', () => {
+                it('builds a class by name', () => {
                     expect(evaluate("Class.new('Bar')")).toEqual("Class(Bar)")
                 });
-                it('descends from Object', () => {
+                it('descends from Object by default', () => {
                     expect(evaluate("Class.new('Bar').super")).toEqual("Class(Object)")
                 });
                 it('constructs a built class', () => {
                     expect(evaluate("Class.new('Bar').new()")).toEqual("Bar")
                 });
 
-                it('builds a subclass', () => {
+                it('builds a subclass descending from a specific class', () => {
                     expect(evaluate("Baz=Class.new('Baz')")).toEqual("Class(Baz)")
                     expect(evaluate("Bar=Class.new('Bar', Baz)")).toEqual("Class(Bar)")
                     expect(evaluate("Bar.super")).toEqual("Class(Baz)")
@@ -141,13 +144,19 @@ describe(Reflex, () => {
                 expect(evaluate("o.yep")).toEqual("Function(Object.yep)")
                 evaluate("o.yep()")
                 expect(evaluate("o.kind")).toEqual("Class(Function)")
-                // doesn't exist on new objects (i.e., those that haven't called .yep() yet)
+                expect(reflex.machine.stack.length).toEqual(0)
+                // the value doesn't exist on new objects (i.e., those that haven't called .yep() yet)
                 expect(() => evaluate("Object.new().kind")).toThrow()
+                expect(evaluate("Object.defineMethod('nope', () => { kind = Class; self })")).toEqual("Function(Object.nope)")
+                expect(reflex.machine.stack.length).toEqual(0)
+                expect(evaluate("Object.new().nope().kind")).toEqual("Class(Class)")
+                expect(reflex.machine.stack.length).toEqual(0)
+                expect(evaluate("o.kind")).toEqual("Class(Function)")
             })
 
-            xit('initializes', () => {
-                expect(evaluate("Baz = Class.new('Bar', Baz)")).toEqual("Class(Baz)")
-                expect(evaluate("Baz.setInitializer((value) => { self.value = value })")).toEqual("Function(Baz.initialize)")
+            it('initializes', () => {
+                expect(evaluate("Baz = Class.new('Baz')")).toEqual("Class(Baz)")
+                expect(evaluate("Baz.defineMethod('init', (value) => { value = value })")).toMatch("Function(Baz.init")
                 expect(evaluate("baz = Baz.new(Object.new())")).toEqual("Baz")
                 expect(evaluate("baz.value")).toEqual("Object")
                 expect(evaluate("baz2 = Baz.new(Class.new('Quux'))")).toEqual("Baz")
@@ -195,22 +204,49 @@ describe(Reflex, () => {
             expect(evaluate("f=()=>{Object}")).toMatch(/Function\(lambda-\d+\)/)
             expect(evaluate("f()")).toEqual("Class(Object)")
         });
-        xit('defines functions', () => {
-            expect(evaluate("Function.new(()=>123)")).toMatch(/Function\(lambda-\d+\)/)
+        describe('.new', () => {
+            it('returns its arg', () => {
+                expect(evaluate("fn=Function.new(()=>{Class})")).toMatch("Function")
+                expect(evaluate("fn.class")).toMatch("Class(Function)")
+                expect(evaluate("fn()")).toMatch("Class(Class)")
+            })
+        })
+    })
+
+    describe("Nil", () => {
+        xit('is the class of uninhabited types', () => {
+            expect(evaluate("Nil")).toEqual("Class(Nil)")
+        });
+
+        xit('is a class', () => {
+            expect(evaluate("Nil.class")).toEqual("Class(Class)")
+        })
+
+        it('has object as supertype', () => {
+            expect(evaluate("Function.super")).toEqual("Class(Object)")
+        })
+            // expect(evaluate("nil")).toEqual("Nil")
+            // expect(evaluate("nil.class")).toEqual("Class(Nil)")
+        // })
+    })
+
+    describe("String", () => {
+        xit('is the class of words', () => {
+            expect(evaluate("String")).toEqual("Class(String)")
         })
     })
 
     describe('main', () => {
-        it('inspects main object', () => {
+        it('is an object', () => {
             expect(evaluate("self")).toEqual("Main")
         })
-        it('inspects main class', () => {
+        it('has a class', () => {
             expect(evaluate("Main")).toEqual("Class(Main)")
         })
-        it('main class is a class', () => {
+        it('has a class that is a class', () => {
             expect(evaluate("Main.class")).toEqual("Class(Class)")
         })
-        it('main is an object', () => {
+        it('descends from object', () => {
             expect(evaluate("Main.super")).toEqual("Class(Object)")
         })
 

@@ -1,24 +1,22 @@
 import ReflexClass from "./types/ReflexClass";
 import ReflexObject from "./types/ReflexObject";
+import { ReflexFunction } from "./types/ReflexFunction";
+
 
 const classClass = ReflexClass.klass;
 classClass.set("class", classClass);
+
 const objectClass = ReflexClass.makeClass("Object");
 objectClass.set("super", objectClass);
 classClass.set("super", objectClass);
 ReflexObject.klass = objectClass;
 
 const functionClass = ReflexClass.makeClass("Function");
-
-// objectClass.set("class", classClass);
-// objectClass.set("super", objectClass);
-// functionClass.set("class", classClass)
-// functionClass.set("super", objectClass);
+ReflexFunction.klass = functionClass;
 
 let mainClass = ReflexClass.makeClass("Main")
 mainClass.set('class', classClass)
 mainClass.set('super', objectClass)
-
 let main = new ReflexObject()
 main.set('class', mainClass)
 

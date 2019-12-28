@@ -1,5 +1,5 @@
 import ReflexClass from "./ReflexClass";
-import { log } from "../Log";
+import { log } from "../log";
 class MethodMissing extends Error {}
 type Store = {[key: string]: ReflexObject} 
 export default class ReflexObject {
@@ -34,12 +34,36 @@ export default class ReflexObject {
             if (this.surroundingObject) {
                 return this.surroundingObject.send(message);
             } else {
+                // this.send("method_missing")
                 return this.methodMissing(message);
             }
         }
     }
 
+
     methodMissing(message: string): ReflexObject { throw new MethodMissing(`Method missing: ${message} on ${this.inspect()}`); }
+
+    respondsTo(message: string): boolean {
+        let shared = this.klass.get("instance_methods")
+        let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
+        if (message === 'self') {
+            return true;
+        } else if (this.get(message)) {
+            return true; //this.get(message)
+        } else if (shared && shared.get(message)) {
+            return true; //shared.get(message)
+        } else if (supershared && supershared.get(message)) {
+            return true; //supershared.get(message)
+        } else {
+            if (this.surroundingObject && this.surroundingObject.respondsTo(message)) {
+                return true;
+                // return this.surroundingObject.respondsTo(message);
+            }
+        }
+        return false;
+    }
+
+    // private 
 
     get className(): string {return (this.klass as ReflexObject & {name: string}).name}
     get displayName(): string { return this.className }
@@ -55,7 +79,7 @@ export default class ReflexObject {
             } catch { return "..." }
         }
         let members: string = Object.entries(this.members).map(([k,v]) => `${k}:${display(v)}`).join(", ")
-        return this.displayName + "(" + members + ")"
+        return this.displayName //+ "(" + members + ")"
     }
 
     toString() { return this.displayName; }

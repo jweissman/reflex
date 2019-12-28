@@ -1,16 +1,36 @@
 import ReflexObject from "./ReflexObject";
+
 export class ReflexFunction extends ReflexObject {
-    constructor(public name: string, public label: string, public self?: ReflexObject) {
-        super();
-    }
+    public name?: string;
+    public label!: string;
+    public self?: ReflexObject
+    public arity!: number
+    public params!: string[]
+    // static klass: ReflexClass;
+    // constructor() { //) {
+    //     super();
+    // }
     inspect() { return this.displayName; }
-    get displayName() { return `Function(${this.name})`; }
+    get displayName() {
+        // return `Function(${this.name}, arity: ${this.arity})`;
+        return `Function(${this.name})` //, arity: ${this.arity})`;
+    }
 }
 
+// a js function
 export class WrappedFunction extends ReflexObject {
     constructor(public name: string, public impl: Function) {
         super();
     }
 
     get displayName() { return `Function(${this.name}[wrap])`; }
+
+    get arity() { return this.impl.length; }
 }
+
+// a fn with a pure reflex impl, constructed via Function.new...
+// export class ClassicalReflexFunction extends ReflexFunction {
+//     constructor(underlyingFn: ReflexFunction) {
+//         super(underlyingFn.name, underlyingFn.label, underlyingFn.self);
+//     }
+// }
