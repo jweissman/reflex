@@ -3,12 +3,12 @@ import { Code } from "../../vm/Instruction";
 import { Message } from "./Message";
 
 export default class SendMessageEq extends Tree {
-    constructor(public message: Message, public expr: Tree) { super(); }
+    constructor(public receiver: Tree, public message: Message, public expr: Tree) { super(); }
     get code(): Code {
         return [
             ...this.expr.code,
             // ...this.message.code,
-            // ...this.receiver.code,
+            ...this.receiver.code,
             ["send_eq",this.message.key],
         ]
     }

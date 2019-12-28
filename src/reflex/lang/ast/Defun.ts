@@ -11,10 +11,11 @@ export class Defun extends Tree {
         return `defun(${this.name.inspect()}, ${this.params.inspect()} => ${this.block.inspect()})`;
     }
     get code(): Code {
-        // compile block
-        // throw new Error("Defun.code -- Method not implemented.");
         let compile: Instruction = ['compile', this];
-        let send: Code = this.compileOnly ? [] : [['send_eq', this.name.key]];
+        let send: Code = this.compileOnly ? [] : [
+            ['send', 'self'],
+            ['send_eq', this.name.key]
+        ];
         return [
             compile,
             ...send
@@ -23,13 +24,8 @@ export class Defun extends Tree {
 
     get shell(): Code {
         return [
-            // load params??
-            // ['label', this.name.key],
             ...this.block.code,
             ['ret', null],
-            // ret
-            // ['compile', this],
-            // ['store', this.name.key]
         ]
     }
 }

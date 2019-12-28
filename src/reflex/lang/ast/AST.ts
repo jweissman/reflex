@@ -11,6 +11,7 @@ import SendMessageEq from "./SendMessageEq";
 import { Defun } from "./Defun";
 import { FunctionLiteral } from "./FunctionLiteral";
 import { Defclass } from "./Defclass";
+import LocalVarSet from "./LocalVarSet";
 
 const self = new Bareword('self')
 
@@ -33,8 +34,10 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
       // new Sequence([paramList.tree]),
     SendMessage_attr: (receiver: Node, _dot: Node, message: Node) =>
       new SendMessage(receiver.tree, message.tree),
-    SendMessageEq_self: (message: Node, _eq: Node, expr: Node) =>
-      new SendMessageEq(message.tree, expr.tree),
+    SendMessageEq_other: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) =>
+      new SendMessageEq(receiver.tree, message.tree, expr.tree),
+    SendMessageEq_local: (message: Node, _eq: Node, expr: Node) =>
+      new LocalVarSet(message.tree, expr.tree),
     Message: (contents: Node) => new Message(contents.sourceString),
     Bareword: (word: Node) => new Bareword(word.sourceString),
     FunctionLit: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),

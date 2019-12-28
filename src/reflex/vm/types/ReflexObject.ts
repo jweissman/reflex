@@ -20,20 +20,38 @@ export default class ReflexObject {
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
         let shared = this.klass.get("instance_methods")
-        let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
+        if (shared) {
+            // log("SHARED: " + JSON.stringify(shared))
+        }
+        let supershared = this.ancestors.map(a => {
+            // log("ANCESTOR " + a + ": " + JSON.stringify(a.get("instance_methods")))
+            return a.get("instance_methods")
+        }).find(a => a.get(message))
+        // log("ANCESTORS: " + this.ancestors)
+        if (supershared) {
+            // log("SUPERSHARED: " + JSON.stringify(supershared))
+        }
         if (message === 'self') {
+            log('msg is self')
             return this;
         } else if (this.get(message)) {
+            log('msg is instance_method')
             return this.get(message)
         } else if (shared && shared.get(message)) {
+            log('msg is parent instance_method')
             return shared.get(message)
         } else if (supershared && supershared.get(message)) {
+            log('msg is ancestor instance_method')
             return supershared.get(message)
         } else {
             // send lower self?
-            if (this.surroundingObject) {
+            if (this.surroundingObject && this.surroundingObject !== this) {
+                log('trying on surrounding obj?')
+                // log('self is -- ' + this.inspect() +
+                    // ' -- surrounding obj is -- ' + this.surroundingObject.inspect())
                 return this.surroundingObject.send(message);
             } else {
+                log('meth missing!')
                 // this.send("method_missing")
                 return this.methodMissing(message);
             }
@@ -41,7 +59,9 @@ export default class ReflexObject {
     }
 
 
-    methodMissing(message: string): ReflexObject { throw new MethodMissing(`Method missing: ${message} on ${this.inspect()}`); }
+    methodMissing(message: string): ReflexObject {
+        throw new MethodMissing(`Method missing: ${message} on ${this.inspect()}`);
+    }
 
     respondsTo(message: string): boolean {
         let shared = this.klass.get("instance_methods")
@@ -49,21 +69,18 @@ export default class ReflexObject {
         if (message === 'self') {
             return true;
         } else if (this.get(message)) {
-            return true; //this.get(message)
+            return true;
         } else if (shared && shared.get(message)) {
-            return true; //shared.get(message)
+            return true;
         } else if (supershared && supershared.get(message)) {
-            return true; //supershared.get(message)
+            return true;
         } else {
             if (this.surroundingObject && this.surroundingObject.respondsTo(message)) {
                 return true;
-                // return this.surroundingObject.respondsTo(message);
             }
         }
         return false;
     }
-
-    // private 
 
     get className(): string {return (this.klass as ReflexObject & {name: string}).name}
     get displayName(): string { return this.className }

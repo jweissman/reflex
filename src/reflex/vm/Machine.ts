@@ -31,17 +31,29 @@ function call(stack: Stack, frames: Frame[]) {
         stack[stack.length - 2],
         stack[stack.length - 1]
     ];
+    let frame = frames[frames.length - 1]
     log("CALL -- top: " + top + " second: " + (second) + "(" + typeof second + ")");
     if (second && second instanceof ReflexObject && top && typeof top === 'string') {
         pop(stack);
         pop(stack);
-        // stack.pop();
-        // stack.pop();
         let receiver = second;
         let method = top;
-        let result = receiver.send(method);
-        if (result instanceof ReflexFunction) {
-            result.self = receiver;
+        let result; 
+        // locals shadow
+        if (frame.locals[method]) {
+            let local = frame.locals[method]
+            result = local;
+            if (result instanceof ReflexFunction) {
+                // result.self = frame.self; // SHOULD we even override self here???
+                                          // (what does that even really mean semantically?)
+                                          // seems like if you have a local copy of bound fn,
+                                          // we would NOT want this behavior
+            }
+        } else {
+            result = receiver.send(method);
+            if (result instanceof ReflexFunction) {
+                result.self = receiver;
+            }
         }
         stack.push(result)
     } else {
@@ -179,6 +191,21 @@ const update: (state: State, instruction: Instruction, code: Code) => State = (s
         case 'halt': break;
         case 'invoke': invoke(value as number, stack, frames, code, meta); break;
         case 'compile': compile(value as Tree, stack, meta); break;
+        case 'local_var_set':
+            // log('stack: ' + dump(stack))
+            let key = value as string;
+            let top = stack[stack.length - 1];
+            if (top instanceof ReflexObject) {
+                // stack.pop()
+                log(`LOCAL VAR SET ${key}=${top.inspect()}`)
+                frame.locals[key] = top;
+
+                // frame.self.set(key, top);
+                // stack.push(key)
+            } else {
+                fail("local_var_set expects top is be reflex obj to assign")
+            }
+            break;
         case 'send':
             let val: string = value as string;
             if (Object.keys(frame.locals).includes(val)) {
@@ -189,16 +216,20 @@ const update: (state: State, instruction: Instruction, code: Code) => State = (s
             }
             break;
         case 'send_eq':
-            // log('stack: ' + dump(stack))
-            let key = value as string;
-            let top = stack[stack.length - 1];
-            if (top instanceof ReflexObject) {
+            log('send eq -- stack: ' + dump(stack))
+            let k = value as string;
+            let recv = stack[stack.length - 1];
+            pop(stack)
+            let obj = stack[stack.length - 1];
+            if (obj instanceof ReflexObject && recv instanceof ReflexObject) {
                 // stack.pop()
-                log(`SEND EQ ${key}=${top.inspect()}`)
-                frame.self.set(key, top);
+                log(`SEND EQ ${recv.inspect()}.${k}=${obj.inspect()}`)
+                // frame.locals[key] = top;
+                // frame.self.
+                recv.set(k, obj);
                 // stack.push(key)
             } else {
-                fail("send_eq expects top is be reflex obj to assign")
+                fail("send_eq expects top is be reflex obj to receiver, second to be object to assign")
             }
             break;
         default: assertNever(op);
@@ -241,7 +272,6 @@ export default class Machine {
     }
 
     run(code: Instruction[]) {
-        // log("RUN CODE: " + prettyCode(code))
         this.install(code);
         this.initiateExecution('.main');
     }
@@ -251,18 +281,15 @@ export default class Machine {
         let step = labelStep(code, label)
         if (step) {
             let labelIndex = indexForLabel(code, label)
-            // if (labelIndex !== -1) {
             this.frame.ip = labelIndex
             log(chalk.yellow(`init execution @${label}, ip = ${this.ip}`))
             this.executeLoop();
-            // }
         } else {
             fail("Could not find label " + label)
         }
     }
 
     executeLoop() {
-        // log(`HARD LOOP -- ip=${this.ip}`)
         let halted = false;
         while (!halted) {
             let [op] = this.currentInstruction
@@ -280,17 +307,12 @@ export default class Machine {
         let frame = frames[frames.length - 1]
         trace(`exec @${this.ip}`, instruction, frame, stack)
         update(this.state, instruction, this.currentProgram)
-        // trace(`(after)`, instruction, frame, stack)
     }
 
     doInvoke(ret: ReflexObject | undefined, fn: ReflexFunction, ...args: ReflexObject[]) {
-        log("doInvoke: " + fn.inspect() + " -- args=" + args)
-        // push args manually here...??
         args.forEach(arg => this.stack.push(arg))
         this.stack.push(fn)
         invoke(fn.arity, this.stack, this.frames, this.currentProgram, this, ret);
-        // exec until ret??
-        // call(this.stack, this.frames)
     }
 
     get state() { return { stack: this.stack, frames: this.frames, meta: this } }

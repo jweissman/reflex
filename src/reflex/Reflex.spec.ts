@@ -42,6 +42,10 @@ describe(Reflex, () => {
                 // expect(evaluate("Object.new().methods()")).toMatch(/\[.+\]/)
             // })
         })
+
+        // describe("everything is an instance of Object", () => {
+        //     // expect(evaluate("Object.new().isA(Object)")).toEqual(true)
+        // })
     });
 
     describe('Class', () => {
@@ -139,7 +143,7 @@ describe(Reflex, () => {
             })
 
             it('may set a value', () => {
-                expect(evaluate("Object.defineMethod('yep', () => { kind = Function })")).toEqual("Function(Object.yep)")
+                expect(evaluate("Object.defineMethod('yep', () => { self.kind = Function })")).toEqual("Function(Object.yep)")
                 evaluate("o=Object.new()")
                 expect(evaluate("o.yep")).toEqual("Function(Object.yep)")
                 evaluate("o.yep()")
@@ -147,7 +151,7 @@ describe(Reflex, () => {
                 expect(reflex.machine.stack.length).toEqual(0)
                 // the value doesn't exist on new objects (i.e., those that haven't called .yep() yet)
                 expect(() => evaluate("Object.new().kind")).toThrow()
-                expect(evaluate("Object.defineMethod('nope', () => { kind = Class; self })")).toEqual("Function(Object.nope)")
+                expect(evaluate("Object.defineMethod('nope', () => { self.kind = Class; self })")).toEqual("Function(Object.nope)")
                 expect(reflex.machine.stack.length).toEqual(0)
                 expect(evaluate("Object.new().nope().kind")).toEqual("Class(Class)")
                 expect(reflex.machine.stack.length).toEqual(0)
@@ -156,7 +160,7 @@ describe(Reflex, () => {
 
             it('initializes', () => {
                 expect(evaluate("Baz = Class.new('Baz')")).toEqual("Class(Baz)")
-                expect(evaluate("Baz.defineMethod('init', (value) => { value = value })")).toMatch("Function(Baz.init")
+                expect(evaluate("Baz.defineMethod('init', (value) => { self.value = value })")).toMatch("Function(Baz.init")
                 expect(evaluate("baz = Baz.new(Object.new())")).toEqual("Baz")
                 expect(evaluate("baz.value")).toEqual("Object")
                 expect(evaluate("baz2 = Baz.new(Class.new('Quux'))")).toEqual("Baz")
@@ -176,6 +180,13 @@ describe(Reflex, () => {
                 expect(evaluate("Foo.new()")).toEqual("Foo")
                 expect(evaluate("Foo.new().banana")).toEqual("Function(Foo.banana)")
                 expect(evaluate("Foo.new().banana()")).toEqual("Class(Function)")
+            })
+
+            xit("extends Object", () => {
+                expect(evaluate("class Object { foo() { self.class } }")).toEqual("Class(Object)")
+                expect(evaluate("Object.new().foo()")).toEqual("Class(Object)")
+                expect(evaluate("Function.new(()=>{}).foo()")).toEqual("Class(Function)")
+                expect(evaluate("Class.new().foo()")).toEqual("Class(Class)")
             })
         })
     });
@@ -200,7 +211,7 @@ describe(Reflex, () => {
         it('creates lambdas', () => {
             expect(evaluate("()=>{Object}")).toMatch(/Function\(lambda-\d+\)/)
         });
-        it('creates lambdas', () => {
+        it('invokes lambdas', () => {
             expect(evaluate("f=()=>{Object}")).toMatch(/Function\(lambda-\d+\)/)
             expect(evaluate("f()")).toEqual("Class(Object)")
         });
@@ -213,6 +224,30 @@ describe(Reflex, () => {
         })
     })
 
+    describe("Boolean", () => {
+        xit('is the class of truth-values', () => {
+            expect(evaluate("Boolean")).toEqual("Class(Boolean)")
+        })
+    })
+
+    describe("String", () => {
+        xit('is the class of words', () => {
+            expect(evaluate("String")).toEqual("Class(String)")
+        })
+    })
+
+    describe("Number", () => {
+        xit('is the class of numeric values', () => {
+            expect(evaluate("Number")).toEqual("Class(Number)")
+        })
+    })
+
+    describe("Array", () => {
+        xit('is the class of collections', () => {
+            expect(evaluate("Array")).toEqual("Class(Array)")
+        })
+    })
+
     describe("Nil", () => {
         xit('is the class of uninhabited types', () => {
             expect(evaluate("Nil")).toEqual("Class(Nil)")
@@ -222,19 +257,14 @@ describe(Reflex, () => {
             expect(evaluate("Nil.class")).toEqual("Class(Class)")
         })
 
-        it('has object as supertype', () => {
-            expect(evaluate("Function.super")).toEqual("Class(Object)")
+        xit('has object as supertype', () => {
+            expect(evaluate("Nil.super")).toEqual("Class(Object)")
         })
             // expect(evaluate("nil")).toEqual("Nil")
             // expect(evaluate("nil.class")).toEqual("Class(Nil)")
         // })
     })
 
-    describe("String", () => {
-        xit('is the class of words', () => {
-            expect(evaluate("String")).toEqual("Class(String)")
-        })
-    })
 
     describe('main', () => {
         it('is an object', () => {
@@ -250,15 +280,26 @@ describe(Reflex, () => {
             expect(evaluate("Main.super")).toEqual("Class(Object)")
         })
 
-        it('variables', () => {
+        xit('local variables', () => {
             evaluate("Obj = Object")
             expect(evaluate("Obj")).toEqual("Class(Object)")
             expect(evaluate("Obj.class")).toEqual("Class(Class)")
-
             evaluate("o = Object.new()")
             expect(evaluate("o")).toEqual("Object")
             expect(evaluate("o.class")).toEqual("Class(Object)")
+            // they are not defined on main but 'merely' in local scope / frame 
+            // (so inherited into child scopes but not living on the object as such...)
+            expect(()=>evaluate("self.o")).toThrow()
         })
+
+        //it('local variables', () => {
+        //    evaluate("self.Obj = Object")
+        //    expect(evaluate("Obj")).toEqual("Class(Object)")
+        //    expect(evaluate("Obj.class")).toEqual("Class(Class)")
+        //    evaluate("o = Object.new()")
+        //    expect(evaluate("o")).toEqual("Object")
+        //    expect(evaluate("o.class")).toEqual("Class(Object)")
+        //})
         
         //test.todo('construct new instance of new class')
         //test.todo('define new class more eloquently')

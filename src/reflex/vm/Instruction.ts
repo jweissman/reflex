@@ -5,7 +5,10 @@ export type Op
   = 'push'
   | 'pop'
   // | 'load'
+  
   // | 'store'
+  | 'local_var_set'
+
   | 'label' 
   // | 'jump'
   | 'call'

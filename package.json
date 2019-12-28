@@ -24,7 +24,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test:debug": "node --inspect-brk ./node_modules/jest-cli/bin/jest.js --runInBand"
+    "test:debug": "node --inspect-brk ./node_modules/jest-cli/bin/jest.js --runInBand",
+    "reflex": "ts-node --project ./tsconfig.production.json ./bin/index.ts"
   },
   "eslintConfig": {
     "extends": "react-app"

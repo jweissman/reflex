@@ -32,8 +32,8 @@ Reflex {
       = ident
  
     SendMessageEq
-      = Receiver "." Message "=" Expr -- other
-      | Message "=" Expr -- self
+      = (Bareword | Funcall | SendMessage) "." Message "=" Expr -- other
+      | Message "=" Expr -- local
 
     SendMessage
       = Receiver "." Message Args -- call
