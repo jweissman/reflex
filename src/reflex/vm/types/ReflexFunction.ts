@@ -1,5 +1,6 @@
 import ReflexObject from "./ReflexObject";
 import { State } from "../State";
+import { Store } from "../Frame";
 
 interface Binding { state: State }
 
@@ -9,7 +10,9 @@ export class ReflexFunction extends ReflexObject {
     public self?: ReflexObject
     public arity!: number
     public params!: string[]
-    public binding?: Binding;
+    public locals: Store = {};
+
+    // public binding?: Binding;
     // static klass: ReflexClass;
     // constructor() { //) {
     //     super();

@@ -9,6 +9,7 @@ import { fail } from './util/fail';
 import { invoke } from './invoke';
 import { trace } from './trace';
 import { update } from './update';
+import Reflex from '../Reflex';
 
 export default class Machine {
     stack: Value[] = []
@@ -72,7 +73,7 @@ export default class Machine {
         }
     }
 
-    delaySecs: number = -1 //0.2
+    delaySecs: number = Reflex.config.delay
     executeLoop() {
         let halted = false;
         while (!halted) {

@@ -30,6 +30,9 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
         fn.label = label;
         fn.arity = arity;
         fn.params = ast.params.map(param => (param as Bareword).word);
+        let frame = meta.frames[meta.frames.length - 1]
+        fn.locals = frame.locals
+        fn.self = frame.self
         stack.push(fn);
     }
     else {

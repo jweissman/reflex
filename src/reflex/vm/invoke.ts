@@ -37,6 +37,7 @@ export function invoke(
         }
         let locals = {
             ...oldFrame.locals,
+            ...top.locals,
             ...Object.fromEntries(zip(top.params, args))
         };
         let newFrame: Frame = {

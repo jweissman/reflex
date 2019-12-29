@@ -213,15 +213,26 @@ describe(Reflex, () => {
                 expect(evaluate("fn()")).toMatch("Class(Class)")
             })
         })
-        xit('binds locals', () => {
-            expect(evaluate("class Baz{bar(){b=self;()=>{b}}}")).toEqual("Class(Baz)")
-            expect(evaluate("baz=Baz.new()")).toEqual("Baz")
+        it('binds locals', () => {
+            expect(evaluate("class A{bar(){b=self;()=>{b}}}")).toEqual("Class(A)")
+            expect(evaluate("baz=A.new()")).toEqual("A")
             expect(evaluate("fn=baz.bar()")).toMatch("Function")
-            expect(evaluate("fn()")).toMatch("Baz")
+            expect(evaluate("fn()")).toMatch("A")
 
-            expect(evaluate("class Baz{quux(){()=>{self}}}")).toEqual("Class(Baz)")
+            expect(evaluate("class A{quux(){()=>{self}}}")).toEqual("Class(A)")
             expect(evaluate("fn=baz.quux()")).toMatch("Function")
-            expect(evaluate("fn()")).toMatch("Baz")
+            expect(evaluate("fn()")).toMatch("A")
+        })
+        it('higher-order', () => {
+            evaluate('parent=(klass)=>klass.super')
+            evaluate('twice=(f)=>(x)=>f(f(x))')
+            evaluate('grandparent=twice parent')
+            expect(evaluate('grandparent(Object)')).toEqual("Class(Object)")
+            expect(evaluate('grandparent(Function)')).toEqual("Class(Object)")
+            expect(evaluate('grandparent(Class)')).toEqual("Class(Object)")
+            expect(evaluate('grandparent(Class.new("Bar"))')).toEqual("Class(Object)")
+            expect(evaluate('grandparent(Class.new("Bar", Class.new("Baz")))')).toEqual("Class(Object)")
+            expect(evaluate('grandparent(Class.new("Bar", Class.new("Baz", Class.new("Quux"))))')).toEqual("Class(Quux)")
         })
     })
 
