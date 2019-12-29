@@ -12,20 +12,7 @@ import { Defun } from "./Defun";
 import { FunctionLiteral } from "./FunctionLiteral";
 import { Defclass } from "./Defclass";
 import LocalVarSet from "./LocalVarSet";
-import { Code } from "../../vm/Instruction";
-
-class Barecall extends Tree {
-  constructor(public key: string, public args: Tree) {
-    super();
-  }
-  inspect(): string { return this.key + "()"}
-  get code(): Code {
-    return [
-      ...this.args.code,
-      ['barecall', this.key],
-    ]
-  }
-}
+import { Barecall } from "./Barecall";
 
 const self = new Bareword('self')
 
@@ -40,7 +27,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     Defun: (name: Node, args: Node, block: Node) =>
       new Defun(name.tree, args.tree, block.tree),
     FunctionName: (id: Node) => new Message(id.sourceString),
-    Args: (_lp: Node, args: Node, _rp: Node) => args.tree,
+    FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
     Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
     SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) =>
       new SendMethodCall(receiver.tree, message.tree, args.tree),
@@ -54,7 +41,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
       new LocalVarSet(message.tree, expr.tree),
     Message: (contents: Node) => new Message(contents.sourceString),
     Bareword: (word: Node) => new Bareword(word.sourceString),
-    Barecall: (word: Node, params: Node) => new Barecall(word.sourceString, params.tree),
+    Barecall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
     FunctionLit: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
     StringLit: (_lq:Node, lit: Node,_rq: Node) => new StringLiteral(lit.sourceString),
     NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),

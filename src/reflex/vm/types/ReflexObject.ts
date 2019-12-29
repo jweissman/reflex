@@ -20,17 +20,8 @@ export default class ReflexObject {
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
         let shared = this.klass.get("instance_methods")
-        if (shared) {
-            // log("SHARED: " + JSON.stringify(shared))
-        }
-        let supershared = this.ancestors.map(a => {
-            // log("ANCESTOR " + a + ": " + JSON.stringify(a.get("instance_methods")))
-            return a.get("instance_methods")
-        }).find(a => a.get(message))
-        // log("ANCESTORS: " + this.ancestors)
-        if (supershared) {
-            // log("SUPERSHARED: " + JSON.stringify(supershared))
-        }
+        let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
+        
         if (message === 'self') {
             log('msg is self')
             return this;
@@ -44,15 +35,11 @@ export default class ReflexObject {
             log('msg is ancestor instance_method')
             return supershared.get(message)
         } else {
-            // send lower self?
             if (this.surroundingObject && this.surroundingObject !== this) {
-                log('trying on surrounding obj?')
-                // log('self is -- ' + this.inspect() +
-                    // ' -- surrounding obj is -- ' + this.surroundingObject.inspect())
+                log('trying on surrounding obj')
                 return this.surroundingObject.send(message);
             } else {
                 log('meth missing!')
-                // this.send("method_missing")
                 return this.methodMissing(message);
             }
         }

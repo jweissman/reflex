@@ -36,7 +36,7 @@ Reflex {
       | Message "=" Expr -- local
 
     SendMessage
-      = Receiver "." Message Args -- call
+      = (SendMessage | Funcall | Bareword) "." Message Args -- call
       | Receiver "." Message -- attr
 
     Funcall
@@ -58,7 +58,14 @@ Reflex {
       = ident
    
     Args
+      = FormalArguments
+      | BareArguments
+    
+    FormalArguments
       = "(" ListOf<Expr, ","> ")"
+
+    BareArguments
+      = ~"(" NonemptyListOf<Expr, ",">
 
     Params
       = "(" ListOf<Bareword, ","> ")"
@@ -68,6 +75,8 @@ Reflex {
 
     FunctionLit
       = Params "=>" Block
+      | Params "=>" Expr
+      | ident "=>" Expr
     
     StringLit
       = "'" #singleStringCharacter* "'"
@@ -87,7 +96,9 @@ Reflex {
     //   = "u" hexDigit hexDigit hexDigit hexDigit
 
     ident
-      = letter alnum*
+      = letter idChar*
+    
+    idChar = alnum | "_"
     
     delim
       = ";"

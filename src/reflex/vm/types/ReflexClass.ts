@@ -1,6 +1,5 @@
 import ReflexObject from "./ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
-import { log } from "../util/log";
 import Machine from "../Machine";
 
 const NATIVE_CLASSES: { [key: string]: any } = {

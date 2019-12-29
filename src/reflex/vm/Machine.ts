@@ -25,6 +25,14 @@ export default class Machine {
     currentProgram: Code = [];
     get currentInstruction() { return this.currentProgram[this.ip]; }
 
+    sideload(newCode: Code) {
+        this.currentProgram = [
+            ...this.currentProgram,
+            ['halt', null],
+            ...newCode,
+        ]
+    }
+
     install(code: Code) {
         let stripped = 0;
         const stripMain = (code: Code) => code.flatMap(i => {
@@ -64,6 +72,7 @@ export default class Machine {
         }
     }
 
+    delaySecs: number = -1 //0.2
     executeLoop() {
         let halted = false;
         while (!halted) {
@@ -73,8 +82,16 @@ export default class Machine {
             } else {
                 this.execute(this.currentInstruction)
                 this.frame.ip++;
+                if (this.delaySecs > 0) {
+                    this.syncDelay(this.delaySecs)
+                }
             }
         }
+    }
+
+    syncDelay(secs: number) {
+            var waitTill = new Date(new Date().getTime() + secs * 1000);
+            while (waitTill > new Date()) { }
     }
 
     execute(instruction: Instruction) {

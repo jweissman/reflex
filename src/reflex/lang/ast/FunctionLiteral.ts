@@ -4,7 +4,7 @@ import { Sequence } from "./Sequence";
 export class FunctionLiteral extends Tree {
   constructor(public params: Sequence, public body: Tree) { super(); }
   inspect(): string {
-    return `FN(${this.params.inspect()})[arity:${this.params.length}] => {${this.body.inspect()}}`;
+    return `${this.params.inspect()} => ${this.body.inspect()}`;
     // throw new Error("FnLit.inspect -- Method not implemented.");
   }
 

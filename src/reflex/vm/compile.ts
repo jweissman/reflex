@@ -8,9 +8,11 @@ import { fail } from './util/fail';
 import ReflexClass from './types/ReflexClass';
 import { Bareword } from '../lang/ast/Bareword';
 import Machine from './Machine';
+import { log } from "./util/log";
 
 export let lambdaCount = 0;
 export function compile(ast: Tree, stack: Stack, meta: Machine) {
+    log("COMPILE " + ast.inspect());
     if (ast instanceof Defun || ast instanceof FunctionLiteral) {
         let label = `lambda-${lambdaCount++}`;
         let name = label;
@@ -22,7 +24,7 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
             ['label', label],
             ...ast.shell,
         ];
-        meta.install(code);
+        meta.sideload(code);
         let fn = ReflexClass.makeInstance(meta, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
         fn.name = name;
         fn.label = label;

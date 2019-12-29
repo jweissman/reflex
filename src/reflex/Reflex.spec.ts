@@ -7,6 +7,7 @@ import Reflex from "./Reflex"
 describe(Reflex, () => {
     let reflex: Reflex = new Reflex()
     const evaluate = (input: string) => reflex.evaluate(input).toString()
+
     describe('Object', () => {
         it('is a class', () => {
             expect(evaluate("Object.class")).toEqual("Class(Class)")
@@ -30,22 +31,10 @@ describe(Reflex, () => {
             it('constructed objects have a class that is a class', () => {
                 expect(evaluate("Object.new().class.class")).toEqual("Class(Class)")
             })
-            // it('wraps the argument if given one', () => {
-            //     expect(evaluate("Object.new(Object)")).toEqual("Object")
-            //     expect(evaluate("Object.new(()=>{Class})")).toEqual("Function")
-            //     expect(evaluate("Object.new(Class.new('Bar'))")).toEqual("Class(Bar)")
-            // })
         });
         describe('#methods()', () => {
             test.todo("once we have lists and strings/symbols...")
-            // xit('reports instance member variables that are callable', () => {
-                // expect(evaluate("Object.new().methods()")).toMatch(/\[.+\]/)
-            // })
         })
-
-        // describe("everything is an instance of Object", () => {
-        //     // expect(evaluate("Object.new().isA(Object)")).toEqual(true)
-        // })
     });
 
     describe('Class', () => {
@@ -224,11 +213,29 @@ describe(Reflex, () => {
                 expect(evaluate("fn()")).toMatch("Class(Class)")
             })
         })
-        xit('binds self', () => {
+        xit('binds locals', () => {
             expect(evaluate("class Baz{bar(){b=self;()=>{b}}}")).toEqual("Class(Baz)")
             expect(evaluate("baz=Baz.new()")).toEqual("Baz")
             expect(evaluate("fn=baz.bar()")).toMatch("Function")
             expect(evaluate("fn()")).toMatch("Baz")
+
+            expect(evaluate("class Baz{quux(){()=>{self}}}")).toEqual("Class(Baz)")
+            expect(evaluate("fn=baz.quux()")).toMatch("Function")
+            expect(evaluate("fn()")).toMatch("Baz")
+        })
+    })
+
+    describe("Nil", () => {
+        xit('is the class of uninhabited types', () => {
+            expect(evaluate("Nil")).toEqual("Class(Nil)")
+        });
+
+        xit('is a class', () => {
+            expect(evaluate("Nil.class")).toEqual("Class(Class)")
+        })
+
+        xit('has object as supertype', () => {
+            expect(evaluate("Nil.super")).toEqual("Class(Object)")
         })
     })
 
@@ -256,23 +263,11 @@ describe(Reflex, () => {
         })
     })
 
-    describe("Nil", () => {
-        xit('is the class of uninhabited types', () => {
-            expect(evaluate("Nil")).toEqual("Class(Nil)")
-        });
-
-        xit('is a class', () => {
-            expect(evaluate("Nil.class")).toEqual("Class(Class)")
+    describe("Hash", () => {
+        xit('is the class of collections', () => {
+            expect(evaluate("Array")).toEqual("Class(Array)")
         })
-
-        xit('has object as supertype', () => {
-            expect(evaluate("Nil.super")).toEqual("Class(Object)")
-        })
-            // expect(evaluate("nil")).toEqual("Nil")
-            // expect(evaluate("nil.class")).toEqual("Class(Nil)")
-        // })
     })
-
 
     describe('main', () => {
         it('is an object', () => {
@@ -299,21 +294,34 @@ describe(Reflex, () => {
             // (so inherited into child scopes but not living on the object as such...)
             expect(()=>evaluate("self.o")).toThrow()
         })
-
-        //it('local variables', () => {
-        //    evaluate("self.Obj = Object")
-        //    expect(evaluate("Obj")).toEqual("Class(Object)")
-        //    expect(evaluate("Obj.class")).toEqual("Class(Class)")
-        //    evaluate("o = Object.new()")
-        //    expect(evaluate("o")).toEqual("Object")
-        //    expect(evaluate("o.class")).toEqual("Class(Object)")
-        //})
         
-        //test.todo('construct new instance of new class')
-        //test.todo('define new class more eloquently')
-        //test.todo('construct new instance of new class')
-        //test.todo('invoke parent methods')
         //test.todo('construct new function')
         //test.todo('construct new higher-order function')
+    })
+
+    describe("syntax", () => {
+        it('permits bare args', () => {
+            expect(evaluate("Bar = Class.new 'Bar'")).toEqual("Class(Bar)")
+            expect(evaluate("Baz = Class.new 'Baz', Bar")).toEqual("Class(Baz)")
+            expect(evaluate("Baz.super")).toEqual("Class(Bar)")
+        })
+
+        it('barewords do not fall back to self', () => {
+            evaluate("class Bar{baz(){self.there=Class; there}}")
+            expect(()=>evaluate("Bar.new().baz()")).toThrow()
+        })
+
+        it('barecalls fall back to self', () => {
+            evaluate("class Bar{there(){Function}}")
+            evaluate("class Bar{baz(){there()}}")
+            expect(()=>evaluate("Bar.new().baz()")).not.toThrow()
+            expect(evaluate("Bar.new().baz()")).toEqual("Class(Function)")
+        })
+
+        it('defines multiple functions in a class stmt', () => {
+            evaluate("class Bar{a(){b()};b(){c()};c(){Class}}");
+            evaluate("bar=Bar.new()");
+            expect(evaluate("bar.a()")).toEqual("Class(Class)")
+        })
     })
 })

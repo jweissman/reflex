@@ -4,6 +4,7 @@ import ohm, { Semantics, Dict } from 'ohm-js';
 import { tree } from "./ast";
 import Tree from './ast/Tree';
 import Reflex from '../Reflex';
+import { log } from '../vm/util/log';
 
 var contents = fs.readFileSync('./src/reflex/lang/Reflex.ohm');
 var grammar = ohm.grammar(contents.toString());
@@ -11,13 +12,11 @@ const semantics: Semantics = grammar.createSemantics();
 semantics.addAttribute("tree", tree)
 
 export default class Parser {
-    trace = Reflex.trace
+    // trace = Reflex.trace
     analyze(input: string) {
         let ast = this.tree(input);
         let code = ast.code //inspect()
-        if (this.trace) {
-            console.debug("AST ANALYZE", input, "=>", chalk.blue(ast.inspect()))
-        }
+        log("AST ANALYZE: "+input+"=>"+chalk.blue(ast.inspect()))
         return code
     }
 

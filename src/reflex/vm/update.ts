@@ -54,12 +54,12 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 throw new Error("no such local variable '" + value as string)
             }
             break;
-
         case 'local_var_set':
             let key = value as string;
             let top = stack[stack.length - 1];
             if (top instanceof ReflexObject) {
                 log(`LOCAL VAR SET ${key}=${top.inspect()}`);
+                // pop(stack);
                 frame.locals[key] = top;
             }
             else {
@@ -76,7 +76,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 }
             }
             else {
-                fail("local_var_set expects top is be reflex obj to assign");
+                fail("local_var_set expects top is reflex obj to assign");
             }
             break;
         case 'bare':
@@ -86,21 +86,31 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             } else if (v === 'self') {
                 stack.push(frame.self)
             } else {
+                // todo this makes sense but test it!
+                // let result = frame.self.send(value as string);
+                // stack.push(result);
                 throw new Error("bareword " + v + " not self/found in locals")
             }
             break;
         case 'barecall':
+            let fn;
             if (Object.keys(frame.locals).includes(value as string)) {
-                let fn = frame.locals[value as string]
-                if (fn instanceof ReflexFunction) {
-                    stack.push(fn);
-                    invoke(fn.arity, stack, frames, meta.currentProgram, meta)
-                } else {
-                    throw new Error("tried to call non-fn")
-                }
+                fn = frame.locals[value as string]
             } else {
-                throw new Error("barecall -- value not in locals" + value)
+                fn = frame.self.send(value as string);
             }
+            if (fn instanceof ReflexFunction) {
+                stack.push(fn);
+                invoke(fn.arity, stack, frames, meta.currentProgram, meta)
+            } else {
+                throw new Error("tried to call non-fn")
+            }
+            //} else {
+            //    // todo test it!
+            //    let result = frame.self.send(value as string);
+            //    stack.push(result);
+            //    // throw new Error("barecall -- value not in locals" + value)
+            //}
             break;
         case 'send':
             let val: string = value as string;

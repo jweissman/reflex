@@ -1,4 +1,7 @@
 import ReflexObject from "./ReflexObject";
+import { State } from "../State";
+
+interface Binding { state: State }
 
 export class ReflexFunction extends ReflexObject {
     public name?: string;
@@ -6,6 +9,7 @@ export class ReflexFunction extends ReflexObject {
     public self?: ReflexObject
     public arity!: number
     public params!: string[]
+    public binding?: Binding;
     // static klass: ReflexClass;
     // constructor() { //) {
     //     super();
