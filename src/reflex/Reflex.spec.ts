@@ -33,6 +33,16 @@ describe('Reflex', () => {
                 expect(() => evaluate("Bar.new().baz()")).toThrow()
             })
         })
+
+        describe("blocks", () => {
+            xit('yields successive values', () => {
+                evaluate("gen(){yield Object; yield Class; yield Function}")
+                expect(evaluate("x=Function; gen(){|val|x=val};x")).toEqual("Class(Object)")
+                expect(evaluate("gen {|val|x=val};x")).toEqual("Class(Class)")
+                expect(evaluate("gen {|val|x=val};x")).toEqual("Class(Function)")
+                // expect(evaluate("gen {|val|x=val};x")).toEqual("Nil")
+            })
+        })
     })
 
     describe('main', () => {

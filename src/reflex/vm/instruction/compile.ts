@@ -1,14 +1,14 @@
 import { Code } from "./Instruction";
-import { ReflexFunction } from './types/ReflexFunction';
-import Tree from '../lang/ast/Tree';
-import { Defun } from '../lang/ast/Defun';
-import { FunctionLiteral } from '../lang/ast/FunctionLiteral';
-import { Stack } from './Stack';
-import { fail } from './util/fail';
-import ReflexClass from './types/ReflexClass';
-import { Bareword } from '../lang/ast/Bareword';
-import Machine from './Machine';
-import { log } from "./util/log";
+import { ReflexFunction } from '../types/ReflexFunction';
+import Tree from '../../lang/ast/Tree';
+import { Defun } from '../../lang/ast/Defun';
+import { FunctionLiteral } from '../../lang/ast/FunctionLiteral';
+import { Stack } from '../Stack';
+import { fail } from '../util/fail';
+import ReflexClass from '../types/ReflexClass';
+import { Bareword } from '../../lang/ast/Bareword';
+import Machine from '../Machine';
+import { log } from "../util/log";
 
 export let lambdaCount = 0;
 export function compile(ast: Tree, stack: Stack, meta: Machine) {

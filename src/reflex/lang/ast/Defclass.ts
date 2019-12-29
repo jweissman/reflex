@@ -5,7 +5,7 @@ import { Sequence } from "./Sequence";
 import { SendMethodCall } from "./SendMethodCall";
 import { Message } from "./Message";
 import { SendMessageOrEq, LocalVarOrEq } from "./SendMessageEq";
-import { Code } from "../../vm/Instruction";
+import { Code } from "../../vm/instruction/Instruction";
 import { Defun } from "./Defun";
 import { SendMessage } from "./SendMessage";
 import LocalVarSet from "./LocalVarSet";

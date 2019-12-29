@@ -1,20 +1,16 @@
 import chalk from 'chalk';
-import ReflexObject from "./types/ReflexObject"
-import Tree from "../lang/ast/Tree"
+import ReflexObject from "../types/ReflexObject"
+import Tree from "../../lang/ast/Tree"
+import { Value } from './Value';
 export type Op
   = 'push'
   | 'pop'
-  // | 'load'
-  
-  // | 'store'
   | 'local_var_get'
   | 'local_var_set'
   | 'local_var_or_eq'
   | 'bare' // handle bareword ...
   | 'barecall'
-
   | 'label' 
-  // | 'jump'
   | 'call'
   | 'ret'
   | 'halt'
@@ -25,11 +21,6 @@ export type Op
   | 'compile' 
   | 'mark'
   | 'sweep'
-export class Stone {
-  constructor(public name: string) {}
-  toString() { return `__${this.name}__`; }
-}
-export type Value = null | string | number | ReflexObject | Tree | Stone
 export const prettyValue = (v: Value) => {
   if (v === null) { return ''; }
   else if (typeof v === 'string') { return v; }

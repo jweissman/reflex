@@ -1,5 +1,5 @@
 import Tree from "./Tree";
-import { Code } from "../../vm/Instruction";
+import { Code } from "../../vm/instruction/Instruction";
 import { Message } from "./Message";
 
 export default class SendMessageEq extends Tree {

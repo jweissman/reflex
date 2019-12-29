@@ -1,4 +1,4 @@
-import { Stack } from './Stack';
+import { Stack } from '../Stack';
 export function pop(stack: Stack) {
     if (stack.length > 0) {
         stack.pop();

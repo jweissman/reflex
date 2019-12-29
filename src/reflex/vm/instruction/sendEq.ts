@@ -1,9 +1,9 @@
-import ReflexObject from './types/ReflexObject';
-import { log } from './util/log';
-import { fail } from './util/fail';
+import ReflexObject from '../types/ReflexObject';
+import { log } from '../util/log';
+import { fail } from '../util/fail';
 import { pop } from './pop';
-import { dump } from './dump';
-import { Stack } from './Stack';
+import { dump } from '../util/dump';
+import { Stack } from '../Stack';
 export function sendEq(value: string, stack: Stack) {
     log('send eq -- stack: ' + dump(stack));
     let k = value as string;

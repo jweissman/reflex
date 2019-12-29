@@ -1,13 +1,13 @@
 import { Code, indexForLabel } from "./Instruction";
-import ReflexObject from './types/ReflexObject';
-import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
-import { Frame } from './Frame';
-import { Stack } from './Stack';
-import { fail } from './util/fail';
-import { zip } from './util/zip';
+import ReflexObject from '../types/ReflexObject';
+import { ReflexFunction, WrappedFunction } from '../types/ReflexFunction';
+import { Frame } from '../Frame';
+import { Stack } from '../Stack';
+import { fail } from '../util/fail';
+import { zip } from '../util/zip';
 import { pop } from './pop';
-import Machine from './Machine';
-import { log } from "./util/log";
+import Machine from '../Machine';
+import { log } from "../util/log";
 
 export function invoke(
     arity: number,

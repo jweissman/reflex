@@ -1,5 +1,5 @@
 import Tree from "./Tree";
-import { Code } from "../../vm/Instruction";
+import { Code } from "../../vm/instruction/Instruction";
 
 export class Bareword extends Tree {
     constructor(public word: string) {

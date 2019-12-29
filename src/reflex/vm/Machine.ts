@@ -1,13 +1,14 @@
 import chalk from 'chalk';
-import { Value, Instruction, Code, indexForLabel, labelStep, prettyCode } from "./Instruction";
+import { Instruction, Code, indexForLabel, labelStep, prettyCode } from "./instruction/Instruction";
+import { Value } from "./instruction/Value";
 import ReflexObject from './types/ReflexObject';
 import main, { bootLocals } from './Bootstrap';
 import { ReflexFunction } from './types/ReflexFunction';
 import { log } from './util/log';
 import { Frame } from './Frame';
 import { fail } from './util/fail';
-import { invoke } from './invoke';
-import { trace } from './trace';
+import { invoke } from './instruction/invoke';
+import { trace } from './instruction/trace';
 import { update } from './update';
 import Reflex from '../Reflex';
 
@@ -83,16 +84,17 @@ export default class Machine {
             } else {
                 this.execute(this.currentInstruction)
                 this.frame.ip++;
-                if (this.delaySecs > 0) {
-                    this.syncDelay(this.delaySecs)
-                }
+                this.syncDelay(this.delaySecs);
             }
         }
     }
 
     syncDelay(secs: number) {
-            var waitTill = new Date(new Date().getTime() + secs * 1000);
-            while (waitTill > new Date()) { }
+        if (secs > 0) {
+            log("thinking...")
+            var wait = new Date(new Date().getTime() + secs * 1000);
+            while (wait > new Date()) { }
+        }
     }
 
     execute(instruction: Instruction) {

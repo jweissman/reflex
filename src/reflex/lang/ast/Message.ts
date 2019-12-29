@@ -1,5 +1,5 @@
 import Tree from "./Tree";
-import { Code } from "../../vm/Instruction";
+import { Code } from "../../vm/instruction/Instruction";
 export class Message extends Tree {
     constructor(public key: string) {
         super();

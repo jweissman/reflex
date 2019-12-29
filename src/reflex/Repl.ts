@@ -1,4 +1,4 @@
-import { prettyCode } from "./vm/Instruction";
+import { prettyCode } from "./vm/instruction/Instruction";
 import chalk from 'chalk';
 import Reflex from "./Reflex";
 export class Repl {

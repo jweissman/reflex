@@ -1,5 +1,5 @@
 import Tree from "./Tree";
-import { Code, Instruction } from "../../vm/Instruction";
+import { Code, Instruction } from "../../vm/instruction/Instruction";
 import { Message } from "./Message";
 import { Sequence } from "./Sequence";
 

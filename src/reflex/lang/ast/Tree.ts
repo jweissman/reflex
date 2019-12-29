@@ -1,4 +1,4 @@
-import { Code } from '../../vm/Instruction'
+import { Code } from '../../vm/instruction/Instruction'
 
 abstract class Tree {
     abstract inspect(): string;

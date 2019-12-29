@@ -1,19 +1,25 @@
 import assertNever from 'assert-never';
-import { Instruction, Code, Stone } from "./Instruction";
+import { Instruction, Code } from "./instruction/Instruction";
+import { Stone } from "./instruction/Stone";
 import ReflexObject from './types/ReflexObject';
 import Tree from '../lang/ast/Tree';
 import { log } from './util/log';
 import { fail } from './util/fail';
-import { pop } from './pop';
+import { pop } from './instruction/pop';
 import { State } from './State';
-import { call } from './call';
-import { invoke } from './invoke';
-import { compile } from './compile';
-import { dump } from './dump';
-import { sweep } from './sweep';
-import { ret } from './ret';
-import { sendEq } from './sendEq';
+import { call } from './instruction/call';
+import { invoke } from './instruction/invoke';
+import { compile } from './instruction/compile';
+import { dump } from './util/dump';
+import { sweep } from './instruction/sweep';
+import { ret } from './instruction/ret';
+import { sendEq } from './instruction/sendEq';
 import { ReflexFunction } from './types/ReflexFunction';
+import { Stack } from './Stack';
+
+function mark(stack: Stack, value: string) {
+    stack.push(new Stone(value));
+}
 
 export function update(state: State, instruction: Instruction, code: Code): State {
     let [op, value] = instruction;
@@ -27,7 +33,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             pop(stack);
             break;
         case 'mark':
-            stack.push(new Stone(value as string));
+            mark(stack, value as string);
             break;
         case 'sweep':
             sweep(value, stack);
@@ -59,7 +65,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             let top = stack[stack.length - 1];
             if (top instanceof ReflexObject) {
                 log(`LOCAL VAR SET ${key}=${top.inspect()}`);
-                // pop(stack);
                 frame.locals[key] = top;
             }
             else {
@@ -86,9 +91,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             } else if (v === 'self') {
                 stack.push(frame.self)
             } else {
-                // todo this makes sense but test it!
-                // let result = frame.self.send(value as string);
-                // stack.push(result);
                 throw new Error("bareword " + v + " not self/found in locals")
             }
             break;
@@ -105,12 +107,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             } else {
                 throw new Error("tried to call non-fn")
             }
-            //} else {
-            //    // todo test it!
-            //    let result = frame.self.send(value as string);
-            //    stack.push(result);
-            //    // throw new Error("barecall -- value not in locals" + value)
-            //}
             break;
         case 'send':
             let val: string = value as string;

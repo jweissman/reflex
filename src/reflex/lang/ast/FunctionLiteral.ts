@@ -1,5 +1,5 @@
 import Tree from "./Tree";
-import { Code } from "../../vm/Instruction";
+import { Code } from "../../vm/instruction/Instruction";
 import { Sequence } from "./Sequence";
 export class FunctionLiteral extends Tree {
   constructor(public params: Sequence, public body: Tree) { super(); }

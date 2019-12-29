@@ -1,4 +1,4 @@
-import { Code } from '../../vm/Instruction';
+import { Code } from '../../vm/instruction/Instruction';
 
 import Tree from './Tree';
 // a structural element, which doesn't matter for codegen

@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import { Instruction, prettyInstruct } from "./Instruction";
-import { log } from './util/log';
-import { Frame } from './Frame';
-import { Stack } from './Stack';
-import { dump } from './dump';
+import { log } from '../util/log';
+import { Frame } from '../Frame';
+import { Stack } from '../Stack';
+import { dump } from '../util/dump';
 let lastStack: Stack = [];
 export function trace(message: string, instruction: Instruction, frame: Frame, stack: Stack) {
     let msg = [

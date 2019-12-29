@@ -1,2 +1,2 @@
-import { Value } from "./Instruction";
+import { Value } from "./instruction/Value";
 export type Stack = Value[];
