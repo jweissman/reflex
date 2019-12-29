@@ -31,7 +31,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
     SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) =>
       new SendMethodCall(receiver.tree, message.tree, args.tree),
-    Params: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
+    FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
       // new Sequence([paramList.tree]),
     SendMessage_attr: (receiver: Node, _dot: Node, message: Node) =>
       new SendMessage(receiver.tree, message.tree),

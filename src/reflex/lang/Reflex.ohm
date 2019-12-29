@@ -26,7 +26,7 @@ Reflex {
     ClassName = ident
 
     Defun
-      = FunctionName Params Block
+      = FunctionName FormalParams Block
 
     FunctionName
       = ident
@@ -68,7 +68,17 @@ Reflex {
       = ~"(" NonemptyListOf<Expr, ",">
 
     Params
-      = "(" ListOf<Bareword, ","> ")"
+      = FormalParams
+      | BareParams
+      
+    FormalParams
+      = "(" ListOf<Param, ","> ")"
+    
+    BareParams
+      = ~"(" ListOf<Param, ",">
+
+    Param
+      = Bareword
 
     Block
       = "{" Program "}"
@@ -76,7 +86,7 @@ Reflex {
     FunctionLit
       = Params "=>" Block
       | Params "=>" Expr
-      | ident "=>" Expr
+      //| ident "=>" Expr
     
     StringLit
       = "'" #singleStringCharacter* "'"
