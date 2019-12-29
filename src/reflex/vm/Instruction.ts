@@ -7,7 +7,11 @@ export type Op
   // | 'load'
   
   // | 'store'
+  | 'local_var_get'
   | 'local_var_set'
+  | 'local_var_or_eq'
+  | 'bare' // handle bareword ...
+  | 'barecall'
 
   | 'label' 
   // | 'jump'

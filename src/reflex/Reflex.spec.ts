@@ -37,7 +37,7 @@ describe(Reflex, () => {
             // })
         });
         describe('#methods()', () => {
-            test.todo("once we have lists...")
+            test.todo("once we have lists and strings/symbols...")
             // xit('reports instance member variables that are callable', () => {
                 // expect(evaluate("Object.new().methods()")).toMatch(/\[.+\]/)
             // })
@@ -288,7 +288,7 @@ describe(Reflex, () => {
             expect(evaluate("Main.super")).toEqual("Class(Object)")
         })
 
-        xit('local variables', () => {
+        it('local variables', () => {
             evaluate("Obj = Object")
             expect(evaluate("Obj")).toEqual("Class(Object)")
             expect(evaluate("Obj.class")).toEqual("Class(Class)")

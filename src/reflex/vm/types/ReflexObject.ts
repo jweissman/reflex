@@ -75,7 +75,9 @@ export default class ReflexObject {
         } else if (supershared && supershared.get(message)) {
             return true;
         } else {
-            if (this.surroundingObject && this.surroundingObject.respondsTo(message)) {
+            if (this.surroundingObject &&
+                !(this === this.surroundingObject) && 
+                this.surroundingObject.respondsTo(message)) {
                 return true;
             }
         }

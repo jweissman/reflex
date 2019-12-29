@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { Value, Instruction, Code, indexForLabel, labelStep, prettyCode } from "./Instruction";
 import ReflexObject from './types/ReflexObject';
-import main from './Bootstrap';
+import main, { bootLocals } from './Bootstrap';
 import { ReflexFunction } from './types/ReflexFunction';
 import { log } from './util/log';
 import { Frame } from './Frame';
@@ -12,7 +12,10 @@ import { update } from './update';
 
 export default class Machine {
     stack: Value[] = []
-    frames: Frame[] = [{ ip: 0, self: main, locals: {} }];
+    frames: Frame[] = [{
+        ip: 0, self: main,
+        locals: bootLocals
+    }];
 
     get top() { return this.stack[this.stack.length - 1] }
     get frame() { return this.frames[this.frames.length - 1] }

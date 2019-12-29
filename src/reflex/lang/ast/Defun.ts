@@ -13,8 +13,8 @@ export class Defun extends Tree {
     get code(): Code {
         let compile: Instruction = ['compile', this];
         let send: Code = this.compileOnly ? [] : [
-            ['send', 'self'],
-            ['send_eq', this.name.key]
+            // ['send', 'self'],
+            ['local_var_set', this.name.key]
         ];
         return [
             compile,

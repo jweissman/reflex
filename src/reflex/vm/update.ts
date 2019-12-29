@@ -13,6 +13,7 @@ import { dump } from './dump';
 import { sweep } from './sweep';
 import { ret } from './ret';
 import { sendEq } from './sendEq';
+import { ReflexFunction } from './types/ReflexFunction';
 
 export function update(state: State, instruction: Instruction, code: Code): State {
     let [op, value] = instruction;
@@ -45,6 +46,15 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
         case 'compile':
             compile(value as Tree, stack, meta);
             break;
+        case 'local_var_get':
+            let variable = frame.locals[value as string]
+            if (variable) {
+                stack.push(variable)
+            } else {
+                throw new Error("no such local variable '" + value as string)
+            }
+            break;
+
         case 'local_var_set':
             let key = value as string;
             let top = stack[stack.length - 1];
@@ -56,15 +66,46 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 fail("local_var_set expects top is be reflex obj to assign");
             }
             break;
-        case 'send':
-            let val: string = value as string;
-            if (Object.keys(frame.locals).includes(val)) {
-                stack.push(frame.locals[val]);
+        case 'local_var_or_eq':
+            let k = value as string;
+            let t = stack[stack.length - 1];
+            if (t instanceof ReflexObject) {
+                if (!frame.locals[k]) {
+                    log(`LOCAL VAR OR EQ -- assign ${k}=${t.inspect()}`);
+                    frame.locals[k] = t;
+                }
             }
             else {
-                let result = frame.self.send(val);
-                stack.push(result);
+                fail("local_var_set expects top is be reflex obj to assign");
             }
+            break;
+        case 'bare':
+            let v: string = value as string;
+            if (Object.keys(frame.locals).includes(v)) {
+                stack.push(frame.locals[v]);
+            } else if (v === 'self') {
+                stack.push(frame.self)
+            } else {
+                throw new Error("bareword " + v + " not self/found in locals")
+            }
+            break;
+        case 'barecall':
+            if (Object.keys(frame.locals).includes(value as string)) {
+                let fn = frame.locals[value as string]
+                if (fn instanceof ReflexFunction) {
+                    stack.push(fn);
+                    invoke(fn.arity, stack, frames, meta.currentProgram, meta)
+                } else {
+                    throw new Error("tried to call non-fn")
+                }
+            } else {
+                throw new Error("barecall -- value not in locals" + value)
+            }
+            break;
+        case 'send':
+            let val: string = value as string;
+            let result = frame.self.send(val);
+            stack.push(result);
             break;
         case 'send_eq':
             sendEq(value as string, stack);
@@ -76,6 +117,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 sendEq(value as string, stack);
             }
             break;
+
         default: assertNever(op);
     }
     return { stack, frames, meta };

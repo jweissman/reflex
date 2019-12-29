@@ -20,9 +20,16 @@ mainClass.set('super', objectClass)
 let main = new ReflexObject()
 main.set('class', mainClass)
 
-main.set('Object', objectClass)
-main.set('Class', classClass)
-main.set('Function', functionClass)
-main.set('Main', mainClass)
+export const bootLocals = {
+  Object: objectClass,
+  Class: classClass,
+  Function: functionClass,
+  Main: mainClass, 
+}
+
+//main.set('Object', objectClass)
+//main.set('Class', classClass)
+//main.set('Function', functionClass)
+//main.set('Main', mainClass)
 
 export default main;

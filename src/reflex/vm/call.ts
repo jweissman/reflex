@@ -18,15 +18,15 @@ export function call(stack: Stack, frames: Frame[]) {
         let receiver = second;
         let method = top;
         let result;
-        if (frame.locals[method]) { // locals shadow
-            let local = frame.locals[method];
-            result = local;
-        } else {
+        // if (frame.locals[method]) { // locals shadow
+        //     let local = frame.locals[method];
+        //     result = local;
+        // } else {
             result = receiver.send(method);
             if (result instanceof ReflexFunction) {
                 result.self = receiver;
             }
-        }
+        // }
         stack.push(result);
     }
     else {

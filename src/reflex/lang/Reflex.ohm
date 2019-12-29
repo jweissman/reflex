@@ -15,7 +15,7 @@ Reflex {
       | Invocation
       
     Invocation
-      = Funcall
+      = Barecall
       | Bareword
 
     Defclass
@@ -38,8 +38,11 @@ Reflex {
     SendMessage
       = Receiver "." Message Args -- call
       | Receiver "." Message -- attr
-    
+
     Funcall
+      = Barecall
+    
+    Barecall
       = Message Args
     
     Receiver
