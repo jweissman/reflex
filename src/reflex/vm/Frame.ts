@@ -5,4 +5,5 @@ export interface Frame {
     self: ReflexObject;
     locals: Store;
     retValue?: ReflexObject;
+    // fake: boolean;
 }

@@ -22,7 +22,7 @@ export default class ReflexClass extends ReflexObject {
             if (mu.respondsTo("init")) {
                 let init = mu.send('init');
                 if (init instanceof ReflexFunction) {
-                    init.self = mu;
+                    init.frame.self = mu;
                     meta.doInvoke(mu, init, ...args)
                 }
             }

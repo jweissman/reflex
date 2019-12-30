@@ -1,3 +1,4 @@
+import util from 'util';
 import assertNever from 'assert-never';
 import { Instruction, Code } from "./instruction/Instruction";
 import { Stone } from "./instruction/Stone";
@@ -16,10 +17,34 @@ import { ret } from './instruction/ret';
 import { sendEq } from './instruction/sendEq';
 import { ReflexFunction } from './types/ReflexFunction';
 import { Stack } from './Stack';
+import { Frame } from './Frame';
 
 function mark(stack: Stack, value: string) {
     stack.push(new Stone(value));
 }
+
+function findFrameWithLocal(key: string, frames: Frame[]) {
+    log("FIND FRAME WITH LOCAL " + key)
+    log("Frames to inspect: " + util.inspect(frames))
+    let top = frames[frames.length - 1];
+    // let matching = top; //.locals[key];
+    if (!top.locals[key] && frames.length > 1) {
+        log("try to find match in parent frames...")
+        // try to find matching local in parent frames
+        for (let i = frames.length-1; i >= 0; i--) {
+            let nextFrame = frames[i];
+            if (nextFrame.locals[key]) {
+                log("found matching frame: " + nextFrame.locals[key])
+                return nextFrame; //.locals[key];
+            }
+        }
+        log("did not find matching parent")
+    }
+    return top
+}
+
+// function yield()
+// we need the block -- 
 
 export function update(state: State, instruction: Instruction, code: Code): State {
     let [op, value] = instruction;
@@ -53,11 +78,15 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             compile(value as Tree, stack, meta);
             break;
         case 'local_var_get':
-            let variable = frame.locals[value as string]
-            if (variable) {
-                stack.push(variable)
-            } else {
-                throw new Error("no such local variable '" + value as string)
+            if (value as string === 'self') { stack.push(frame.self) }
+            else {
+                let frameLoc: Frame = findFrameWithLocal(value as string, frames);
+                let variable = frameLoc.locals[value as string]
+                if (variable) {
+                    stack.push(variable)
+                } else {
+                    throw new Error("no such local variable '" + value as string)
+                }
             }
             break;
         case 'local_var_set':
@@ -65,7 +94,9 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             let top = stack[stack.length - 1];
             if (top instanceof ReflexObject) {
                 log(`LOCAL VAR SET ${key}=${top.inspect()}`);
-                frame.locals[key] = top;
+                let localFrame: Frame = findFrameWithLocal(key, frames);
+                localFrame.locals[key] = top;
+                // frame.locals[key] = top;
             }
             else {
                 fail("local_var_set expects top is be reflex obj to assign");
@@ -75,7 +106,9 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             let k = value as string;
             let t = stack[stack.length - 1];
             if (t instanceof ReflexObject) {
-                if (!frame.locals[k]) {
+                let localFrame: Frame = findFrameWithLocal(k, frames);
+                if (localFrame === frame &&
+                    !frame.locals[k]) {
                     log(`LOCAL VAR OR EQ -- assign ${k}=${t.inspect()}`);
                     frame.locals[k] = t;
                 }
@@ -86,9 +119,11 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             break;
         case 'bare':
             let v: string = value as string;
-            if (Object.keys(frame.locals).includes(v)) {
-                stack.push(frame.locals[v]);
+            let localFrame = findFrameWithLocal(v, frames);
+            if (Object.keys(localFrame.locals).includes(v)) {
+                stack.push(localFrame.locals[v]);
             } else if (v === 'self') {
+                log("bare self fell back to frame self -- " + frame.self.inspect())
                 stack.push(frame.self)
             } else {
                 throw new Error("bareword " + v + " not self/found in locals")
@@ -96,8 +131,11 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             break;
         case 'barecall':
             let fn;
-            if (Object.keys(frame.locals).includes(value as string)) {
-                fn = frame.locals[value as string]
+            let locFrame = findFrameWithLocal(value as string, frames);
+            if (Object.keys(locFrame.locals).includes(value as string)) {
+                fn = locFrame.locals[value as string]
+            // } else if (value as string === 'yield') {
+            //     fn = stack[0] as ReflexFunction;
             } else {
                 fn = frame.self.send(value as string);
             }
@@ -105,7 +143,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 stack.push(fn);
                 invoke(fn.arity, stack, frames, meta.currentProgram, meta)
             } else {
-                throw new Error("tried to call non-fn")
+                throw new Error("tried to call non-fn: " + fn.inspect())
             }
             break;
         case 'send':

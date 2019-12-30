@@ -1,16 +1,17 @@
 import ReflexObject from "./ReflexObject";
 import { State } from "../State";
-import { Store } from "../Frame";
+import { Store, Frame } from "../Frame";
 
 interface Binding { state: State }
 
 export class ReflexFunction extends ReflexObject {
     public name?: string;
     public label!: string;
-    public self?: ReflexObject
+    // public self?: ReflexObject
     public arity!: number
     public params!: string[]
-    public locals: Store = {};
+    // public locals: Store = {};
+    public frame!: Frame;
 
     // public binding?: Binding;
     // static klass: ReflexClass;

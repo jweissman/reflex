@@ -9,6 +9,7 @@ import ReflexClass from '../types/ReflexClass';
 import { Bareword } from '../../lang/ast/Bareword';
 import Machine from '../Machine';
 import { log } from "../util/log";
+import { Message } from "../../lang/ast/Message";
 
 export let lambdaCount = 0;
 export function compile(ast: Tree, stack: Stack, meta: Machine) {
@@ -29,10 +30,22 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
         fn.name = name;
         fn.label = label;
         fn.arity = arity;
-        fn.params = ast.params.map(param => (param as Bareword).word);
+        fn.params = ast.params.map(param =>  {
+            if (param instanceof Bareword) {
+                return param.word;
+            } else if (param instanceof Message) {
+                return param.key;
+            } else {
+                throw new Error("param wasn't bareword/message: " + param.inspect());
+            }
+            // (param as Bareword).word
+        });
         let frame = meta.frames[meta.frames.length - 1]
-        fn.locals = frame.locals
-        fn.self = frame.self
+        // fn.locals = frame.locals
+        // fn.self = frame.self
+        fn.frame = { ...frame };
+        log("COMPILE'D " + fn.inspect() + " arity: " + fn.arity);
+        log(" params: " + fn.params);
         stack.push(fn);
     }
     else {

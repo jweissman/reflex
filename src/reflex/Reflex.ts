@@ -2,7 +2,7 @@ import Parser from "./lang/Parser";
 import Machine from "./vm/Machine";
 import { Code } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
-// import { Repl } from "./Repl";
+import { Repl } from "./Repl";
 
 // const preamble = '';
 //`
@@ -30,5 +30,5 @@ export default class Reflex {
 
     hardReset() { this.machine = new Machine() }
 
-    // repl() { const {Repl} = require('./Repl'); (new Repl()).interact(this); }
+    repl() { const {Repl} = require('./Repl'); (new Repl()).interact(this); }
 }

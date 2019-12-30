@@ -4,7 +4,7 @@ export class Barecall extends Tree {
   constructor(public key: string, public args: Tree) {
     super();
   }
-  inspect(): string { return this.key + "()"; }
+  inspect(): string { return this.key + this.args.inspect(); }
   get code(): Code {
     return [
       ...this.args.code,

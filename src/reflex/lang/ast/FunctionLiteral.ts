@@ -11,6 +11,7 @@ export class FunctionLiteral extends Tree {
   get shell(): Code {
       return [
         // load params?
+        // ...this.params.code,
           ...this.body.code,
           ['ret', null]
       ]

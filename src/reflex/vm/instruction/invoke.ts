@@ -30,22 +30,33 @@ export function invoke(
         stack.push(result);
     }
     else if (top instanceof ReflexFunction) {
+        log('invoke reflex fn with arity ' + top.arity)
+        log('args ' + args)
+        log('params ' + top.params)
         let oldFrame = frames[frames.length - 1];
         let self = oldFrame.self;
-        if (top.self) {
-            self = top.self.within(self);
+        if (top.frame.self) {
+            self = top.frame.self.within(self);
         }
         let locals = {
-            ...oldFrame.locals,
-            ...top.locals,
+            // ...oldFrame.locals,
+            // ...top.frame.locals,
             ...Object.fromEntries(zip(top.params, args))
         };
         let newFrame: Frame = {
+            // ...top.frame,
             ip: indexForLabel(code, top.label),
-            self,
             locals,
+            self,
             ...(ensureReturns ? { retValue: ensureReturns } : {}),
+            // fake: false,
         };
+        //  {
+        //     ip: 
+        //     self,
+        //     locals,
+        // };
+        frames.push(top.frame);
         frames.push(newFrame);
     }
     else {

@@ -19,7 +19,10 @@ export function call(stack: Stack, frames: Frame[]) {
         let result;
         result = receiver.send(method);
         if (result instanceof ReflexFunction) {
-            result.self = receiver;
+            // hmmm, monkeying with the frame :/
+            result.frame.self = receiver;
+            // let pseudoFrame = { ...result.frame, fake: true } //self: receiver, ip: -1, fake: true }
+            // frames.push(pseudoFrame)
         }
         stack.push(result);
     } else {

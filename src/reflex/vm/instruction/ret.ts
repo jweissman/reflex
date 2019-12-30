@@ -3,6 +3,7 @@ import { Stack } from '../Stack';
 export function ret(stack: Stack, frames: Frame[]) {
     let frame = frames[frames.length - 1];
     frames.pop();
+    frames.pop();
     if (frame.retValue) {
         stack.push(frame.retValue);
     }
