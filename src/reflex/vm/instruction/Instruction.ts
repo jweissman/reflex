@@ -19,6 +19,7 @@ export type Op
   | 'send_eq'
   | 'send_or_eq'
   | 'invoke'
+  | 'invoke_block'
   | 'compile' 
   | 'mark'
   | 'sweep'

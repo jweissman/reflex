@@ -5,10 +5,7 @@ import { PipedBlock } from "./PipedBlock";
 export class Arguments extends Tree {
   constructor(public args: Sequence, public block?: PipedBlock) {
     super();
-    // log("CREATE ARGS: " + args.inspect())
-    if (this.block && this.block instanceof PipedBlock) {
-      // log("!!! CREATE ARGS WITH BLOCK: " + this.block.inspect())
-    }
+    // console.log("CREATE ARGUMENTS", { args, block }); 
   }
   inspect(): string {
     let disp = this.args.inspect();
@@ -26,7 +23,6 @@ export class Arguments extends Tree {
     }
     else {
       return [
-        // ...(this.block !== undefined && this.block.code.length ? this.block.code : []), //this.block.code : []),
         ...this.args.code,
       ];
     }

@@ -53,14 +53,26 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
 
   Arguments_block: (args: Node, block: Node) => {
     let argTree = args.tree[0] || new Sequence([]);
+    // console.log("Create arg with block", { argTree, block: block.tree })
     return new Arguments(argTree, block.tree);
   },
-  Arguments_no_block: (args: Node) => new Arguments(args.tree),
+  Arguments_no_block: (args: Node) => {
+    // if (args.tree instanceof Arguments) {
+      // return args.tree;
+    // } else
+    if (args.tree instanceof Sequence) {
+      return new Arguments(args.tree)
+    } else {
+      throw new Error("args tree was not sequence: " + args.tree)
+    }
+  },
   FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
 
-  SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) =>
-    new SendMethodCall(receiver.tree, message.tree, args.tree),
+  SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) => {
+    let theArgs = args.tree;
+    return new SendMethodCall(receiver.tree, message.tree, theArgs);
+  },
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
   Param: (parameter: Node) => {
     if (parameter.tree instanceof Bareword) {

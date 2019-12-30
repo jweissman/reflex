@@ -94,12 +94,31 @@ describe('Reflex', () => {
                 evaluate("dispatch(Function) { |val| y = val }")
                 expect(evaluate("y")).toEqual("Class(Function)")
             })
-            test.todo("passes blocks to instance methods")
+
+            it("passes blocks to instance methods", () => {
+                evaluate("class Baz{next(){yield Object;yield Class; yield Function}}")
+                evaluate("baz=Baz.new()")
+                evaluate("x=Function")
+                evaluate("baz.next { |v| x=v }")
+                expect(evaluate("x")).toEqual("Class(Object)")
+                evaluate("baz.next { |v| x=v }")
+                expect(evaluate("x")).toEqual("Class(Class)")
+                evaluate("baz.next { |v| x=v }")
+                expect(evaluate("x")).toEqual("Class(Function)")
+            })
         })
 
         describe("super", () => {
             test.todo("is the current method's super-method")
         })
+    })
+
+    describe('structures', () => {
+        test.todo('Nil')
+        test.todo('Boolean')
+        test.todo('Number')
+        test.todo('Array')
+        test.todo('String')
     })
 
     describe('main', () => {

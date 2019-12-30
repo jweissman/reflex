@@ -42,22 +42,16 @@ function barecall(value: string, stack: Stack, frames: Frame[], meta: Machine, h
     let fn;
     let locFrame = findFrameWithLocal(value as string, frames);
     if (value as string === 'yield') {
-        log("YIELD CALLED")
+        // log("YIELD CALLED")
         if (frame.currentMethod && frame.block) {
             fn = frame.block as ReflexFunction;
-            log("would yield to block " + fn)
+            log("yield to block " + fn)
             frame.currentMethod.frame = { ...frame };
-            log("YIELD frame is " + util.inspect(frame, true, 4))
+            // log("YIELD frame is " + util.inspect(frame, true, 4))
             ret(stack, frames);
         } else {
             throw new Error("tried to yield from outermost scope (or without a block on frame)")
         }
-    // } else if (value as string === 'block') {
-    //     if (frame.block) {
-    //         fn = frame.block;
-    //     } else {
-    //         throw new Error("no block in current frame?")
-    //     }
     } else if (Object.keys(locFrame.locals).includes(value as string)) {
         fn = locFrame.locals[value as string]
     } else {
@@ -97,9 +91,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             break;
         case 'label': break;
         case 'halt': break;
-        case 'invoke':
-            invoke(value as number, false, stack, frames, code, meta);
-            break;
         case 'compile':
             compile(value as Tree, stack, meta);
             break;
@@ -160,6 +151,13 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             break;
         case 'barecall':
             barecall(value as string, stack, frames, meta)
+            break;
+
+        case 'invoke_block':
+            invoke(value as number, true, stack, frames, code, meta);
+            break;
+        case 'invoke':
+            invoke(value as number, false, stack, frames, code, meta);
             break;
         case 'send':
             let val: string = value as string;

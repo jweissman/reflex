@@ -36,7 +36,7 @@ Reflex {
       | Message "=" Expr -- local
 
     SendMessage
-      = (SendMessage | Funcall | Bareword) "." Message Args -- call
+      = (SendMessage | Funcall | Bareword) "." Message Arguments -- call
       | Receiver "." Message -- attr
 
     Funcall

@@ -7,6 +7,7 @@ import { Message } from "./Message";
 import { LocalVarOrEq } from "./LocalVarOrEq";
 import { Code } from "../../vm/instruction/Instruction";
 import { Defun } from "./Defun";
+import { Arguments } from "./Arguments";
 export class Defclass extends Tree {
   constructor(public name: Message, public body: Tree) {
     super();
@@ -18,13 +19,16 @@ export class Defclass extends Tree {
   get structure() {
       let defClass = new LocalVarOrEq(
           this.name,
-          new SendMethodCall(new Bareword("Class"), new Message("new"), new Sequence([this.name]))
+          new SendMethodCall(new Bareword("Class"), new Message("new"), new Arguments(new Sequence([this.name])))
       );
       let defMethods = ((this.body as Program).lines as Sequence).map((methodDef) => {
           if (methodDef instanceof Defun) {
             let defun = methodDef as Defun;
             defun.compileOnly = true;
-            return new SendMethodCall(new Bareword(this.name.key), new Message("defineMethod"), new Sequence([defun.name, defun]));
+            return new SendMethodCall(
+              new Bareword(this.name.key), new Message("defineMethod"),
+              new Arguments(new Sequence([defun.name, defun]))
+            );
           } else {
               throw new Error("expected each line in class body to be defun?")
           }
