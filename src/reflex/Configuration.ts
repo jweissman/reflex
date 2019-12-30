@@ -1,4 +1,4 @@
 export class Configuration {
-    trace: boolean = false;
-    delay: number = -1;
+    trace: boolean = !!process.env.trace || false;  // per-instruction debug logging
+    delay: number = -1;                         // pause between instructions in seconds 
 }

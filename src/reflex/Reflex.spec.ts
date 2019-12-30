@@ -42,13 +42,16 @@ describe('Reflex', () => {
                 evaluate('mod()')
                 expect(evaluate("x")).toEqual("Class(Object)")
             })
-            xit('yields successive values', () => {
-                evaluate("gen(){yield(Object); yield Class; yield Function}")
-                evaluate("x=Class");
+            it('yields successive values', () => {
+                evaluate("gen(){yield(Object); yield Class}")
+                evaluate("x=Function");
+                expect(evaluate("x")).toEqual("Class(Function)")
                 evaluate("gen(){|val|x=val}")
                 expect(evaluate("x")).toEqual("Class(Object)")
-                expect(evaluate("gen() {|val|x=val};x")).toEqual("Class(Class)")
-                expect(evaluate("gen() {|val|x=val};x")).toEqual("Class(Function)")
+                evaluate("gen(){|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Class)")
+                // expect(evaluate("gen() {|val|x=val};x")).toEqual("Class(Class)")
+                // expect(evaluate("gen() {|val|x=val};x")).toEqual("Class(Function)")
                 // expect(evaluate("gen {|val|x=val};x")).toEqual("Nil")
             })
         })

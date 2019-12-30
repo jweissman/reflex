@@ -10,8 +10,9 @@ export type Op
   | 'local_var_or_eq'
   | 'bare' // handle bareword ...
   | 'barecall'
+  | 'barecall_block'
   | 'label' 
-  | 'call'
+  | 'call' // todo with block??
   | 'ret'
   | 'halt'
   | 'send'

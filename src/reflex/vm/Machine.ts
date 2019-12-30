@@ -107,7 +107,7 @@ export default class Machine {
     doInvoke(ret: ReflexObject | undefined, fn: ReflexFunction, ...args: ReflexObject[]) {
         args.forEach(arg => this.stack.push(arg))
         this.stack.push(fn)
-        invoke(fn.arity, this.stack, this.frames, this.currentProgram, this, ret);
+        invoke(fn.arity, false, this.stack, this.frames, this.currentProgram, this, ret);
     }
 
     get state() { return { stack: this.stack, frames: this.frames, meta: this } }

@@ -7,7 +7,6 @@ export default class SendMessageEq extends Tree {
     get code(): Code {
         return [
             ...this.expr.code,
-            // ...this.message.code,
             ...this.receiver.code,
             ["send_eq",this.message.key],
         ]
@@ -17,7 +16,6 @@ export default class SendMessageEq extends Tree {
 }
 
 export class SendMessageOrEq extends SendMessageEq {
-    // constructor(public receiver: Tree, public message: Message, public expr: Tree) { super(); }
     get code(): Code {
         return [
             ...this.expr.code,

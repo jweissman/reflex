@@ -33,12 +33,12 @@ class PipedBlock extends Tree {
   }
 }
 
-class Arguments extends Tree {
+export class Arguments extends Tree {
   constructor(public args: Sequence, public block?: PipedBlock) {
     super();
-    log("CREATE ARGS: " + args.inspect())
+    // log("CREATE ARGS: " + args.inspect())
     if (this.block && this.block instanceof PipedBlock) {
-      log("!!! CREATE ARGS WITH BLOCK: " + this.block.inspect())
+      // log("!!! CREATE ARGS WITH BLOCK: " + this.block.inspect())
     }
   }
   inspect(): string { 

@@ -1,3 +1,4 @@
+import util from 'util'
 import { Code, indexForLabel } from "./Instruction";
 import ReflexObject from '../types/ReflexObject';
 import { ReflexFunction, WrappedFunction } from '../types/ReflexFunction';
@@ -8,9 +9,11 @@ import { zip } from '../util/zip';
 import { pop } from './pop';
 import Machine from '../Machine';
 import { log } from "../util/log";
+import { dump } from '../util/dump';
 
 export function invoke(
     arity: number,
+    hasBlock: boolean,
     stack: Stack,
     frames: Frame[],
     code: Code,
@@ -30,32 +33,44 @@ export function invoke(
         stack.push(result);
     }
     else if (top instanceof ReflexFunction) {
-        log('invoke reflex fn with arity ' + top.arity)
+        log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
         log('args ' + args)
         log('params ' + top.params)
-        let oldFrame = frames[frames.length - 1];
-        let self = oldFrame.self;
+        let frame = frames[frames.length - 1];
+        let block;
+        if (hasBlock) {
+            log("HAS BLOCK")
+            // throw new Error("has block: " + util.inspect(hasBlock))
+            block = stack[stack.length - 1] as ReflexFunction;
+            pop(stack);
+            log('block ' + block.inspect())
+        }
+        let self = frame.self;
         if (top.frame.self) {
             self = top.frame.self.within(self);
         }
-        let locals = {
-            // ...oldFrame.locals,
-            // ...top.frame.locals,
-            ...Object.fromEntries(zip(top.params, args))
-        };
+        let locals = Object.fromEntries(zip(top.params, args));
+
+        let ip = indexForLabel(code, top.label);
+        debugger;
+
         let newFrame: Frame = {
             // ...top.frame,
-            ip: indexForLabel(code, top.label),
+            // ip: top.frame?.ip ||
+            ip,
             locals,
             self,
             ...(ensureReturns ? { retValue: ensureReturns } : {}),
-            // fake: false,
+            currentMethod: top,
+            ...(hasBlock ? { block } : {}),
         };
-        //  {
-        //     ip: 
-        //     self,
-        //     locals,
-        // };
+
+        debugger;
+        if (top.frame.block) {
+            debugger;
+            newFrame.ip = top.frame.ip;
+        }
+
         frames.push(top.frame);
         frames.push(newFrame);
     }
