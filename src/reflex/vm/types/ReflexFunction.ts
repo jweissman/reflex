@@ -12,6 +12,8 @@ export class ReflexFunction extends ReflexObject {
     public params!: string[]
     // public locals: Store = {};
     public frame!: Frame;
+    // public block?: string;
+    public blockParamName?: string;
 
     // public binding?: Binding;
     // static klass: ReflexClass;

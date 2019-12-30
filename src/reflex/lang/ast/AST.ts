@@ -15,6 +15,22 @@ import LocalVarSet from "./LocalVarSet";
 import { Barecall } from "./Barecall";
 import { PipedBlock } from "./PipedBlock";
 import { Arguments } from "./Arguments";
+import { Code } from "../../vm/instruction/Instruction";
+
+export class Parameter extends Tree {
+  constructor(public name: string, public reference: boolean = false) {
+    super();
+    // console.log("CREATE NEW PARAMETER " + name + " -- ref? " + reference)
+  }
+
+  inspect(): string {
+    return this.reference ? `&${this.name}` : this.name;
+  }
+
+  get code(): Code {
+    return [[ 'bare', this.name ]]
+  }
+}
 
 const self = new Bareword('self')
 
@@ -31,13 +47,10 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   FunctionName: (id: Node) => new Message(id.sourceString),
   PipedBlock: (_lb: Node, pipeVars: Node, block: Node, _rb: Node) => {
     let pipe = pipeVars.tree[0] || new Sequence([]);
-    // console.log("PIPE VARS", pipe);
-    // debugger;
-    // if (pipe instanceof Sequence) {}
-    // else { pipe = new Sequence([])}
     return new PipedBlock(pipe, block.tree)
   },
   PipeVars: (_lp: Node, pipeVars: Node, _rp: Node) => pipeVars.tree,
+
   Arguments_block: (args: Node, block: Node) => {
     let argTree = args.tree[0] || new Sequence([]);
     return new Arguments(argTree, block.tree);
@@ -45,9 +58,20 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Arguments_no_block: (args: Node) => new Arguments(args.tree),
   FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
+
   SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) =>
     new SendMethodCall(receiver.tree, message.tree, args.tree),
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
+  Param: (parameter: Node) => {
+    if (parameter.tree instanceof Bareword) {
+      return new Parameter((parameter.tree as Bareword).word)
+    } else if (parameter.tree instanceof Parameter) {
+      return parameter.tree;
+    } else {
+      throw new Error('Invalid parameter type: ' + parameter.tree)
+    }
+  },
+  Param_ref: (_amp: Node, word: Node) => new Parameter((word.tree as Bareword).word, true),
   SendMessage_attr: (receiver: Node, _dot: Node, message: Node) =>
     new SendMessage(receiver.tree, message.tree),
   SendMessageEq_other: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) =>

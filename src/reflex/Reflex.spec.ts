@@ -42,6 +42,7 @@ describe('Reflex', () => {
                 evaluate('mod()')
                 expect(evaluate("x")).toEqual("Class(Object)")
             })
+
             it('yields successive values', () => {
                 evaluate("gen(){yield Object; yield Class}")
                 evaluate("x=Function");
@@ -50,7 +51,6 @@ describe('Reflex', () => {
                 expect(evaluate("x")).toEqual("Class(Object)")
                 evaluate("gen(){|val|x=val}")
                 expect(evaluate("x")).toEqual("Class(Class)")
-                // expect(evaluate("gen {|val|x=val};x")).toEqual("Nil")
             })
 
             it("funcalls with only blocks", () => {
@@ -80,14 +80,21 @@ describe('Reflex', () => {
 
             it('gives access to the block within the function', () => {
                 evaluate("x=Object; y=Object")
-                evaluate("twice() { x=block(); y=block() }") // should be able to specify block name...
+                evaluate("twice(&block) { x=block(); y=block() }")
                 evaluate("twice {Function}")
                 expect(evaluate("x")).toEqual("Class(Function)")
                 expect(evaluate("y")).toEqual("Class(Function)")
             })
 
-            test.todo("passes blocks to instances methods")
-
+            it("passes args and blocks", () => {
+                evaluate("dispatch(x,&block) { block(x); }")
+                evaluate("y=Class")
+                evaluate("dispatch(Object) { |val| y = val }")
+                expect(evaluate("y")).toEqual("Class(Object)")
+                evaluate("dispatch(Function) { |val| y = val }")
+                expect(evaluate("y")).toEqual("Class(Function)")
+            })
+            test.todo("passes blocks to instance methods")
         })
 
         describe("super", () => {

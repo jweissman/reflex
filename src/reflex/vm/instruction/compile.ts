@@ -10,6 +10,7 @@ import { Bareword } from '../../lang/ast/Bareword';
 import Machine from '../Machine';
 import { log } from "../util/log";
 import { Message } from "../../lang/ast/Message";
+import { Parameter } from "../../lang/ast/AST";
 
 export let lambdaCount = 0;
 export function compile(ast: Tree, stack: Stack, meta: Machine) {
@@ -29,20 +30,25 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
         let fn = ReflexClass.makeInstance(meta, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
         fn.name = name;
         fn.label = label;
-        fn.arity = arity;
-        fn.params = ast.params.map(param =>  {
-            if (param instanceof Bareword) {
-                return param.word;
-            } else if (param instanceof Message) {
-                return param.key;
+        // fn.
+        fn.params = ast.params.map(x=>x).flatMap(param =>  {
+            if (param instanceof Parameter) {
+                if (param.reference) {
+                    if (fn.blockParamName) {
+                        throw new Error("should only have one block param, found " + param.name + " and " + fn.blockParamName)
+                    }
+                    fn.blockParamName = param.name;
+                    log("Found block param " + param.name)
+                    return [];
+                } else {
+                    return [param.name];
+                }
             } else {
-                throw new Error("param wasn't bareword/message: " + param.inspect());
+                throw new Error("expected parameter, got " + param.inspect());
             }
-            // (param as Bareword).word
         });
+        fn.arity = fn.params.length;
         let frame = meta.frames[meta.frames.length - 1]
-        // fn.locals = frame.locals
-        // fn.self = frame.self
         fn.frame = { ...frame };
         log("COMPILE'D " + fn.inspect() + " arity: " + fn.arity);
         log(" params: " + fn.params);

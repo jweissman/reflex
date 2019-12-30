@@ -20,8 +20,8 @@ export class Arguments extends Tree {
   get code(): Code {
     if (this.block && this.block instanceof PipedBlock) {
       return [
-        ...this.args.code,
         ...this.block.code,
+        ...this.args.code,
       ];
     }
     else {

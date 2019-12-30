@@ -82,13 +82,14 @@ Reflex {
       = ~"(" ListOf<Param, ",">
 
     Param
-      = Bareword
+      = "&" Bareword -- ref
+      | Bareword
 
     Block
       = "{" Program "}"
       
     PipedBlock = "{" PipeVars? Program "}"
-    PipeVars = "|" ListOf<Message,","> "|"
+    PipeVars = "|" ListOf<Param,","> "|"
 
     FunctionLit
       = Params "=>" Block

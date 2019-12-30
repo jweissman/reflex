@@ -39,9 +39,11 @@ export function invoke(
         let frame = frames[frames.length - 1];
         let block;
         if (hasBlock) {
-            log("HAS BLOCK")
             // throw new Error("has block: " + util.inspect(hasBlock))
+            log("HAS BLOCK!")
+            debugger;
             block = stack[stack.length - 1] as ReflexFunction;
+            log("HAS BLOCK: " + block.inspect())
             pop(stack);
             log('block ' + block.inspect())
         }
@@ -51,8 +53,12 @@ export function invoke(
         }
         let locals = Object.fromEntries(zip(top.params, args));
 
+        if (block && top.blockParamName){
+            locals[top.blockParamName] = block;
+        }
+
         let ip = indexForLabel(code, top.label);
-        debugger;
+        // debugger;
 
         let newFrame: Frame = {
             // ...top.frame,
@@ -65,7 +71,7 @@ export function invoke(
             ...(hasBlock ? { block } : {}),
         };
 
-        debugger;
+        // debugger;
         if (top.frame.block) {
             debugger;
             newFrame.ip = top.frame.ip;

@@ -52,12 +52,12 @@ function barecall(value: string, stack: Stack, frames: Frame[], meta: Machine, h
         } else {
             throw new Error("tried to yield from outermost scope (or without a block on frame)")
         }
-    } else if (value as string === 'block') {
-        if (frame.block) {
-            fn = frame.block;
-        } else {
-            throw new Error("no block in current frame?")
-        }
+    // } else if (value as string === 'block') {
+    //     if (frame.block) {
+    //         fn = frame.block;
+    //     } else {
+    //         throw new Error("no block in current frame?")
+    //     }
     } else if (Object.keys(locFrame.locals).includes(value as string)) {
         fn = locFrame.locals[value as string]
     } else {
