@@ -4,7 +4,7 @@ import { Bareword } from "./Bareword";
 import { Sequence } from "./Sequence";
 import { SendMethodCall } from "./SendMethodCall";
 import { Message } from "./Message";
-import { LocalVarOrEq } from "./SendMessageEq";
+import { LocalVarOrEq } from "./LocalVarOrEq";
 import { Code } from "../../vm/instruction/Instruction";
 import { Defun } from "./Defun";
 export class Defclass extends Tree {

@@ -58,7 +58,7 @@ Reflex {
       = ident
       
     Arguments
-      = Args PipedBlock -- block
+      = Args? PipedBlock -- block
       | Args -- no_block
    
     Args
@@ -87,7 +87,7 @@ Reflex {
     Block
       = "{" Program "}"
       
-    PipedBlock = "{" PipeVars Program "}"
+    PipedBlock = "{" PipeVars? Program "}"
     PipeVars = "|" ListOf<Message,","> "|"
 
     FunctionLit

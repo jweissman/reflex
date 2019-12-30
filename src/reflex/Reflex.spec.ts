@@ -43,17 +43,55 @@ describe('Reflex', () => {
                 expect(evaluate("x")).toEqual("Class(Object)")
             })
             it('yields successive values', () => {
-                evaluate("gen(){yield(Object); yield Class}")
+                evaluate("gen(){yield Object; yield Class}")
                 evaluate("x=Function");
                 expect(evaluate("x")).toEqual("Class(Function)")
                 evaluate("gen(){|val|x=val}")
                 expect(evaluate("x")).toEqual("Class(Object)")
                 evaluate("gen(){|val|x=val}")
                 expect(evaluate("x")).toEqual("Class(Class)")
-                // expect(evaluate("gen() {|val|x=val};x")).toEqual("Class(Class)")
-                // expect(evaluate("gen() {|val|x=val};x")).toEqual("Class(Function)")
                 // expect(evaluate("gen {|val|x=val};x")).toEqual("Nil")
             })
+
+            it("funcalls with only blocks", () => {
+                evaluate("g(){yield Object; yield Class; yield Function}")
+                evaluate("x=Function")
+                evaluate("g{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Object)")
+                evaluate("g{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Class)")
+                evaluate("g{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Function)")
+            })
+
+            it('creates a generator factory', () => {
+                evaluate("thrice=(x)=>()=>{yield x; yield x; yield x; yield Class}")
+                evaluate("x=Function")
+                evaluate("three_obj = thrice(Object)")
+                evaluate("three_obj{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Object)")
+                evaluate("three_obj{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Object)")
+                evaluate("three_obj{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Object)")
+                evaluate("three_obj{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Class)")
+            })
+
+            it('gives access to the block within the function', () => {
+                evaluate("x=Object; y=Object")
+                evaluate("twice() { x=block(); y=block() }") // should be able to specify block name...
+                evaluate("twice {Function}")
+                expect(evaluate("x")).toEqual("Class(Function)")
+                expect(evaluate("y")).toEqual("Class(Function)")
+            })
+
+            test.todo("passes blocks to instances methods")
+
+        })
+
+        describe("super", () => {
+            test.todo("is the current method's super-method")
         })
     })
 
