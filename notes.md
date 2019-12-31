@@ -1,12 +1,16 @@
-# core types
-## object
-in theory, every entity in the system descends from object
-## class
-every entity in the system also has a class, which has a member `super` that is its parent inheritance-wise
-## function
-a function is a callable entity that can wrap a raw JS function or have an implementation somewhere in the vm code (in which case it is more like a label that tracks things like arity etc)
+## syntax ideas
+
+ -- it would be interesting to have
+syntax for passing a function *as* a block (rather than an arg -- i guess ampersand could work here? i guess
+this is how ruby thinks about it)
+
+ -- tree notation (xml literal...)
+ -- graph notation (grammar lit??)
+
+ -- path and url literals
 
 ----------------------------------------------------------------
+## types
 
 - we have kept the core type system to the small core above to build a kind of shell that
   we can try to use to model the basic type system elements (i.e., a core language and testing harness
@@ -14,6 +18,8 @@ a function is a callable entity that can wrap a raw JS function or have an imple
 - the extended type system should try to comprise at least the basics (with syntax support):
     * strings, numbers, booleans and lists
     * possibly: maps, tuples, ranges, nils/options, enums, symbols
+
+- symbols looking increasingly important (for &:method calls e.g., but maybe there's a clearer way to express that??)
 
 ### modules and traits
 - a module system is also in order; it would be interesting to consider a 'first-class traits'

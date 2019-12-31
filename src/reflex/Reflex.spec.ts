@@ -76,14 +76,16 @@ describe('Reflex', () => {
                 expect(evaluate("x")).toEqual("Class(Object)")
                 evaluate("three_obj{|val|x=val}")
                 expect(evaluate("x")).toEqual("Class(Class)")
-            })
 
-            it('gives access to the block within the function', () => {
-                evaluate("x=Object; y=Object")
-                evaluate("twice(&block) { x=block(); y=block() }")
-                evaluate("twice {Function}")
+                evaluate("three_fn = thrice(Function)")
+                evaluate("three_fn{|val|x=val}")
                 expect(evaluate("x")).toEqual("Class(Function)")
-                expect(evaluate("y")).toEqual("Class(Function)")
+                evaluate("three_fn{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Function)")
+                evaluate("three_fn{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Function)")
+                evaluate("three_fn{|val|x=val}")
+                expect(evaluate("x")).toEqual("Class(Class)")
             })
 
             it("passes args and blocks", () => {
@@ -105,6 +107,23 @@ describe('Reflex', () => {
                 expect(evaluate("x")).toEqual("Class(Class)")
                 evaluate("baz.next { |v| x=v }")
                 expect(evaluate("x")).toEqual("Class(Function)")
+            })
+
+            describe('unary ampersand', () => {
+                it('binds a block parameter', () => {
+                    evaluate("x=Object; y=Object")
+                    evaluate("twice(&block) { x=block(); y=block() }")
+                    evaluate("twice {Function}")
+                    expect(evaluate("x")).toEqual("Class(Function)")
+                    expect(evaluate("y")).toEqual("Class(Function)")
+                })
+                xit('passes functions as blocks', () => {
+                    evaluate('x=nil')
+                    evaluate('f(val){x=val}')
+                    evaluate('g(&b){b(Object)}')
+                    evaluate('g(&f)')
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                })
             })
         })
 
