@@ -75,11 +75,15 @@ Reflex {
       | BareArguments
     
     FormalArguments
-      = "(" ListOf<Expr, ","> ")"
+      = "(" ListOf<Arg, ","> ")"
 
     BareArguments
-      = ~"(" NonemptyListOf<Expr, ",">
-
+      = ~"(" NonemptyListOf<Arg, ",">
+     
+    Arg
+      = "&" Expr -- ref
+      | Expr
+    
     Params
       = FormalParams
       | BareParams

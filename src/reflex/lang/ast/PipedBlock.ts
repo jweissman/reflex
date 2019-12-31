@@ -3,8 +3,9 @@ import { Program } from "./Program";
 import { Sequence } from "./Sequence";
 import { FunctionLiteral } from "./FunctionLiteral";
 import { Code } from "../../vm/instruction/Instruction";
+import { Parameter } from "./Parameter";
 export class PipedBlock extends Tree {
-  constructor(public pipeVars: Sequence, public body: Program) {
+  constructor(public pipeVars: Sequence<Parameter>, public body: Program) {
     super();
   }
   inspect(): string {

@@ -14,7 +14,7 @@ import { Defclass } from "./Defclass";
 import LocalVarSet from "./LocalVarSet";
 import { Barecall } from "./Barecall";
 import { PipedBlock } from "./PipedBlock";
-import { Arguments } from "./Arguments";
+import { Arguments, Argument } from "./Arguments";
 import { Parameter } from "./Parameter";
 
 const self = new Bareword('self')
@@ -50,6 +50,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     }
   },
   FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
+  Arg_ref: (_amp: Node, expr: Node) => new Argument(expr.tree, true),
+  Arg: (expr: Node) => expr.tree instanceof Argument ? expr.tree : new Argument(expr.tree, false),
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
   SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) => {
     let theArgs = args.tree;

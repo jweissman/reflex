@@ -1,13 +1,13 @@
 import Tree from './Tree';
-export class Sequence extends Tree {
-    constructor(public items: Tree[]) { super(); }
+export class Sequence<T extends Tree> extends Tree {
+    constructor(public items: T[]) { super(); }
     get code() { return this.items.flatMap(item => item.code); }
     get length() { return this.items.length; }
     reverse() { return new Sequence([...this.items].reverse()); } 
     inspect(): string {
         return "("+ this.items.map(item => item.inspect()).join(',') +")";
     }
-    map<T>(fn: (item: Tree) => T): T[] {
+    map<U>(fn: (item: T) => U): U[] {
         return this.items.map(fn)
     }
 }

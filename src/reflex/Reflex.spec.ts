@@ -1,6 +1,7 @@
 import reflex, { evaluate } from "./SpecHelper"
 describe('Reflex', () => {
     describe("concepts", () => {
+        // waiting at least on strings/symbols and equality...
         describe("message dispatch", () => {
             test.todo("method_missing")
             test.todo("responds_to")
@@ -123,7 +124,7 @@ describe('Reflex', () => {
                     expect(evaluate("x")).toEqual("Class(Function)")
                     expect(evaluate("y")).toEqual("Class(Function)")
                 })
-                xit('passes functions as blocks', () => {
+                it('passes functions as blocks', () => {
                     evaluate('x=nil')
                     evaluate('f(val){x=val}')
                     evaluate('g(&b){b(Object)}')
