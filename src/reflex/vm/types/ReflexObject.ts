@@ -19,8 +19,11 @@ export default class ReflexObject {
 
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
+        let classMethods = this.get("class_methods")
         let shared = this.klass.get("instance_methods")
         let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
+        // let shared = this.klass.get("instance_methods")
+        // let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
         
         if (message === 'self') {
             log('msg is self')
@@ -28,6 +31,9 @@ export default class ReflexObject {
         } else if (this.get(message)) {
             log('msg is instance_method')
             return this.get(message)
+        } else if (classMethods && classMethods.get(message)) {
+            log('msg is class_method')
+            return classMethods.get(message)
         } else if (shared && shared.get(message)) {
             log('msg is parent instance_method')
             return shared.get(message)

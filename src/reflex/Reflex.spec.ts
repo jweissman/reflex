@@ -1,5 +1,11 @@
 import reflex, { evaluate } from "./SpecHelper"
 describe('Reflex', () => {
+    describe("concepts", () => {
+        describe("message dispatch", () => {
+            test.todo("method_missing")
+            test.todo("responds_to")
+        })
+    })
     describe("syntax", () => {
         it('permits bare args', () => {
             expect(evaluate("Bar = Class.new 'Bar'")).toEqual("Class(Bar)")

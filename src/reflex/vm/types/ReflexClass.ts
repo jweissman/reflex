@@ -1,6 +1,7 @@
 import ReflexObject from "./ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
 import Machine from "../Machine";
+import { log } from "../util/log";
 
 const NATIVE_CLASSES: { [key: string]: any } = {
     // "Object": ReflexObject,
@@ -50,21 +51,34 @@ export default class ReflexClass extends ReflexObject {
         klass.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
             (_meta: Machine, name: string, fn: ReflexFunction) => ReflexClass.defineInstanceMethod(klass, fn, name)
         ));
+        klass.set("defineClassMethod", new WrappedFunction(`${name}.defineClassMethod`,
+            (_meta: Machine, name: string, fn: ReflexFunction) => ReflexClass.defineClassMethod(klass, fn, name)
+        ));
         return klass;
     }
 
     static defineInstanceMethod = (klass: ReflexClass, fn: ReflexFunction, name: string) => {
-        // log("DEFINE INSTANCE METHOD name="+ name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
-        fn.name = `${klass.name}.${name}`
+        log("DEFINE INSTANCE METHOD name="+ name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
+        fn.name = `${klass.name}#${name}`
         let methods = klass.get("instance_methods") || new ReflexObject();
         methods.set(name, fn);
         klass.set("instance_methods", methods)
         return fn
     }
-
+    static defineClassMethod = (klass: ReflexClass, fn: ReflexFunction, name: string) => {
+        log("DEFINE CLASS METHOD name="+ name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
+        fn.name = `${klass.name}.${name}`
+        let methods = klass.get("class_methods") || new ReflexObject();
+        methods.set(name, fn);
+        klass.set("class_methods", methods)
+        return fn
+    }
     private constructor(public name: string) { super(); } 
     get superclass(): ReflexClass { return this.get("super") as ReflexClass }
     get ancestors(): ReflexClass[] { return this.name === 'Object' ? [] : [ this.superclass, ...this.superclass.ancestors]}
     protected get instanceMethods(): ReflexObject { return this.get("instance_methods") as ReflexObject }
     get displayName() { return `Class(${this.name})` }
+
+    // send(message: string): ReflexObject {
+    // }
 }

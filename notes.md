@@ -87,3 +87,31 @@ code in a gist and go, even though that seems incredibly dangerous from other PO
 
 ----------------------------------------------------------------
 
+----------------------------------------------------------------
+
+## objects
+
+okay, but seriously, how to expose object attributes
+
+this does seem like a thing we can do without much else
+
+and would help us understand method dispatch
+
+it does seem like there needs to be a 'class execution context'
+that additional stuff in the class def gets executed in
+
+at least we need a chance to say 'all these things have such and such'
+
+```
+class Light {
+  expose :lumens
+}
+```
+
+that needs to run somewhere, and do some metamagic
+
+what exactly does it do? it writes some methods to the instance methods of the class that
+get and set lumens...
+
+at the very least we should be able to call defineMethod there, even if the accessor helpers
+are just wrappers around those

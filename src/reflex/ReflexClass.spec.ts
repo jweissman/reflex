@@ -52,21 +52,21 @@ describe('Class', () => {
     describe('instance methods', () => {
         it('defines an instance method', () => {
             expect(evaluate("o=Object.new()")).toEqual("Object")
-            expect(evaluate("Object.defineMethod('baz', () => { Function })")).toEqual("Function(Object.baz)")
-            expect(evaluate("o.baz")).toEqual("Function(Object.baz)")
+            expect(evaluate("Object.defineMethod('baz', () => { Function })")).toEqual("Function(Object#baz)")
+            expect(evaluate("o.baz")).toEqual("Function(Object#baz)")
             expect(evaluate("o.baz()")).toEqual("Class(Function)")
             expect(evaluate("o2=Object.new()")).toEqual("Object")
-            expect(evaluate("o2.baz")).toEqual("Function(Object.baz)")
+            expect(evaluate("o2.baz")).toEqual("Function(Object#baz)")
             expect(evaluate("o2.baz()")).toEqual("Class(Function)")
         })
 
         it('redefines an instance method', () => {
             expect(evaluate("o=Object.new()")).toEqual("Object")
-            expect(evaluate("Object.defineMethod('baz', () => { Class })")).toEqual("Function(Object.baz)")
-            expect(evaluate("o.baz")).toEqual("Function(Object.baz)")
+            expect(evaluate("Object.defineMethod('baz', () => { Class })")).toEqual("Function(Object#baz)")
+            expect(evaluate("o.baz")).toEqual("Function(Object#baz)")
             expect(evaluate("o.baz()")).toEqual("Class(Class)")
             expect(evaluate("o2=Object.new()")).toEqual("Object")
-            expect(evaluate("o2.baz")).toEqual("Function(Object.baz)")
+            expect(evaluate("o2.baz")).toEqual("Function(Object#baz)")
             expect(evaluate("o2.baz()")).toEqual("Class(Class)")
         })
 
@@ -79,39 +79,40 @@ describe('Class', () => {
 
         it('inherits instance methods', () => {
             expect(evaluate("o=Object.new()")).toEqual("Object")
-            expect(evaluate("Object.defineMethod('quux', () => { Function })")).toEqual("Function(Object.quux)")
-            expect(evaluate('o.quux')).toEqual('Function(Object.quux)')
+            expect(evaluate("Object.defineMethod('quux', () => { Function })")).toEqual("Function(Object#quux)")
+            expect(evaluate('o.quux')).toEqual('Function(Object#quux)')
             expect(evaluate('o.quux()')).toEqual('Class(Function)')
 
             expect(evaluate("Bar=Class.new('Bar')")).toEqual("Class(Bar)")
             expect(evaluate("Bar.super")).toEqual("Class(Object)")
             expect(evaluate('bar=Bar.new()')).toEqual('Bar')
-            expect(evaluate('bar.quux')).toEqual('Function(Object.quux)')
+            expect(evaluate('bar.quux')).toEqual('Function(Object#quux)')
             expect(evaluate('bar.quux()')).toEqual('Class(Function)')
 
             expect(evaluate("Baz=Class.new('Baz', Bar)")).toEqual("Class(Baz)")
             expect(evaluate("Baz.super")).toEqual("Class(Bar)")
             expect(evaluate('baz=Baz.new()')).toEqual('Baz')
-            expect(evaluate('baz.quux')).toEqual('Function(Object.quux)')
+            expect(evaluate('baz.quux')).toEqual('Function(Object#quux)')
             expect(evaluate('baz.quux()')).toEqual('Class(Function)')
         })
 
         it('may set a value', () => {
-            expect(evaluate("Object.defineMethod('yep', () => { self.kind = Function })")).toEqual("Function(Object.yep)")
+            expect(evaluate("Object.defineMethod('yep', () => { self.kind = Function })"))
+                .toEqual("Function(Object#yep)")
             evaluate("o=Object.new()")
-            expect(evaluate("o.yep")).toEqual("Function(Object.yep)")
+            expect(evaluate("o.yep")).toEqual("Function(Object#yep)")
             evaluate("o.yep()")
             expect(evaluate("o.kind")).toEqual("Class(Function)")
             // the value doesn't exist on new objects (i.e., those that haven't called .yep() yet)
             expect(() => evaluate("Object.new().kind")).toThrow()
-            expect(evaluate("Object.defineMethod('nope', () => { self.kind = Class; self })")).toEqual("Function(Object.nope)")
+            expect(evaluate("Object.defineMethod('nope', () => { self.kind = Class; self })")).toEqual("Function(Object#nope)")
             expect(evaluate("Object.new().nope().kind")).toEqual("Class(Class)")
             expect(evaluate("o.kind")).toEqual("Class(Function)")
         })
 
         it('initializes', () => {
             expect(evaluate("Baz = Class.new('Baz')")).toEqual("Class(Baz)")
-            expect(evaluate("Baz.defineMethod('init', (value) => { self.value = value })")).toMatch("Function(Baz.init")
+            expect(evaluate("Baz.defineMethod('init', (value) => { self.value = value })")).toEqual("Function(Baz#init)")
             expect(evaluate("baz = Baz.new(Object.new())")).toEqual("Baz")
             expect(evaluate("baz.value")).toEqual("Object")
             expect(evaluate("baz2 = Baz.new(Class.new('Quux'))")).toEqual("Baz")
@@ -129,7 +130,7 @@ describe('Class', () => {
         it('defines an instance method', () => {
             expect(evaluate("class Foo { banana() { Function }}")).toEqual("Class(Foo)")
             expect(evaluate("Foo.new()")).toEqual("Foo")
-            expect(evaluate("Foo.new().banana")).toEqual("Function(Foo.banana)")
+            expect(evaluate("Foo.new().banana")).toEqual("Function(Foo#banana)")
             expect(evaluate("Foo.new().banana()")).toEqual("Class(Function)")
         })
 
@@ -145,6 +146,11 @@ describe('Class', () => {
             expect(evaluate("Bang.super")).toEqual("Class(Buzz)")
             expect(evaluate("Buzz.super")).toEqual("Class(Fizz)")
             expect(evaluate("Fizz.super")).toEqual("Class(Object)")
+        })
+
+        it('calls methods in class definition', () => {
+            evaluate("class Animal { self.defineMethod('speak', () => 'hello') }");
+            expect(evaluate("Animal.new().speak()")).toEqual('hello')
         })
     })
 });

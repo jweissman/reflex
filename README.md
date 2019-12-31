@@ -2,8 +2,10 @@
 a reflecting language
 
 # Synopsis
-a general-purpose, reflection-oriented language
-this repo contains the grammar, the vm, cli harness
+A general-purpose, reflection-oriented language for the contemporary web.
+Inspired by Ruby, Eiffel, Self, Javascript.
+This repo contains the grammar, the vm, cli harness.
+Implemented in Typescript.
 
 # Status
 `reflex` is still highly experimental!
@@ -12,6 +14,7 @@ this repo contains the grammar, the vm, cli harness
 ## Core Types
 ### Object
 Every entity in the system descends from `Object`.
+Interacts via messages dispatched through its native `send` method.
 ### Class
 Every entity in the system also has a `Class`, which has a member `super` that is its parent class. The root of every object's ancestor chain is therefore `Class(Object)`.
 ### Function
@@ -34,3 +37,14 @@ Most interactions with objects go through `send` on ReflexObject, which is going
 methods on the object and then on parents/ancestors.
 ## First-class Functions
 Any function you can invoke, you should be able to pass it around as an object in the system.
+## Binding
+There is a globally-accessible binding object wrapping around the current execution context of the interpreter.
+It should be able to get/set local vars, send messages etc.
+## Mirrors and Bindings
+Reflective utilities are accessible through an explicit `Mirror` utility object,
+which should conjure classes, dispatch methods and capture bindings.
+Mirrors can also create reflected objects ("holograms") that can modify messages/manipulate bindings/etc.
+(An important use of holograms is creating 'illusions' or formalized mock objects.)
+## Traits
+Classes may specify mixin behaviors, modelled as formal trait objects that can be reflected on.
+(`Array.enumerable?` should be true.)
