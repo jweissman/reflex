@@ -140,6 +140,11 @@ describe('Class', () => {
             expect(evaluate("Class.new().foo()")).toEqual("Class(Class)")
         })
 
-        test.todo("subclasses specified class")
+        it("subclasses specified class", () => {
+            evaluate("class Fizz {}; class Buzz < Fizz {}; class Bang < Buzz {}")
+            expect(evaluate("Bang.super")).toEqual("Class(Buzz)")
+            expect(evaluate("Buzz.super")).toEqual("Class(Fizz)")
+            expect(evaluate("Fizz.super")).toEqual("Class(Object)")
+        })
     })
 });

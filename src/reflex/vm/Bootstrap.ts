@@ -19,8 +19,8 @@ const nihilClass = ReflexClass.makeClass("Nihil");
 ReflexNihil.klass = nihilClass;
 
 let mainClass = ReflexClass.makeClass("Main")
-mainClass.set('class', classClass)
-mainClass.set('super', objectClass)
+// mainClass.set('class', classClass)
+// mainClass.set('super', objectClass)
 let main = new ReflexObject()
 main.set('class', mainClass)
 

@@ -19,11 +19,20 @@ Reflex {
       | Bareword
 
     Defclass
-      = Class ClassName Block
+      = Class ClassName ExtendsClass Block -- extends
+      | Class ClassName Block -- plain
     
-    Class = "class"
+    Class
+      = "class"
 
-    ClassName = ident
+    ClassName
+      = capitalIdent
+
+    ExtendsClass
+      = Extends Bareword
+
+    Extends
+      = "<"
 
     Defun
       = "def"? FunctionName FormalParams Block
@@ -112,6 +121,9 @@ Reflex {
     
     // unicodeLiteral
     //   = "u" hexDigit hexDigit hexDigit hexDigit
+
+    capitalIdent
+      = "A".."Z" idChar*
 
     ident
       = letter idChar*

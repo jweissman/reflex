@@ -10,7 +10,7 @@ import { Bareword } from '../../lang/ast/Bareword';
 import Machine from '../Machine';
 import { log } from "../util/log";
 import { Message } from "../../lang/ast/Message";
-import { Parameter } from "../../lang/ast/AST";
+import { Parameter } from "../../lang/ast/Parameter";
 
 export let lambdaCount = 0;
 export function compile(ast: Tree, stack: Stack, meta: Machine) {

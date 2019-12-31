@@ -15,22 +15,7 @@ import LocalVarSet from "./LocalVarSet";
 import { Barecall } from "./Barecall";
 import { PipedBlock } from "./PipedBlock";
 import { Arguments } from "./Arguments";
-import { Code } from "../../vm/instruction/Instruction";
-
-export class Parameter extends Tree {
-  constructor(public name: string, public reference: boolean = false) {
-    super();
-    // console.log("CREATE NEW PARAMETER " + name + " -- ref? " + reference)
-  }
-
-  inspect(): string {
-    return this.reference ? `&${this.name}` : this.name;
-  }
-
-  get code(): Code {
-    return [[ 'bare', this.name ]]
-  }
-}
+import { Parameter } from "./Parameter";
 
 const self = new Bareword('self')
 
@@ -39,9 +24,12 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Program(list.tree),
   Funcall: (call: Node) =>
     new SendMethodCall(self, call.key.tree, call.args.tree),
-  Defclass: (_class: Node, name: Node, block: Node) =>
+  Defclass_plain: (_class: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree),
+  Defclass_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
+    new Defclass(name.tree, block.tree, superclass.tree),
   ClassName: (id: Node) => new Message(id.sourceString),
+  ExtendsClass: (_extends: Node, name: Node) => name.tree,
   Defun: (_def: Node, name: Node, args: Node, block: Node) =>
     new Defun(name.tree, args.tree, block.tree),
   FunctionName: (id: Node) => new Message(id.sourceString),
@@ -50,16 +38,11 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     return new PipedBlock(pipe, block.tree)
   },
   PipeVars: (_lp: Node, pipeVars: Node, _rp: Node) => pipeVars.tree,
-
   Arguments_block: (args: Node, block: Node) => {
     let argTree = args.tree[0] || new Sequence([]);
-    // console.log("Create arg with block", { argTree, block: block.tree })
     return new Arguments(argTree, block.tree);
   },
   Arguments_no_block: (args: Node) => {
-    // if (args.tree instanceof Arguments) {
-      // return args.tree;
-    // } else
     if (args.tree instanceof Sequence) {
       return new Arguments(args.tree)
     } else {
@@ -68,7 +51,6 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   },
   FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
-
   SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) => {
     let theArgs = args.tree;
     return new SendMethodCall(receiver.tree, message.tree, theArgs);
