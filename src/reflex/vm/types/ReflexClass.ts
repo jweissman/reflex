@@ -9,6 +9,7 @@ const NATIVE_CLASSES: { [key: string]: any } = {
 }
 
 export default class ReflexClass extends ReflexObject {
+    isClass: boolean = true;
     static klass = ReflexClass.makeClass("Class", ReflexClass.klass);
 
     static makeInstance = (meta: Machine, klass: ReflexClass, args: ReflexObject[]) => {
@@ -46,14 +47,16 @@ export default class ReflexClass extends ReflexObject {
                     customSuper || ReflexObject.klass
                 );
         }
-        klass.set("new", new WrappedFunction(name + '.new', newFn));
-
-        klass.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
+        let classMethods = new ReflexObject();
+        classMethods.set("new", new WrappedFunction(name + '.new', newFn));
+        classMethods.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
             (_meta: Machine, name: string, fn: ReflexFunction) => ReflexClass.defineInstanceMethod(klass, fn, name)
         ));
-        klass.set("defineClassMethod", new WrappedFunction(`${name}.defineClassMethod`,
+        classMethods.set("defineClassMethod", new WrappedFunction(`${name}.defineClassMethod`,
             (_meta: Machine, name: string, fn: ReflexFunction) => ReflexClass.defineClassMethod(klass, fn, name)
         ));
+        klass.set("class_methods", classMethods);
+
         return klass;
     }
 
@@ -79,6 +82,21 @@ export default class ReflexClass extends ReflexObject {
     protected get instanceMethods(): ReflexObject { return this.get("instance_methods") as ReflexObject }
     get displayName() { return `Class(${this.name})` }
 
-    // send(message: string): ReflexObject {
-    // }
+    send(message: string): ReflexObject {
+        let classMethods = this.get("class_methods")
+        let supershared = this.ancestors.map(a => a.get("class_methods")).find(a => a.get(message))
+        // if (this.get(message)) {
+        //     log('msg is class_attr')
+        //     return this.get(message)
+        // } else
+        if (classMethods && classMethods.get(message)) {
+            log('msg is class_method')
+            return classMethods.get(message)
+        } else if (supershared && supershared.get(message)) {
+            log('msg is ancestor class_method')
+            return supershared.get(message)
+        } else {
+            return super.send(message) //this.methodMissing(message)
+        }
+    }
 }

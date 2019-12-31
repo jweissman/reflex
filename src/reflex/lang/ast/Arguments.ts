@@ -15,28 +15,27 @@ export class Argument extends Tree {
 }
 
 export class Arguments extends Tree {
-  // public blockRef?: Argument; 
   constructor(public args: Sequence<Argument>, public block?: PipedBlock | Argument) {
     super();
     if (!block) {
       let blockArg = this.args.items.find((arg: Argument) => arg.isReference)
       if (blockArg) {
-        log("FOUND BLOCK ARG: " + blockArg)
         this.args.items = this.args.items.filter(arg => arg.isReference)
         this.block = blockArg;
       }
     }
-    // console.log("CREATE ARGUMENTS", { args, block }); 
   }
+
   inspect(): string {
     let disp = this.args.inspect();
-    if (this.block && this.block instanceof PipedBlock) {
+    if (this.block && this.block instanceof Tree) {
       disp += this.block.inspect();
     }
     return disp;
   }
+
   get code(): Code {
-    if (this.block && this.block instanceof PipedBlock) {
+    if (this.block && this.block instanceof Tree) {
       return [
         ...this.block.code,
         ...this.args.code,

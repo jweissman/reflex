@@ -6,10 +6,8 @@ import { FunctionLiteral } from '../../lang/ast/FunctionLiteral';
 import { Stack } from '../Stack';
 import { fail } from '../util/fail';
 import ReflexClass from '../types/ReflexClass';
-import { Bareword } from '../../lang/ast/Bareword';
 import Machine from '../Machine';
 import { log } from "../util/log";
-import { Message } from "../../lang/ast/Message";
 import { Parameter } from "../../lang/ast/Parameter";
 
 export let lambdaCount = 0;
@@ -18,7 +16,6 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
     if (ast instanceof Defun || ast instanceof FunctionLiteral) {
         let label = `lambda-${lambdaCount++}`;
         let name = label;
-        let arity = ast.params.length;
         if (ast instanceof Defun) {
             name = ast.name.key;
         }
@@ -31,7 +28,7 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
         fn.name = name;
         fn.label = label;
         // fn.
-        fn.params = ast.params.map(x=>x).flatMap(param =>  {
+        fn.params = ast.params.items.flatMap((param: Parameter) =>  {
             if (param instanceof Parameter) {
                 if (param.reference) {
                     if (fn.blockParamName) {
@@ -44,14 +41,13 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
                     return [param.name];
                 }
             } else {
-                throw new Error("expected parameter, got " + param.inspect());
+                throw new Error("expected parameter, got " + param);
             }
         });
         fn.arity = fn.params.length;
         let frame = meta.frames[meta.frames.length - 1]
         fn.frame = { ...frame };
-        log("COMPILE'D " + fn.inspect() + " arity: " + fn.arity);
-        log(" params: " + fn.params);
+        log("COMPILE'D " + fn.inspect() + " / arity: " + fn.arity + " / params: " + fn.params);
         stack.push(fn);
     }
     else {

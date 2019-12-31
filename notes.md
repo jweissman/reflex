@@ -115,3 +115,58 @@ get and set lumens...
 
 at the very least we should be able to call defineMethod there, even if the accessor helpers
 are just wrappers around those
+
+
+## Archetypes
+A meta-trait, or hyperclass. Binds together traits and provides a classlike namespace.
+So for data objects maybe the archetype is Structure, which we could give the name `struct`.
+(Maybe Archetypes let you build new 'keyword-level' capabilities...)
+
+i really like this idea (of archetypes letting you build new 'keyword-level' capabilities)...
+
+[or 'closed classes' even?]
+
+```
+archetype struct {
+  attribute(sym) { get_set(sym) }
+}
+
+struct Person {
+  attribute :name
+  attribute :age
+  attribute :gender
+}
+
+Person # => Struct(Person)
+```
+
+jeez, this way maybe even lots of structures could be written in the language itself??
+(we need language support for parsing but... i'm not even sure what exactly the thought
+here really was -- but )
+
+i guess you could still reopen structs but still, kind of interesting take...
+
+i still think archetypes could code for something even more 'radical' than this, a hyperclass
+
+but still, i guess the idea was to do an archetype for data operations
+
+readonly seems more like a trait
+
+```
+trait reads { |attribute|
+  self.defineMethod(attribute) { self.send(attribute) }
+}
+trait writes { |attribute|
+  self.defineMethod("#@attribute=") { self.send(attribute + '=') }
+}
+trait exposes { |attribute|
+  reads(attribute)
+  writes(attribute)
+}
+
+class B { exposes :foo; reads :bar }
+B.new().foo = "baz"
+B.new().foo # "baz"
+B.new().bar # nil
+B.new().bar = "quuz" # meth missing "bar=" on B
+```

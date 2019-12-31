@@ -152,5 +152,26 @@ describe('Class', () => {
             evaluate("class Animal { self.defineMethod('speak', () => 'hello') }");
             expect(evaluate("Animal.new().speak()")).toEqual('hello')
         })
+
+        it('defines class methods', () => {
+            evaluate("class Animal { self.defineClassMethod('foo', () => { Object })}")
+            expect(evaluate("Animal.foo()")).toEqual("Class(Object)")
+        });
+
+        xit('defines class methods with shorthand', () => {
+            // this doesn't actually create a proper 'class_method'...
+            evaluate("class Animal { self.foo = () => { Object }}")
+            expect(evaluate("Animal.foo()")).toEqual("Class(Object)")
+        });
+        
+        it('inherits class methods', () => {
+            // evaluate("class Animal { .foo() { Object }}")
+            evaluate("class Animal { self.defineClassMethod('foo', () => { Object })}")
+            // evaluate("class Bird < Animal { .bar() { Class }}")
+            evaluate("class Bird < Animal { self.defineClassMethod('bar', () => { Class })}")
+            expect(evaluate("Bird")).toEqual("Class(Bird)")
+            expect(evaluate("Bird.foo()")).toEqual("Class(Object)")
+            expect(evaluate("Bird.bar()")).toEqual("Class(Class)")
+        });
     })
 });

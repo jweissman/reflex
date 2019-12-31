@@ -1,3 +1,4 @@
+import util from 'util';
 import ReflexClass from "./ReflexClass";
 import { log } from "../util/log";
 class MethodMissing extends Error {}
@@ -19,7 +20,7 @@ export default class ReflexObject {
 
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
-        let classMethods = this.get("class_methods")
+        // let classMethods = this.get("class_methods")
         let shared = this.klass.get("instance_methods")
         let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
         // let shared = this.klass.get("instance_methods")
@@ -29,11 +30,11 @@ export default class ReflexObject {
             log('msg is self')
             return this;
         } else if (this.get(message)) {
-            log('msg is instance_method')
+            log('msg is raw attribute')
             return this.get(message)
-        } else if (classMethods && classMethods.get(message)) {
-            log('msg is class_method')
-            return classMethods.get(message)
+        // } else if (classMethods && classMethods.get(message)) {
+            // log('msg is class_method')
+            // return classMethods.get(message)
         } else if (shared && shared.get(message)) {
             log('msg is parent instance_method')
             return shared.get(message)
@@ -80,18 +81,8 @@ export default class ReflexObject {
     get className(): string {return (this.klass as ReflexObject & {name: string}).name}
     get displayName(): string { return this.className }
 
-    inspect(deep: boolean=false): string {
-        // let display = (v: ReflexObject) => {
-        //     try {
-        //         if (deep) {
-        //             return v === this ? this.displayName : v.inspect(false)
-        //         } else {
-        //             return v.displayName
-        //         }
-        //     } catch { return "..." }
-        // }
-        // let members: string = Object.entries(this.members).map(([k,v]) => `${k}:${display(v)}`).join(", ")
-        return this.displayName //+ "(" + members + ")"
+    inspect(): string {
+        return this.displayName + "(" + util.inspect(this.members) + ")"
     }
 
     toString() { return this.displayName; }

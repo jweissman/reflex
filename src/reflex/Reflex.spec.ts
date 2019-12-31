@@ -128,6 +128,7 @@ describe('Reflex', () => {
                     evaluate('x=nil')
                     evaluate('f(val){x=val}')
                     evaluate('g(&b){b(Object)}')
+                    expect(evaluate("x")).toEqual("Nihil")
                     evaluate('g(&f)')
                     expect(evaluate("x")).toEqual("Class(Object)")
                 })
