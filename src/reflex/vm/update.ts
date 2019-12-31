@@ -1,4 +1,3 @@
-import util from 'util';
 import assertNever from 'assert-never';
 import { Instruction, Code } from "./instruction/Instruction";
 import { Stone } from "./instruction/Stone";
@@ -37,6 +36,15 @@ function findFrameWithLocal(key: string, frames: Frame[]) {
     return top
 }
 
+//function yield(stack: Stack, frames: Frame[], meta: Machine, doRet: boolean) {
+//    let frame = frames[frames.length - 1];
+//    if (frame.block)
+//    frame.currentMethod.frame = { ...frame };
+//    if (doRet) {
+//        ret(stack, frames, meta);
+//    }
+//}
+
 function barecall(value: string, stack: Stack, frames: Frame[], meta: Machine, hasBlock: boolean = false) {
     let frame = frames[frames.length - 1];
     let fn;
@@ -48,7 +56,7 @@ function barecall(value: string, stack: Stack, frames: Frame[], meta: Machine, h
             log("yield to block " + fn)
             frame.currentMethod.frame = { ...frame };
             // log("YIELD frame is " + util.inspect(frame, true, 4))
-            ret(stack, frames);
+            ret(stack, frames, meta);
         } else {
             throw new Error("tried to yield from outermost scope (or without a block on frame)")
         }
@@ -60,6 +68,7 @@ function barecall(value: string, stack: Stack, frames: Frame[], meta: Machine, h
     if (fn instanceof ReflexFunction) {
         stack.push(fn);
         invoke(fn.arity, hasBlock, stack, frames, meta.currentProgram, meta)
+        if (stack.length) { pop(stack) } // hm
     } else {
         throw new Error("tried to call non-fn: " + fn.inspect())
     }
@@ -69,7 +78,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
     let [op, value] = instruction;
     let { meta, stack, frames } = state;
     let frame = frames[frames.length - 1];
-    let block = false;
     switch (op) {
         case 'push':
             stack.push(value);
@@ -87,7 +95,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             call(stack, frames);
             break;
         case 'ret':
-            ret(stack, frames);
+            ret(stack, frames, meta);
             break;
         case 'label': break;
         case 'halt': break;
@@ -95,8 +103,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             compile(value as Tree, stack, meta);
             break;
         case 'local_var_get':
-            // if (value as string === 'self') { stack.push(frame.self) }
-            // else {
             let frameLoc: Frame = findFrameWithLocal(value as string, frames);
             let variable = frameLoc.locals[value as string]
             if (variable) {
@@ -104,7 +110,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             } else {
                 throw new Error("no such local variable '" + value as string)
             }
-            // }
             break;
         case 'local_var_set':
             let key = value as string;
@@ -113,9 +118,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 log(`LOCAL VAR SET ${key}=${top.inspect()}`);
                 let localFrame: Frame = findFrameWithLocal(key, frames);
                 localFrame.locals[key] = top;
-                // frame.locals[key] = top;
-            }
-            else {
+            } else {
                 fail("local_var_set expects top is be reflex obj to assign");
             }
             break;
@@ -129,8 +132,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                     log(`LOCAL VAR OR EQ -- assign ${k}=${t.inspect()}`);
                     frame.locals[k] = t;
                 }
-            }
-            else {
+            } else {
                 fail("local_var_set expects top is reflex obj to assign");
             }
             break;
@@ -152,7 +154,6 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
         case 'barecall':
             barecall(value as string, stack, frames, meta)
             break;
-
         case 'invoke_block':
             invoke(value as number, true, stack, frames, code, meta);
             break;

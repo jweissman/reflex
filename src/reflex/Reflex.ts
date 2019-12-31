@@ -2,14 +2,10 @@ import Parser from "./lang/Parser";
 import Machine from "./vm/Machine";
 import { Code } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
-import { Repl } from "./Repl";
 
-// const preamble = '';
-//`
-//class Object {};
-//class Class {};
-//class Function {};
-//`;
+ const preamble = `
+nil = Nihil.new();
+`;
 
 export default class Reflex {
     static config: Configuration = new Configuration()
@@ -17,7 +13,7 @@ export default class Reflex {
     parser: Parser = new Parser();
     machine: Machine = new Machine()
 
-    // constructor() { this.evaluate(preamble); }
+    constructor() {this.evaluate(preamble); }
 
     evaluate(input: string) {
         let code: Code = this.parser.analyze(input)

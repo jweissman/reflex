@@ -52,3 +52,5 @@ export const indexForLabel = (code: Code, label: string) => {
         throw new Error("no such label found: " + label)
     }
 }
+
+export const nextOperativeCommand = (code: Code) => code.find(([op]) => op !== 'label')

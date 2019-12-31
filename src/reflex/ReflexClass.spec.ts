@@ -139,5 +139,7 @@ describe('Class', () => {
             expect(evaluate("Function.new(()=>{}).foo()")).toEqual("Class(Function)")
             expect(evaluate("Class.new().foo()")).toEqual("Class(Class)")
         })
+
+        test.todo("subclasses specified class")
     })
 });

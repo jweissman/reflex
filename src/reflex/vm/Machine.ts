@@ -67,7 +67,7 @@ export default class Machine {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
             log(`init execution @${label}, ip = ${this.ip}`)
-            log(prettyCode(code))
+            log(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
             this.executeLoop();
         } else {
             fail("Could not find label " + label)
@@ -91,9 +91,10 @@ export default class Machine {
 
     syncDelay(secs: number) {
         if (secs > 0) {
-            log("thinking...")
             var wait = new Date(new Date().getTime() + secs * 1000);
-            while (wait > new Date()) { }
+            while (wait > new Date()) {
+                // spinlock
+            }
         }
     }
 
