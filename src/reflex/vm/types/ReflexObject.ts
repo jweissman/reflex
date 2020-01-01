@@ -1,4 +1,3 @@
-import util from 'util';
 import ReflexClass from "./ReflexClass";
 import { log } from "../util/log";
 class MethodMissing extends Error {}
@@ -10,7 +9,11 @@ export default class ReflexObject {
     get klass(): ReflexClass { return this.get('class') as ReflexClass }
     get superclass(): ReflexClass { return this.klass.get('super') as ReflexClass }
 
-    get ancestors(): ReflexClass[] { return [ this.klass, ...this.klass.ancestors]}
+    get ancestors(): ReflexClass[] {
+        // if (this.)
+        // console.log("ANCESTORS OF " + this.inspect())
+        return [ this.klass, ...this.klass.ancestors]
+    }
 
     set(k: string,v: ReflexObject) { this.members[k] = v }
     get(k: string): ReflexObject { return this.members[k] }

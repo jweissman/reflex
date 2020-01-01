@@ -7,20 +7,26 @@ import { ReflexNihil } from "./types/ReflexNihil";
 const classClass = ReflexClass.klass;
 classClass.set("class", classClass);
 
-const metaclassClass = ReflexClass.makeClass("Metaclass")
-const classMetaclass = ReflexClass.makeClass("Meta(Class)", metaclassClass);
-classMetaclass.set("meta", classMetaclass);
-classClass.set("meta", classMetaclass);
+const metaclassClass = ReflexClass.makeClass("Metaclass", ReflexObject.klass, false)
+const classMetaclass = ReflexClass.makeClass("Meta(Class)", metaclassClass, false);
 
-const objectClass = ReflexClass.makeClass("Object");
+
+// const basicObject = ReflexClass.makeClass("BasicObject", Reflex)
+
+const objectClass = ReflexClass.makeClass("Object", ReflexObject.klass, false);
 objectClass.set("super", objectClass);
 classClass.set("super", objectClass);
 classClass.set("meta", classMetaclass);
 
-const objectMetaclass = ReflexClass.makeClass("Meta(Object)", classMetaclass);
-objectMetaclass.set("meta", classMetaclass);
+const objectMetaclass = ReflexClass.makeClass("Meta(Object)", classMetaclass, false);
+objectMetaclass.set("super", objectMetaclass);
+objectMetaclass.set("meta", objectMetaclass);
+classMetaclass.set("super", objectMetaclass);
+classClass.set("meta", classMetaclass);
 objectClass.set("meta", objectMetaclass);
 ReflexObject.klass = objectClass;
+objectClass.wireInstanceMethods();
+classClass.wireInstanceMethods()
 
 const functionClass = ReflexClass.makeClass("Function");
 ReflexFunction.klass = functionClass;

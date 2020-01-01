@@ -224,15 +224,21 @@ describe('Class', () => {
             expect(evaluate("Animal.meta")).toEqual("Class(Meta(Animal))")
             expect(evaluate("Bird.meta")).toEqual("Class(Meta(Bird))")
             expect(evaluate("Bird.meta.super")).toEqual("Class(Meta(Animal))")
+        });
+
+        xit('creates metaclasses on demand', () => {
+            evaluate("class Baron {}")
+            expect(evaluate("Baron.meta.meta")).toEqual("Class(Meta(Meta(Baron)))")
         })
 
-        it('class metaclass is its own metaclass', () => {
+        it('object metaclass is its own metaclass', () => {
             expect(evaluate("Class.meta")).toEqual("Class(Meta(Class))")
-            expect(evaluate("Class.meta.meta")).toEqual("Class(Meta(Class))")
-            expect(evaluate("Class.meta.meta.meta")).toEqual("Class(Meta(Class))")
+            expect(evaluate("Class.meta.super")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Class.meta.super.super")).toEqual("Class(Meta(Object))")
 
             expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
-            expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Class))")
+            expect(evaluate("Object.meta.super")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Object.meta.super.meta")).toEqual("Class(Meta(Object))")
         })
     })
 });
