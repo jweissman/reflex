@@ -8,7 +8,13 @@ const classClass = ReflexClass.klass;
 classClass.set("class", classClass);
 
 const metaclassClass = ReflexClass.makeClass("Metaclass", ReflexObject.klass, false)
-const classMetaclass = ReflexClass.makeClass("Meta(Class)", metaclassClass, false);
+metaclassClass.set("super", classClass);
+export const classMetaclass = ReflexClass.makeClass("Meta(Class)", metaclassClass, false);
+
+// kind of a hyperclass!
+export const metaMetaclass = ReflexClass.makeClass("Meta(Meta)", ReflexObject.klass, false) // shared metaclass of all meta-metaclasses
+metaMetaclass.set("super", metaclassClass);
+metaMetaclass.set("meta", metaclassClass);
 
 
 // const basicObject = ReflexClass.makeClass("BasicObject", Reflex)
@@ -20,13 +26,14 @@ classClass.set("meta", classMetaclass);
 
 const objectMetaclass = ReflexClass.makeClass("Meta(Object)", classMetaclass, false);
 objectMetaclass.set("super", objectMetaclass);
-objectMetaclass.set("meta", objectMetaclass);
-classMetaclass.set("super", objectMetaclass);
+// objectMetaclass.set("meta", objectMetaclass);
+classMetaclass.set("super", metaclassClass);
 classClass.set("meta", classMetaclass);
 objectClass.set("meta", objectMetaclass);
 ReflexObject.klass = objectClass;
 objectClass.wireInstanceMethods();
 classClass.wireInstanceMethods()
+metaMetaclass.wireInstanceMethods();
 
 const functionClass = ReflexClass.makeClass("Function");
 ReflexFunction.klass = functionClass;

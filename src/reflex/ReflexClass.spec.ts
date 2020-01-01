@@ -56,9 +56,7 @@ describe('Class', () => {
     describe('instance methods', () => {
         it('defines an instance method', () => {
             expect(evaluate("o=Object.new()")).toEqual("Object")
-            // expect(
-                evaluate("Object.defineMethod('baz', () => { Function })")
-                // ).toEqual("Function(Object#baz)")
+            evaluate("Object.defineMethod('baz', () => { Function })")
             expect(evaluate("o.baz")).toEqual("Function(Object#baz)")
             expect(evaluate("o.baz()")).toEqual("Class(Function)")
             expect(evaluate("o2=Object.new()")).toEqual("Object")
@@ -68,12 +66,8 @@ describe('Class', () => {
 
         it('redefines an instance method', () => {
             expect(evaluate("o=Object.new()")).toEqual("Object")
-            // expect(
-                evaluate("Object.defineMethod('baz', () => { Function })")
-                // ).toEqual("Function(Object#baz)")
-            // expect(
-                evaluate("Object.defineMethod('baz', () => { Class })")
-            // ).toEqual("Function(Object#baz)")
+            evaluate("Object.defineMethod('baz', () => { Function })")
+            evaluate("Object.defineMethod('baz', () => { Class })")
             expect(evaluate("o.baz")).toEqual("Function(Object#baz)")
             expect(evaluate("o.baz()")).toEqual("Class(Class)")
             expect(evaluate("o2=Object.new()")).toEqual("Object")
@@ -90,9 +84,7 @@ describe('Class', () => {
 
         it('inherits instance methods', () => {
             expect(evaluate("o=Object.new()")).toEqual("Object")
-            // expect(
-                evaluate("Object.defineMethod('quux', () => { Function })")
-            // ).toEqual("Function(Object#quux)")
+            evaluate("Object.defineMethod('quux', () => { Function })")
             expect(evaluate('o.quux')).toEqual('Function(Object#quux)')
             expect(evaluate('o.quux()')).toEqual('Class(Function)')
 
@@ -111,23 +103,19 @@ describe('Class', () => {
 
         it('may set a value', () => {
             evaluate("Object.defineMethod('yep', () => { self.kind = Function })")
-                // .toEqual("Function(Object#yep)")
             evaluate("o=Object.new()")
             expect(evaluate("o.yep")).toEqual("Function(Object#yep)")
             evaluate("o.yep()")
             expect(evaluate("o.kind")).toEqual("Class(Function)")
-            // the value doesn't exist on new objects (i.e., those that haven't called .yep() yet)
-            expect(() => evaluate("Object.new().kind")).toThrow()
-            // expect(
-                evaluate("Object.defineMethod('nope', () => { self.kind = Class; self })")
-            // ).toEqual("Function(Object#nope)")
+            expect(() => evaluate("Object.new().kind")).toThrow() // todo maybe don't break the machine?
+            evaluate("Object.defineMethod('nope', () => { self.kind = Class; self })")
             expect(evaluate("Object.new().nope().kind")).toEqual("Class(Class)")
             expect(evaluate("o.kind")).toEqual("Class(Function)")
         })
 
         it('initializes', () => {
             expect(evaluate("Baz = Class.new('Baz')")).toEqual("Class(Baz)")
-            evaluate("Baz.defineMethod('init', (value) => { self.value = value })") //).toEqual("Function(Baz#init)")
+            evaluate("Baz.defineMethod('init', (value) => { self.value = value })")
             expect(evaluate("baz = Baz.new(Object.new())")).toEqual("Baz")
             expect(evaluate("baz.value")).toEqual("Object")
             expect(evaluate("baz2 = Baz.new(Class.new('Quux'))")).toEqual("Baz")
@@ -184,9 +172,7 @@ describe('Class', () => {
         })
 
         xit('defines class methods with shorthand', () => {
-            evaluate("class Animal { .foo() { Object }; .bar() { Class }}")
-            // jeez, could have a method_missing on class that just defines it from a block?
-            // (that's just chaos though, even if we were checking for a block)
+            evaluate("class Animal { .foo() { Object }; .bar() { Class }}}}")
             expect(evaluate("Animal.foo()")).toEqual("Class(Object)")
             expect(evaluate("Animal.bar()")).toEqual("Class(Class)")
         });
@@ -201,7 +187,7 @@ describe('Class', () => {
     })
     
     describe('super', () => {
-        it('is the classes superclass', () => {
+        it('is the superclass', () => {
             evaluate("class Animal {}; class Bird < Animal {}; class Flamingo < Bird {}")
             expect(evaluate("Animal.super")).toEqual("Class(Object)")
             expect(evaluate("Bird.super")).toEqual("Class(Animal)")
@@ -226,19 +212,30 @@ describe('Class', () => {
             expect(evaluate("Bird.meta.super")).toEqual("Class(Meta(Animal))")
         });
 
-        xit('creates metaclasses on demand', () => {
+        it('creates metaclasses on demand', () => {
             evaluate("class Baron {}")
+            expect(evaluate("Baron.meta")).toEqual("Class(Meta(Baron))")
             expect(evaluate("Baron.meta.meta")).toEqual("Class(Meta(Meta(Baron)))")
-        })
-
-        it('object metaclass is its own metaclass', () => {
-            expect(evaluate("Class.meta")).toEqual("Class(Meta(Class))")
-            expect(evaluate("Class.meta.super")).toEqual("Class(Meta(Object))")
-            expect(evaluate("Class.meta.super.super")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Baron.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Baron))))")
 
             expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
             expect(evaluate("Object.meta.super")).toEqual("Class(Meta(Object))")
-            expect(evaluate("Object.meta.super.meta")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
+            expect(evaluate("Object.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Object))))")
+        })
+
+        it('metaclass is ancestor of all metaclasses', () => {
+            expect(evaluate("Class.meta")).toEqual("Class(Meta(Class))")
+            expect(evaluate("Class.meta.super")).toEqual("Class(Metaclass)")
+            expect(evaluate("Class.meta.super.super")).toEqual("Class(Class)")
+            expect(evaluate("Class.meta.super.super.super")).toEqual("Class(Object)")
+        })
+
+        it('meta-metaclasses have a shared super, Meta(Meta)', () => {
+            expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
+            expect(evaluate("Object.meta.meta.super")).toEqual("Class(Meta(Meta))")
+            expect(evaluate("Object.meta.meta.super.super")).toEqual("Class(Metaclass)")
+            expect(evaluate("Object.meta.meta.super.super.super")).toEqual("Class(Class)")
         })
     })
 });
