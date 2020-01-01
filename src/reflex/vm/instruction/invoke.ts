@@ -17,11 +17,11 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
     log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
     log('args ' + args)
     log('params ' + top.params)
+    log('stack at invoke: ' + dump(stack))
     let frame = frames[frames.length - 1];
     let block;
     if (hasBlock) {
         block = stack[stack.length - 1] as ReflexFunction;
-        log('stack ' + dump(stack))
         pop(stack);
         log('block ' + block.inspect())
     }
@@ -66,15 +66,9 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
             }
         } else {
             // no operative command upcoming, that seems like a problem?
+            throw new Error("could not determine next upcoming command? (at least a halt should be present...?)")
         }
     }
-
-    debugger;
-
-    // if (hasBlock && block) {
-    //     let line = block.frame.ip;
-    //     // log(prettyCode(code.slice(line)))
-    // }
 
     if (!nihilate) {
         frames.push(top.frame);
@@ -103,6 +97,7 @@ export function invoke(
     meta: Machine,
     ensureReturns?: ReflexObject
 ) {
+    log("INVOKE "+arity + "-- stack " + dump(stack))
     let top = stack[stack.length - 1];
     pop(stack);
     let args = [];

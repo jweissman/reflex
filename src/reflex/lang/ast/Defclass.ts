@@ -8,6 +8,7 @@ import { LocalVarOrEq } from "./LocalVarOrEq";
 import { Code } from "../../vm/instruction/Instruction";
 import { Defun } from "./Defun";
 import { Arguments, Argument } from "./Arguments";
+import { FunctionLiteral } from "./FunctionLiteral";
 
 export class Defclass extends Tree {
   constructor(public name: Message, public body: Tree, public superclass?: Message) {
@@ -34,7 +35,9 @@ export class Defclass extends Tree {
         defun.compileOnly = true;
         return new SendMethodCall(
           new Bareword('self'), new Message("defineMethod"),
-          new Arguments(new Sequence([new Argument(defun.name), new Argument(defun)]))
+          new Arguments(new Sequence([new Argument(defun.name), new Argument(
+            new FunctionLiteral(defun.params, defun.block)
+          )]))
         );
       } else {
         return maybeMethod;
@@ -42,12 +45,15 @@ export class Defclass extends Tree {
     })
     return new Program(new Sequence([
       defClass,
+      // new LocalVarGet(this.name),
       new SendMethodCall(
         new Bareword(this.name.key), new Message("defineClassMethod"),
         new Arguments(new Sequence([
+          // new Argument(new Bareword('_setup')),
+          // new Argument(new Message('_setup')),
           new Argument(new Message('_setup')),
           new Argument(
-            new Defun(new Message("_setup"), new Sequence([]), new Program(new Sequence(newBody)))
+            new FunctionLiteral(new Sequence([]), new Program(new Sequence(newBody)))
           )
         ]))
       ),
@@ -60,7 +66,7 @@ export class Defclass extends Tree {
   get code(): Code {
     return [
       ...this.structure.code,
-      ['local_var_get', this.name.key],
+      // ['local_var_get', this.name.key],
     ];
   }
 }

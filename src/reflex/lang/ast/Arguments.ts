@@ -26,6 +26,8 @@ export class Arguments extends Tree {
     }
   }
 
+  get length() { return this.args.length}
+
   inspect(): string {
     let disp = this.args.inspect();
     if (this.block && this.block instanceof Tree) {

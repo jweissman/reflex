@@ -33,13 +33,13 @@ describe('Reflex', () => {
             expect(evaluate("bar.a()")).toEqual("Class(Class)")
         })
 
-        describe("negative tests", () => {
-            afterEach(() => reflex.hardReset());
-            it('barewords do not fall back to self', () => {
-                evaluate("class Bar{baz(){self.there=Class; there}}")
-                expect(() => evaluate("Bar.new().baz()")).toThrow()
-            })
+        // describe("negative tests", () => {
+            // afterEach(() => reflex.hardReset());
+        it('barewords fall back to self', () => {
+            evaluate("class Bar{baz(){self.there=Class; there}}")
+            expect(evaluate("Bar.new().baz()")).toEqual("Class(Class)")
         })
+        // })
 
         describe("blocks", () => {
             it('modifies locals', () => {
@@ -107,7 +107,7 @@ describe('Reflex', () => {
             it("passes blocks to instance methods", () => {
                 evaluate("class Baz{next(){yield Object;yield Class; yield Function}}")
                 evaluate("baz=Baz.new()")
-                evaluate("x=Function")
+                evaluate("x=nil")
                 evaluate("baz.next { |v| x=v }")
                 expect(evaluate("x")).toEqual("Class(Object)")
                 evaluate("baz.next { |v| x=v }")

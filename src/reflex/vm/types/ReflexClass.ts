@@ -66,7 +66,7 @@ export default class ReflexClass extends ReflexObject {
         let methods = klass.get("instance_methods") || new ReflexObject();
         methods.set(name, fn);
         klass.set("instance_methods", methods)
-        return fn
+        // return fn
     }
     static defineClassMethod = (klass: ReflexClass, fn: ReflexFunction, name: string) => {
         log("DEFINE CLASS METHOD name="+ name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
@@ -74,7 +74,7 @@ export default class ReflexClass extends ReflexObject {
         let methods = klass.get("class_methods") || new ReflexObject();
         methods.set(name, fn);
         klass.set("class_methods", methods)
-        return fn
+        // return fn
     }
     private constructor(public name: string) { super(); } 
     get superclass(): ReflexClass { return this.get("super") as ReflexClass }

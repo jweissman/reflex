@@ -2,11 +2,12 @@ import Tree from "./Tree";
 import { Code, Instruction } from "../../vm/instruction/Instruction";
 import { Message } from "./Message";
 import { Sequence } from "./Sequence";
+import { Parameter } from "./Parameter";
 
 // type Function
 export class Defun extends Tree {
     compileOnly: boolean = false;
-    constructor(public name: Message, public params: Sequence, public block: Tree) { super(); }
+    constructor(public name: Message, public params: Sequence<Parameter>, public block: Tree) { super(); }
     inspect(): string {
         return `defun(${this.name.inspect()}, ${this.params.inspect()} => ${this.block.inspect()})`;
     }
@@ -14,7 +15,8 @@ export class Defun extends Tree {
         let compile: Instruction = ['compile', this];
         let send: Code = this.compileOnly ? [] : [
             // ['send', 'self'],
-            ['local_var_set', this.name.key]
+            ['local_var_set', this.name.key],
+            // ['local_var_get', this.name.key],
         ];
         return [
             compile,

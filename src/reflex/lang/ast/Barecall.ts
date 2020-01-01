@@ -7,7 +7,12 @@ export class Barecall extends Tree {
   }
   inspect(): string { return this.key + this.args.inspect(); }
   get code(): Code {
-    let op: 'barecall_block' | 'barecall' = (!!this.args.block ? 'barecall_block' : 'barecall');
-    return [...this.args.code, [ op, this.key ]];
+    let op: 'invoke_block' | 'invoke' =
+      (!!this.args.block ? 'invoke_block' : 'invoke');
+    return [
+      ...this.args.code,
+      [ 'bare', this.key ],
+      [ op, this.args.length ]
+    ];
   }
 }

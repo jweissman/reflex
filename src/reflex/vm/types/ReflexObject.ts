@@ -78,11 +78,11 @@ export default class ReflexObject {
         return false;
     }
 
-    get className(): string {return (this.klass as ReflexObject & {name: string}).name}
+    get className(): string {return this.klass ? (this.klass as ReflexObject & {name: string}).name : 'Unknown'}
     get displayName(): string { return this.className }
 
     inspect(): string {
-        return this.displayName + "(" + util.inspect(this.members) + ")"
+        return this.displayName //+ "(" + util.inspect(this.members) + ")"
     }
 
     toString() { return this.displayName; }
