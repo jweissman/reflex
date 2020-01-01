@@ -5,7 +5,7 @@ import ReflexClass from '../types/ReflexClass';
 import Machine from '../Machine';
 import { dump } from '../util/dump';
 import { log } from '../util/log';
-export function ret(stack: Stack, frames: Frame[], meta: Machine) {
+export function ret(stack: Stack, frames: Frame[], machine: Machine) {
     // log("RETURN")
     let frame = frames[frames.length - 1];
     frames.pop();
@@ -18,7 +18,7 @@ export function ret(stack: Stack, frames: Frame[], meta: Machine) {
             // leave whatever is there? implicit return
             log("RETURN something on stack, leaving alone: " + dump(stack))
         } else {
-            let nil = ReflexClass.makeInstance(meta, ReflexNihil.klass, []);
+            let nil = ReflexClass.makeInstance(machine, ReflexNihil.klass, []);
             stack.push(nil);
             log("RETURN creating nihil: " + dump(stack))
         }

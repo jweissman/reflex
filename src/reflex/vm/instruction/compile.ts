@@ -11,7 +11,7 @@ import { log } from "../util/log";
 import { Parameter } from "../../lang/ast/Parameter";
 
 export let lambdaCount = 0;
-export function compile(ast: Tree, stack: Stack, meta: Machine) {
+export function compile(ast: Tree, stack: Stack, machine: Machine) {
     log("COMPILE " + ast.inspect());
     if (ast instanceof Defun || ast instanceof FunctionLiteral) {
         let label = `lambda-${lambdaCount++}`;
@@ -23,8 +23,8 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
             ['label', label],
             ...ast.shell,
         ];
-        meta.sideload(code);
-        let fn = ReflexClass.makeInstance(meta, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
+        machine.sideload(code);
+        let fn = ReflexClass.makeInstance(machine, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
         fn.name = name;
         fn.label = label;
         // fn.
@@ -45,7 +45,7 @@ export function compile(ast: Tree, stack: Stack, meta: Machine) {
             }
         });
         fn.arity = fn.params.length;
-        let frame = meta.frames[meta.frames.length - 1]
+        let frame = machine.frames[machine.frames.length - 1]
         fn.frame = { ...frame };
         log("COMPILE'D " + fn.inspect() + " / arity: " + fn.arity + " / params: " + fn.params);
         stack.push(fn);

@@ -17,7 +17,6 @@ import { sendEq } from './instruction/sendEq';
 import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
 import { Stack } from './Stack';
 import { Frame } from './Frame';
-import Machine from './Machine';
 
 function mark(stack: Stack, value: string) {
     stack.push(new Stone(value));
@@ -36,52 +35,9 @@ function findFrameWithLocal(key: string, frames: Frame[]) {
     return top
 }
 
-//function yield(stack: Stack, frames: Frame[], meta: Machine, doRet: boolean) {
-//    let frame = frames[frames.length - 1];
-//    if (frame.block)
-//    frame.currentMethod.frame = { ...frame };
-//    if (doRet) {
-//        ret(stack, frames, meta);
-//    }
-//}
-
-//function barecall(value: string, stack: Stack, frames: Frame[], meta: Machine, hasBlock: boolean = false) {
-//    let frame = frames[frames.length - 1];
-//    let fn;
-//    let locFrame = findFrameWithLocal(value as string, frames);
-//    if (value as string === 'yield') {
-//        // log("YIELD CALLED")
-//        if (frame.currentMethod && frame.block) {
-//            fn = frame.block as ReflexFunction;
-//            log("yield to block " + fn)
-//            frame.currentMethod.frame = { ...frame };
-//            // log("YIELD frame is " + util.inspect(frame, true, 4))
-//            ret(stack, frames, meta);
-//        } else {
-//            throw new Error("tried to yield from outermost scope (or without a block on frame)")
-//        }
-//    } else if (Object.keys(locFrame.locals).includes(value as string)) {
-//        fn = locFrame.locals[value as string]
-//    } else {
-//        fn = frame.self.send(value as string);
-//    }
-//    if (fn instanceof ReflexFunction) {
-//        stack.push(fn);
-//        invoke(fn.arity, hasBlock, stack, frames, meta.currentProgram, meta)
-//        if (stack.length) { pop(stack) } // hm
-//    } else if (fn instanceof WrappedFunction) {
-//        log("GOT WRAPPED FN: " + fn.inspect())
-//        stack.push(fn)
-//        invoke(fn.arity, hasBlock, stack, frames, meta.currentProgram, meta)
-//        if (stack.length) { pop(stack) } // hm
-//    } else {
-//        throw new Error("tried to call non-fn: " + fn.inspect())
-//    }
-//}
-
 export function update(state: State, instruction: Instruction, code: Code): State {
     let [op, value] = instruction;
-    let { meta, stack, frames } = state;
+    let { machine, stack, frames } = state;
     let frame = frames[frames.length - 1];
     switch (op) {
         case 'push':
@@ -100,12 +56,12 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             call(stack, frames);
             break;
         case 'ret':
-            ret(stack, frames, meta);
+            ret(stack, frames, machine);
             break;
         case 'label': break;
         case 'halt': break;
         case 'compile':
-            compile(value as Tree, stack, meta);
+            compile(value as Tree, stack, machine);
             break;
         case 'local_var_get':
             let frameLoc: Frame = findFrameWithLocal(value as string, frames);
@@ -153,17 +109,14 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 stack.push(frame.self)
             } else if (v === 'yield') {
                 if (frame.currentMethod && frame.block) {
-                    // let f = frame;
                     let yieldFn = new WrappedFunction('yielder', (...args: ReflexObject[]) => {;
                         frame.currentMethod!.frame = { ...frame };
-                        ret(stack, frames, meta);
-                        // stack.push(new ReflexFunction())
+                        ret(stack, frames, machine);
                         let fn = frame.block as ReflexFunction;
                         log("yield to block " + fn)
-                        // log("YIELD frame is " + util.inspect(frame, true, 4))
                         args.forEach(arg => stack.push(arg))
                         stack.push(fn);
-                        invoke(fn.arity, !!fn.blockParamName, stack, frames, meta.currentProgram, meta)
+                        invoke(fn.arity, !!fn.blockParamName, stack, frames, machine.currentProgram, machine)
                     });
                     stack.push(yieldFn)
                 } else {
@@ -172,20 +125,13 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             } else {
                 let dispatched = frame.self.send(value as string)
                 stack.push(dispatched);
-                // throw new Error("bareword " + v + " not self/found in locals")
             }
             break;
-        // case 'barecall_block':
-        //     barecall(value as string, stack, frames, meta, true)
-        //     break;
-        // case 'barecall':
-        //     barecall(value as string, stack, frames, meta)
-        //     break;
         case 'invoke_block':
-            invoke(value as number, true, stack, frames, code, meta);
+            invoke(value as number, true, stack, frames, code, machine);
             break;
         case 'invoke':
-            invoke(value as number, false, stack, frames, code, meta);
+            invoke(value as number, false, stack, frames, code, machine);
             break;
         case 'send':
             let val: string = value as string;
@@ -205,5 +151,5 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
 
         default: assertNever(op);
     }
-    return { stack, frames, meta };
+    return { stack, frames, machine: machine };
 }

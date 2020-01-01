@@ -13,7 +13,7 @@ import ReflexClass from "../types/ReflexClass";
 import { ReflexNihil } from "../types/ReflexNihil";
 import { dump } from "../util/dump";
 
-function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, meta: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
+function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
     log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
     log('args ' + args)
     log('params ' + top.params)
@@ -77,11 +77,10 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
         // let block = top.frame.block;
         if (block) {
             log("NIHILATE")
-            let nil = ReflexClass.makeInstance(meta, ReflexNihil.klass, []);
+            let nil = ReflexClass.makeInstance(machine, ReflexNihil.klass, []);
             // stack.push(nil);
             // stack.push(block);
-            // invoke(block.arity, hasBlock, stack, frames, meta.currentProgram, meta)
-            invokeReflex(block, [nil], stack, frames, code, meta, false);
+            invokeReflex(block, [nil], stack, frames, code, machine, false);
         } else {
             throw new Error("tried to pass nihil to a block, but there wasn't a block??")
         }
@@ -94,7 +93,7 @@ export function invoke(
     stack: Stack,
     frames: Frame[],
     code: Code,
-    meta: Machine,
+    machine: Machine,
     ensureReturns?: ReflexObject
 ) {
     log("INVOKE "+arity + "-- stack " + dump(stack))
@@ -107,10 +106,10 @@ export function invoke(
         pop(stack);
     }
     if (top instanceof WrappedFunction) {
-        let result = top.impl(meta, ...args);
+        let result = top.impl(machine, ...args);
         stack.push(result);
     } else if (top instanceof ReflexFunction) {
-        invokeReflex(top, args, stack, frames, code, meta, hasBlock, ensureReturns);
+        invokeReflex(top, args, stack, frames, code, machine, hasBlock, ensureReturns);
     }
     else {
         log("invoke -- error, top not a function but " + top)

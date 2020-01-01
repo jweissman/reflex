@@ -7,9 +7,19 @@ import { ReflexNihil } from "./types/ReflexNihil";
 const classClass = ReflexClass.klass;
 classClass.set("class", classClass);
 
+const metaclassClass = ReflexClass.makeClass("Metaclass")
+const classMetaclass = ReflexClass.makeClass("Meta(Class)", metaclassClass);
+classMetaclass.set("meta", classMetaclass);
+classClass.set("meta", classMetaclass);
+
 const objectClass = ReflexClass.makeClass("Object");
 objectClass.set("super", objectClass);
 classClass.set("super", objectClass);
+classClass.set("meta", classMetaclass);
+
+const objectMetaclass = ReflexClass.makeClass("Meta(Object)", classMetaclass);
+objectMetaclass.set("meta", classMetaclass);
+objectClass.set("meta", objectMetaclass);
 ReflexObject.klass = objectClass;
 
 const functionClass = ReflexClass.makeClass("Function");
@@ -32,9 +42,6 @@ export const bootLocals = {
   Nihil: nihilClass,
 }
 
-//main.set('Object', objectClass)
-//main.set('Class', classClass)
-//main.set('Function', functionClass)
-//main.set('Main', mainClass)
+// meta wiring
 
 export default main;

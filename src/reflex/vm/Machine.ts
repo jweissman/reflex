@@ -11,6 +11,7 @@ import { invoke } from './instruction/invoke';
 import { trace } from './instruction/trace';
 import { update } from './update';
 import Reflex from '../Reflex';
+import { State } from './State';
 
 export default class Machine {
     stack: Value[] = []
@@ -111,5 +112,5 @@ export default class Machine {
         invoke(fn.arity, false, this.stack, this.frames, this.currentProgram, this, ret);
     }
 
-    get state() { return { stack: this.stack, frames: this.frames, meta: this } }
+    get state(): State { return { stack: this.stack, frames: this.frames, machine: this } }
 }
