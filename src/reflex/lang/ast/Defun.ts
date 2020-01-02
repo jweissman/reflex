@@ -3,6 +3,10 @@ import { Code, Instruction } from "../../vm/instruction/Instruction";
 import { Message } from "./Message";
 import { Sequence } from "./Sequence";
 import { Parameter } from "./Parameter";
+import { SendMethodCall } from "./SendMethodCall";
+import { Bareword } from "./Bareword";
+import { Arguments, Argument } from "./Arguments";
+import { FunctionLiteral } from "./FunctionLiteral";
 
 // type Function
 export class Defun extends Tree {
@@ -12,16 +16,13 @@ export class Defun extends Tree {
         return `defun(${this.name.inspect()}, ${this.params.inspect()} => ${this.block.inspect()})`;
     }
     get code(): Code {
-        let compile: Instruction = ['compile', this];
-        let send: Code = this.compileOnly ? [] : [
-            // ['send', 'self'],
-            ['local_var_set', this.name.key],
-            // ['local_var_get', this.name.key],
-        ];
-        return [
-            compile,
-            ...send
-        ]
+        let structure = new SendMethodCall(
+          new Bareword('self'), new Message("defineMethod"),
+          new Arguments(new Sequence([new Argument(this.name), new Argument(
+            new FunctionLiteral(this.params, this.block)
+          )]))
+        )
+        return structure.code
     }
 
     get shell(): Code {

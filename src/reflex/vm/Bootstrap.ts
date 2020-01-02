@@ -31,9 +31,9 @@ classMetaclass.set("super", metaclassClass);
 classClass.set("meta", classMetaclass);
 objectClass.set("meta", objectMetaclass);
 ReflexObject.klass = objectClass;
-objectClass.wireInstanceMethods();
-classClass.wireInstanceMethods()
-metaMetaclass.wireInstanceMethods();
+objectClass.wireClassMethods();
+classClass.wireClassMethods()
+metaMetaclass.wireClassMethods();
 
 const functionClass = ReflexClass.makeClass("Function");
 ReflexFunction.klass = functionClass;
@@ -42,10 +42,13 @@ const nihilClass = ReflexClass.makeClass("Nihil");
 ReflexNihil.klass = nihilClass;
 
 let mainClass = ReflexClass.makeClass("Main")
+mainClass.get("instance_methods").set("defineMethod", mainClass.eigenclass.get("instance_methods").get("defineMethod"))
 // mainClass.set('class', classClass)
 // mainClass.set('super', objectClass)
 let main = new ReflexObject()
 main.set('class', mainClass)
+
+// let mainMeta = main
 
 export const bootLocals = {
   Object: objectClass,

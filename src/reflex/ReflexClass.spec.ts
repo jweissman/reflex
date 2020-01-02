@@ -156,7 +156,7 @@ describe('Class', () => {
             expect(evaluate("Animal.new().speak()")).toEqual('Class(Object)')
         })
 
-        xit('defines methods with blocks', () => {
+        it('defines methods with blocks', () => {
             evaluate("class Animal { self.defineMethod('speak') { Function } }");
             expect(evaluate("Animal.new().speak()")).toEqual('Class(Function)')
         })
@@ -166,9 +166,20 @@ describe('Class', () => {
             expect(evaluate("Animal.foo()")).toEqual("Class(Object)")
         });
 
-        xit('defines class methods with blocks', () => {
+        it('defines class methods with blocks', () => {
             evaluate("class Animal { self.defineClassMethod('baz') { Nihil } }");
-            expect(evaluate("Animal.new().baz()")).toEqual('Class(Nihil)')
+            expect(evaluate("Animal.baz()")).toEqual('Class(Nihil)')
+        })
+
+        it('defines class methods with self.asMeta blocks', () => {
+            evaluate(`class Animal {
+                self.asMeta {
+                    foo() { Object };
+                    bar() { Class }
+                }
+            }`)
+            expect(evaluate("Animal.foo()")).toEqual("Class(Object)")
+            expect(evaluate("Animal.bar()")).toEqual("Class(Class)")
         })
 
         xit('defines class methods with shorthand', () => {

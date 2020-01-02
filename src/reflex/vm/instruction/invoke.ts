@@ -106,8 +106,14 @@ export function invoke(
         pop(stack);
     }
     if (top instanceof WrappedFunction) {
+        if (hasBlock) {
+            // pass block as arg
+            args.push(stack[stack.length - 1]); pop(stack);
+        }
         let result = top.impl(machine, ...args);
-        stack.push(result);
+        if (result) {
+            stack.push(result);
+        }
     } else if (top instanceof ReflexFunction) {
         invokeReflex(top, args, stack, frames, code, machine, hasBlock, ensureReturns);
     }

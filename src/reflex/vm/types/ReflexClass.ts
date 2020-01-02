@@ -36,21 +36,16 @@ export default class ReflexClass extends ReflexObject {
     static makeClass(name: string, superclass: ReflexClass = ReflexObject.klass, wireMethods: boolean = true) {
         log("MAKE CLASS " + name + " SUBCLASS OF " + superclass)
         let klass = new ReflexClass(name);
-        // klass.set("name", )
         klass.set("super", superclass);
         klass.set("class", ReflexClass.klass);
         let meta;
         if (!name.startsWith("Meta(") && superclass && superclass.get("meta")) {
-            // if (superclass.get("meta").get("name") !== name) {
             let metaName = `Meta(${name})`
             log("CRAFTING META for " + name + ": " + metaName)
             meta = ReflexClass.makeClass(`Meta(${name})`, superclass.get("meta") as ReflexClass);
             klass.set("meta", meta);
             if (wireMethods) { ReflexClass.wireClassMethods(klass); }
-            // }
         } else {
-            // klass.set("meta", ReflexClass.makeClass(`Meta(${name})`, ))
-            // throw new Error("No meta defined on superclass " + name)
             log("Warning: no superclass or no meta defined on class " + name)
         }
         klass.set("instance_methods", new ReflexObject());
@@ -72,6 +67,13 @@ export default class ReflexClass extends ReflexObject {
         if (meta) {
             let classMethods = meta.get("instance_methods");
             classMethods.set("new", new WrappedFunction(name + '.new', newFn));
+            classMethods.set("asMeta", new WrappedFunction(`${name}.asMeta`,
+                (machine: Machine, block: ReflexFunction) => { 
+                    log("WOULD EVAL BLOCK " + block + "AS META")
+                    klass.eigenclass.instanceEval(machine, block)
+                    //ReflexClass.defineInstanceMethod(klass, fn, name)
+                }
+            ));
             classMethods.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
                 (_machine: Machine, name: string, fn: ReflexFunction) => ReflexClass.defineInstanceMethod(klass, fn, name)
             ));
@@ -83,7 +85,13 @@ export default class ReflexClass extends ReflexObject {
         }
     }
 
-    wireInstanceMethods() { ReflexClass.wireClassMethods(this); }
+    wireClassMethods() { ReflexClass.wireClassMethods(this); }
+    instanceEval(machine: Machine, block: ReflexFunction) {
+        // okay, somehow evaluate block as this instance...
+        // with self on the frame
+        block.frame.self = this;
+        machine.doInvoke(undefined, block)
+    }
 
     static defineInstanceMethod = (klass: ReflexClass, fn: ReflexFunction, name: string) => {
         log("DEFINE INSTANCE METHOD name=" + name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)

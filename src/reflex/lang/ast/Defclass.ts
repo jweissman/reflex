@@ -22,6 +22,7 @@ export class Defclass extends Tree {
     return `class ${this.name.inspect()} {${this.body.inspect()}}`;
   }
 
+  // okay, maybe formal defuns just define instance methods??
   get structure() {
     let newClassArgs: Argument[] = [new Argument(this.name)];
     if (this.superclass) { newClassArgs.push(new Argument(this.superclass)) }
@@ -29,20 +30,20 @@ export class Defclass extends Tree {
       this.name,
       new SendMethodCall(new Bareword("Class"), new Message("new"), new Arguments(new Sequence<Argument>(newClassArgs)))
     );
-    let newBody = ((this.body as Program).lines as Sequence<Defun>).map((maybeMethod) => {
-      if (maybeMethod instanceof Defun) {
-        let defun = maybeMethod as Defun;
-        defun.compileOnly = true;
-        return new SendMethodCall(
-          new Bareword('self'), new Message("defineMethod"),
-          new Arguments(new Sequence([new Argument(defun.name), new Argument(
-            new FunctionLiteral(defun.params, defun.block)
-          )]))
-        );
-      } else {
-        return maybeMethod;
-      }
-    })
+    // let newBody = ((this.body as Program).lines as Sequence<Defun>).map((maybeMethod) => {
+    //   if (maybeMethod instanceof Defun) {
+    //     let defun = maybeMethod as Defun;
+    //     defun.compileOnly = true;
+    //     return new SendMethodCall(
+    //       new Bareword('self'), new Message("defineMethod"),
+    //       new Arguments(new Sequence([new Argument(defun.name), new Argument(
+    //         new FunctionLiteral(defun.params, defun.block)
+    //       )]))
+    //     );
+    //   } else {
+    //     return maybeMethod;
+    //   }
+    // })
     return new Program(new Sequence([
       defClass,
       // new LocalVarGet(this.name),
@@ -53,7 +54,7 @@ export class Defclass extends Tree {
           // new Argument(new Message('_setup')),
           new Argument(new Message('_setup')),
           new Argument(
-            new FunctionLiteral(new Sequence([]), new Program(new Sequence(newBody)))
+            new FunctionLiteral(new Sequence([]), this.body) //new Program(new Sequence(this.body.lines)))
           )
         ]))
       ),

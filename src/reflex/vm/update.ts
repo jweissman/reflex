@@ -139,13 +139,13 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             stack.push(result);
             break;
         case 'send_eq':
-            sendEq(value as string, stack);
+            sendEq(value as string, stack, frames, code, machine);
             break;
         case 'send_or_eq':
             let theKey = value as string;
             log('send or eq -- key: ' + theKey + ' stack: ' + dump(stack));
             if (!frame.self.respondsTo(theKey)) {
-                sendEq(value as string, stack);
+                sendEq(value as string, stack, frames, code, machine);
             }
             break;
 
