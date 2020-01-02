@@ -230,7 +230,6 @@ describe('Class', () => {
             expect(evaluate("Baron.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Baron))))")
 
             expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
-            expect(evaluate("Object.meta.super")).toEqual("Class(Meta(Object))")
             expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
             expect(evaluate("Object.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Object))))")
         })
@@ -242,11 +241,12 @@ describe('Class', () => {
             expect(evaluate("Class.meta.super.super.super")).toEqual("Class(Object)")
         })
 
-        it('meta-metaclasses have a shared super, Meta(Meta)', () => {
+        it('metaclasses have a shared super, Metaclass', () => {
+            expect(evaluate("Object.meta.super")).toEqual("Class(Metaclass)")
             expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
-            expect(evaluate("Object.meta.meta.super")).toEqual("Class(Meta(Meta))")
-            expect(evaluate("Object.meta.meta.super.super")).toEqual("Class(Metaclass)")
-            expect(evaluate("Object.meta.meta.super.super.super")).toEqual("Class(Class)")
+            expect(evaluate("Object.meta.meta.super")).toEqual("Class(Metaclass)")
+            expect(evaluate("Object.meta.meta.super.super")).toEqual("Class(Class)")
+            expect(evaluate("Object.meta.meta.super.super.super")).toEqual("Class(Object)")
         })
     })
 });

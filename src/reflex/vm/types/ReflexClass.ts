@@ -2,7 +2,7 @@ import ReflexObject from "./ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
 import Machine from "../Machine";
 import { log } from "../util/log";
-import { metaMetaclass } from "../Bootstrap";
+// import { metaMetaclass } from "../Bootstrap";
 
 const NATIVE_CLASSES: { [key: string]: any } = {
     // "Object": ReflexObject,
@@ -137,7 +137,7 @@ export default class ReflexClass extends ReflexObject {
             return supershared.get(message)
         } else if (this.name.match(/Meta\(/) && message === "meta" && !this.eigenclass) {
         //     // build meta??
-            this.set("meta", ReflexClass.makeClass(`Meta(${this.name})`, metaMetaclass))
+            this.set("meta", ReflexClass.makeClass(`Meta(${this.name})`, this.superclass.get("meta") as ReflexClass))
             return this.get("meta")
         } else {
             return super.send(message)
