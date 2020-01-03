@@ -8,5 +8,5 @@ export class Message extends Tree {
         return [['push', this.key]];
     }
 
-    inspect() { return this.key + '<msg>' }
+    inspect() { return ':' + this.key }
 }

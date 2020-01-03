@@ -5,7 +5,11 @@ import { Parameter } from "./Parameter";
 export class FunctionLiteral extends Tree {
   constructor(public params: Sequence<Parameter>, public body: Tree) { super(); }
   inspect(): string {
-    return `${this.params.inspect()} => ${this.body.inspect()}`;
+    if (this.params.length) {
+      return `${this.params.inspect()} => ${this.body.inspect()}`;
+    } else {
+      return `->${this.body.inspect()}`
+    }
     // throw new Error("FnLit.inspect -- Method not implemented.");
   }
 

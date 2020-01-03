@@ -1,13 +1,23 @@
 import ReflexClass from "./ReflexClass";
 import { log } from "../util/log";
+import Machine from "../Machine";
+// import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
 class MethodMissing extends Error {}
 type Store = {[key: string]: ReflexObject} 
 export default class ReflexObject {
     static klass: ReflexClass; // = new ReflexClass("Object");
+
     protected members: Store = {}
+
+    // constructor() { 
+    // }
+    assembleMeta() {
+    }
+
 
     get klass(): ReflexClass { return this.get('class') as ReflexClass }
     get superclass(): ReflexClass { return this.klass.get('super') as ReflexClass }
+    get eigenclass(): ReflexClass { return this.get('meta') as ReflexClass }
 
     get ancestors(): ReflexClass[] {
         // if (this.)
@@ -21,6 +31,7 @@ export default class ReflexObject {
     private surroundingObject: ReflexObject | null = null;
     within(obj: ReflexObject) { this.surroundingObject = obj; return this; }
 
+
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
         // let classMethods = this.get("class_methods")
@@ -32,6 +43,9 @@ export default class ReflexObject {
         if (message === 'self') {
             log('msg is self')
             return this;
+        // } else if (message === 'instance_eval') {
+            // log ('msg is instance_eval')
+            
         } else if (this.get(message)) {
             log('msg is raw attribute')
             return this.get(message)

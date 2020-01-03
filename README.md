@@ -1,24 +1,49 @@
 # reflex
 a reflecting language
 
+🤖 GENERAL-PURPOSE
+💎 CRYSTALLINE ELEGANCE 
+🕵🏻‍ REFLECTION-ORIENTED
+🎉 XML LITERALS
+🥂 INTEROP WITH JS
+🥳 SAFE METAPROGRAMMING
+🥺 BUILT WITH TYPESCRIPT
+❤️ MADE WITH LOVE FOR DEVELOPERS
+
 # Synopsis
+
 A general-purpose, reflection-oriented language for the contemporary web.
 
 # About
+
 Inspired by Ruby, Eiffel, Self, Smalltalk.
 This repo contains the grammar, the vm, cli harness.
 Implemented in Typescript.
 
 # Status
-`reflex` is still highly experimental!
+`reflex` is still highly experimental! Lots of things are still in progress.
+
+# Roadmap
+"grind and polish" cycles. let's just do two for now.
+0.1 grind: core object model. core types (bool, number, array, string, dict, tuple). mirrors and bindings. xml lit.
+0.2 polish: refactor, document, cleanup -- optimization, bugfixes
+0.3 grind: stdlib, modules/packages. (archetypes?)
+0.4 polish: refactor, document, cleanup -- optimization, bugfixes
 
 # Language
 ## Core Types
 ### Object
 Every entity in the system descends from `Object`.
 Interacts via messages dispatched through its native `send` method.
+Objects have members whose values are other objects and which are distinguished by their attribute names.
+By default object member attributes are readonly. That is, objects accept raw attribute writes only when the context is self (e.g., when inside an instance method).
+Instance methods are distinguished function-valued members of an object which are inherited.
+
 ### Class
 Every entity in the system also has a `Class`, which has a member `super` that is its parent class. The root of every object's ancestor chain is `Class(Object)`.
+A special kind of class is a `Metaclass`, represents the class as an instance of an object. They are intended to be largely 'transparent'. The metaclass is accessible on a class object through the member `meta`.
+Classes have a `new` function which generates a new object. Note the `new` for Class itself generates a new class object (`new(name, superclass)`).
+
 ### Function
 A `Function` is a callable entity that can wrap a raw JS function or have a Reflex implementation.
 Reflex functions can access locals both in their enclosing context and their context at definition.

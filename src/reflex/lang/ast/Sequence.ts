@@ -5,7 +5,7 @@ export class Sequence<T extends Tree> extends Tree {
     get length() { return this.items.length; }
     reverse() { return new Sequence([...this.items].reverse()); } 
     inspect(): string {
-        return "("+ this.items.map(item => item.inspect()).join(',') +")";
+        return this.items.length ? "("+ this.items.map(item => item.inspect()).join(',') +")" : "";
     }
     map<U>(fn: (item: T) => U): U[] {
         return this.items.map(fn)

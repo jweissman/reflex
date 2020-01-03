@@ -8,10 +8,15 @@ export class ReflexFunction extends ReflexObject {
     public params!: string[]
     public frame!: Frame;
     public blockParamName?: string;
+    public source?: string;
 
     inspect() { return this.displayName; }
     get displayName() {
-        return `Function(${this.name})`
+        if (this.name && this.name.match(/lambda/) && this.source) {
+            return `Function(${this.source})`
+        } else {
+            return `Function(${this.name})`
+        }
     }
 }
 

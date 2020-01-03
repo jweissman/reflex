@@ -18,10 +18,10 @@ describe('Function', () => {
         expect(evaluate("foo()")).toEqual("Class(Object)")
     })
     it('creates lambdas', () => {
-        expect(evaluate("()=>{Object}")).toMatch(/Function\(lambda-\d+\)/)
+        expect(evaluate("()=>{Object}")).toEqual("Function(->Object)")
     });
     it('invokes lambdas', () => {
-        expect(evaluate("f=()=>{Object}")).toMatch(/Function\(lambda-\d+\)/)
+        expect(evaluate("f=()=>{Object}")).toEqual("Function(->Object)")
         expect(evaluate("f()")).toEqual("Class(Object)")
     });
     describe('.new', () => {

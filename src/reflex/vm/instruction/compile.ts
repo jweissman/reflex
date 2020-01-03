@@ -27,6 +27,7 @@ export function compile(ast: Tree, stack: Stack, machine: Machine) {
         let fn = ReflexClass.makeInstance(machine, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
         fn.name = name;
         fn.label = label;
+        fn.source = ast.inspect()
         // fn.
         fn.params = ast.params.items.flatMap((param: Parameter) =>  {
             if (param instanceof Parameter) {

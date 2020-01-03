@@ -13,7 +13,7 @@ export class Defun extends Tree {
     compileOnly: boolean = false;
     constructor(public name: Message, public params: Sequence<Parameter>, public block: Tree) { super(); }
     inspect(): string {
-        return `defun(${this.name.inspect()}, ${this.params.inspect()} => ${this.block.inspect()})`;
+        return `${this.name.inspect()}(${this.params.inspect()} ${this.block.inspect()})`;
     }
     get code(): Code {
         let structure = new SendMethodCall(
