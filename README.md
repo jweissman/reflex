@@ -1,14 +1,16 @@
 # reflex
-a reflecting language
 
-🤖 GENERAL-PURPOSE
-💎 CRYSTALLINE ELEGANCE 
-🕵🏻‍ REFLECTION-ORIENTED
-🎉 XML LITERALS
-🥂 INTEROP WITH JS
-🥳 SAFE METAPROGRAMMING
-🥺 BUILT WITH TYPESCRIPT
-❤️ MADE WITH LOVE FOR DEVELOPERS
+🤖 GENERAL-PURPOSE programming language
+
+💎 Write code with CRYSTALLINE ELEGANCE 
+
+🕵🏻‍ Employ reification and REFLECTION
+
+🎉 Syntax for XML LITERALS
+
+🥂 Interoperate with JAVASCRIPT 
+
+🥳 Enjoy SAFE METAPROGRAMMING
 
 # Synopsis
 
@@ -16,8 +18,8 @@ A general-purpose, reflection-oriented language for the contemporary web.
 
 # About
 
-Inspired by Ruby, Eiffel, Self, Smalltalk.
-This repo contains the grammar, the vm, cli harness.
+A reflecting language, inspired by Ruby, Eiffel, Self, Smalltalk.
+This repo contains the grammar, the vm and the cli harness.
 Implemented in Typescript.
 
 # Status
@@ -25,10 +27,14 @@ Implemented in Typescript.
 
 # Roadmap
 "grind and polish" cycles. let's just do two for now.
-0.1 grind: core object model. core types (bool, number, array, string, dict, tuple). mirrors and bindings. xml lit.
-0.2 polish: refactor, document, cleanup -- optimization, bugfixes
-0.3 grind: stdlib, modules/packages. (archetypes?)
-0.4 polish: refactor, document, cleanup -- optimization, bugfixes
+
+0.1 (grind) -- core object model. core types (bool, number, array, string, dict, tuple). mirrors and bindings. xml lit.
+
+0.2 (polish) -- refactor, document, cleanup -- optimization, bugfixes
+
+0.3 (grind) -- stdlib (files, network, math). modules/packages. traits, archetypes.
+
+0.4 (polish) -- refactor, document, cleanup -- optimization, bugfixes
 
 # Language
 ## Core Types
