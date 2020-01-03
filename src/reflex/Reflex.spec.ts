@@ -33,13 +33,18 @@ describe('Reflex', () => {
             expect(evaluate("bar.a()")).toEqual("Class(Class)")
         })
 
-        // describe("negative tests", () => {
-            // afterEach(() => reflex.hardReset());
         it('barewords fall back to self', () => {
             evaluate("class Bar{baz(){self.there=Class; there}}")
             expect(evaluate("Bar.new().baz()")).toEqual("Class(Class)")
         })
-        // })
+
+        // was just a sanity check, can probably remove this
+        it("dot access never falls back", () => {
+            evaluate("class Ladder { climb() { Class }}")
+            evaluate("fall=Object")
+            expect(evaluate("Ladder.new().climb()")).toEqual("Class(Class)")
+            expect(()=>evaluate("Ladder.new().fall")).toThrow()
+        })
 
         describe("blocks", () => {
             it('modifies locals', () => {

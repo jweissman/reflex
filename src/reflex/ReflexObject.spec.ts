@@ -1,4 +1,5 @@
 import { evaluate } from "./SpecHelper";
+import { isRegExp } from "util";
 
 describe('Object', () => {
     it('is a class', () => {
@@ -42,6 +43,12 @@ describe('Object', () => {
             evaluate("o=Object.new()")
             expect(evaluate("o.instanceEval { self }")).toEqual("Object")
             expect(evaluate("o.instanceEval { self.x = Function }; o.x")).toEqual("Class(Function)")
+        })
+
+        xit('has access to eigenobject', () => {
+            evaluate("o=Object.new()")
+            evaluate("o.instanceEval { meta.defineMethod('bar') { Function } }")
+            expect(evaluate("o.bar()")).toEqual("Function")
         })
     })
 });

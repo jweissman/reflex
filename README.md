@@ -10,7 +10,7 @@
 
 🥂 Interoperate with JAVASCRIPT 
 
-🥳 Enjoy SAFE METAPROGRAMMING
+🥳 Enjoy METAPROGRAMMING!
 
 # Synopsis
 

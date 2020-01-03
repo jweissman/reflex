@@ -19,7 +19,9 @@ classClass.set("meta", classMetaclass);
 
 const objectMetaclass = ReflexClass.makeClass("Meta(Object)", classMetaclass, false);
 objectMetaclass.set("super", metaclassClass);
+objectMetaclass.set("pre", objectClass);
 classMetaclass.set("super", metaclassClass);
+classMetaclass.set("pre", classClass);
 classClass.set("meta", classMetaclass);
 objectClass.set("meta", objectMetaclass);
 ReflexObject.klass = objectClass;

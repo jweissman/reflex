@@ -216,3 +216,15 @@ okay, so what makes it hard to realize we're calling A.meta.defineMethod rather 
 okay, so A and A.meta -- we want to define class methods on A, and we call A.meta.defineMethod('bar') {}
 this ends up getting a method `A.defineMethod` (that is Class(A)'s define-instance method)
 
+--------------------------------
+
+just a terminological question that keeps bugging me
+
+if X is the superclass of Y, X is Y's parent, Y is X's child, Y is X's "subclass"
+so we have superclass/subclass as coordinate terms
+what the's equivalent coordinate term of eigenclass or metaclass?
+it's the "preclass" is the closest thing, but that sounds wild
+
+can you even get to the preclass from the metaclass??
+("protoclass" also seems like an option linguistically but something weird about it too)
+'meta' and 'proto' have a nice symmetry

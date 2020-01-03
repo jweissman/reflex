@@ -271,6 +271,7 @@ describe('Class', () => {
             expect(evaluate("Bird.meta.super")).toEqual("Class(Meta(Animal))")
         });
 
+
         it('metaclasses unfold up to metametaclasses', () => {
             evaluate("class Baron {}")
             expect(evaluate("Baron.meta")).toEqual("Class(Meta(Baron))")
@@ -298,6 +299,17 @@ describe('Class', () => {
             expect(evaluate("Object.meta.meta.super")).toEqual("Class(Metaclass)") //Meta(Meta(Class)))")
             expect(evaluate("Object.meta.meta.super.super")).toEqual("Class(Class)")
             expect(evaluate("Object.meta.meta.super.super.super")).toEqual("Class(Object)")
+        })
+
+        it('metaclasses have a .pre entry back to the protoclass', () => {
+            expect(evaluate("Function.meta.pre")).toEqual("Class(Function)")
+            expect(evaluate("Object.meta.pre")).toEqual("Class(Object)")
+            expect(evaluate("class Bar{};Bar.meta.pre")).toEqual("Class(Bar)")
+        })
+
+        xit('instances have eigenclass (eigenobject)', () => {
+            evaluate("o=Object.new()")
+            expect(evaluate("o.meta")).toEqual("Meta(o)")
         })
     })
 
