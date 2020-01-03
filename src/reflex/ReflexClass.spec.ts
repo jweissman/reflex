@@ -301,6 +301,12 @@ describe('Class', () => {
             expect(evaluate("Object.meta.meta.super.super.super")).toEqual("Class(Object)")
         })
 
+        it('Metaclass is in global namespace', () => {
+            expect(evaluate("Metaclass")).toEqual("Class(Metaclass)")
+            expect(evaluate("Metaclass.meta")).toEqual("Class(Metaclass)")
+            expect(evaluate("Metaclass.pre")).toEqual("Class(Metaclass)")
+        })
+
         it('metaclasses have a .pre entry back to the protoclass', () => {
             expect(evaluate("Function.meta.pre")).toEqual("Class(Function)")
             expect(evaluate("Object.meta.pre")).toEqual("Class(Object)")

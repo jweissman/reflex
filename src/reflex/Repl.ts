@@ -6,9 +6,12 @@ export class Repl {
         const clear = require('clear');
         const figlet = require('figlet');
         const repl = require('repl');
-        clear();
+        if (!Reflex.config.trace) {
+            clear();
+        }
         console.log(chalk.green(figlet.textSync('reflex')));
         console.log("\n" + chalk.blue("Reflex") + chalk.cyan("Repl"));
+
         const server = repl.start({
             prompt: chalk.gray("\n(reflex) "),
             eval: (input: string, _ctx: any, _filename: any, cb: any) => {

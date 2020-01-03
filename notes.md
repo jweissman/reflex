@@ -228,3 +228,28 @@ it's the "preclass" is the closest thing, but that sounds wild
 can you even get to the preclass from the metaclass??
 ("protoclass" also seems like an option linguistically but something weird about it too)
 'meta' and 'proto' have a nice symmetry
+
+---
+
+okay, just to state some facts that are now true about the object system
+
+metaclasses hold the instance methods for classes
+
+metaclasses of metaclasses hold instance methods for metaclasses
+
+the metaclass of all meta-metaclasses is the class metaclass (also the 'root' super of all metametaclasses?)
+(it basically stitches some holes in the type system but maybe with unexpected effects --
+what does defining a class or an instance method on Metaclass itself do?
+are those methods now instance methods of allllllllllllllllllll meta-metaclasses?!??
+it's the hyperclass back again
+is that true??
+)
+
+honestly the idea is that for practical purposes all the higher-order eigenclasses are really just
+kind of notionaly -- it's interesting that mechanically we've needed at least one more order than i
+would have thought (we apparently had to go to metametaclasses, inspiring some of this strange
+wiring of Metaclass -- which again mucking about with is definitely encouraged if it would yield
+interesting results but beware i suppose?)
+
+---
+

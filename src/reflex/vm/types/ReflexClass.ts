@@ -20,7 +20,7 @@ export default class ReflexClass extends ReflexObject {
             mu.set("class", Klass.klass);
         } else {
             mu.set("class", klass);
-            // mu.set("meta",)
+            mu.set("meta", ReflexClass.makeInstanceMetaclass(mu))
             mu.set("instanceEval", new WrappedFunction(
                 `PhantomInstanceMeta(${klass.name})#instanceEval`,
                 (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(mu, machine, fn)
@@ -79,6 +79,13 @@ export default class ReflexClass extends ReflexObject {
         return meta;
     }
 
+    static makeInstanceMetaclass(proto: ReflexObject) {
+        let meta = ReflexClass.makeClass(`Meta(${proto.klass.name} instance)`, proto.klass.eigenclass);
+        meta.set("pre", proto)
+        meta.wireClassMethods()
+        return meta;
+    }
+
     static wireClassMethods(klass: ReflexClass) {
         let name = klass.name;
         let meta = klass.eigenclass;
@@ -92,24 +99,28 @@ export default class ReflexClass extends ReflexObject {
         }
         if (meta) {
             let classMethods = meta.get("instance_methods");
-            classMethods.set("new", new WrappedFunction(name + '.new', newFn));
-            classMethods.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
-                (_machine: Machine, name: string, fn: ReflexFunction) => {
-                    // debugger;
-                    ReflexClass.defineInstanceMethod(klass, fn, name, meta) //name.startsWith("Meta("))
-                }
-            ));
-            classMethods.set("defineClassMethod", new WrappedFunction(`${name}.defineClassMethod`,
-                (_machine: Machine, name: string, fn: ReflexFunction) =>
-                  ReflexClass.defineClassMethod(klass, fn, name)
-            ));
+            if (classMethods.get("new")) {
+                log("WARNING: not overriding class methods, already existed on... " + meta)
+            } else {
+                classMethods.set("new", new WrappedFunction(name + '.new', newFn));
+                classMethods.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
+                    (_machine: Machine, name: string, fn: ReflexFunction) => {
+                        // debugger;
+                        ReflexClass.defineInstanceMethod(klass, fn, name, meta) //name.startsWith("Meta("))
+                    }
+                ));
+                classMethods.set("defineClassMethod", new WrappedFunction(`${name}.defineClassMethod`,
+                    (_machine: Machine, name: string, fn: ReflexFunction) =>
+                        ReflexClass.defineClassMethod(klass, fn, name)
+                ));
+            }
         } else {
             throw new Error("No meta at wire instance methods for " + name + " (super is " + klass.superclass + ")")
         }
     }
 
     wireClassMethods() { ReflexClass.wireClassMethods(this); }
-    
+
     static instanceEval(self: ReflexObject, machine: Machine, block: ReflexFunction) {
         log("INSTANCE EVAL " + block + " -- SELF IS " + this)
         block.frame.self = self;
@@ -152,7 +163,7 @@ export default class ReflexClass extends ReflexObject {
     }
     private constructor(public name: string) { super(); } 
     get superclass(): ReflexClass { return this.get("super") as ReflexClass }
-    get eigenclass(): ReflexClass { return this.get("meta") as ReflexClass }
+    // get eigenclass(): ReflexClass { return this.get("meta") as ReflexClass }
     get ancestors(): ReflexClass[] {
         return this.name === 'Object' || this.name === "Meta(Object)" || this.superclass === undefined ? [] : [ this.superclass, ...this.superclass.ancestors]
     }

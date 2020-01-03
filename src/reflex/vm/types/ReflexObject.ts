@@ -1,29 +1,16 @@
 import ReflexClass from "./ReflexClass";
 import { log } from "../util/log";
-import Machine from "../Machine";
-// import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
+
 class MethodMissing extends Error {}
 type Store = {[key: string]: ReflexObject} 
 export default class ReflexObject {
-    static klass: ReflexClass; // = new ReflexClass("Object");
-
+    static klass: ReflexClass;
     protected members: Store = {}
-
-    // constructor() { 
-    // }
-    assembleMeta() {
-    }
-
 
     get klass(): ReflexClass { return this.get('class') as ReflexClass }
     get superclass(): ReflexClass { return this.klass.get('super') as ReflexClass }
     get eigenclass(): ReflexClass { return this.get('meta') as ReflexClass }
-
-    get ancestors(): ReflexClass[] {
-        // if (this.)
-        // console.log("ANCESTORS OF " + this.inspect())
-        return [ this.klass, ...this.klass.ancestors]
-    }
+    get ancestors(): ReflexClass[] { return [ this.klass, ...this.klass.ancestors] }
 
     set(k: string,v: ReflexObject) { this.members[k] = v }
     get(k: string): ReflexObject { return this.members[k] }
@@ -31,9 +18,9 @@ export default class ReflexObject {
     private surroundingObject: ReflexObject | null = null;
     within(obj: ReflexObject) { this.surroundingObject = obj; return this; }
 
-
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
+        let eigen = this.eigenclass && this.eigenclass.get("instance_methods")
         let shared = this.klass.get("instance_methods")
         let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
         if (message === 'self') {
@@ -42,6 +29,9 @@ export default class ReflexObject {
         } else if (this.get(message)) {
             log('msg is raw attribute')
             return this.get(message)
+        } else if (eigen && eigen.get(message)) {
+            log('msg is own eigen attribute')
+            return eigen.get(message)
         } else if (shared && shared.get(message)) {
             log('msg is parent instance_method')
             return shared.get(message)
@@ -65,7 +55,7 @@ export default class ReflexObject {
     }
 
     respondsTo(message: string): boolean {
-        log("ReflexObject.respndsTo -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
+        log("ReflexObject.respondsTo -- " + message + " -- on self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
         let shared = this.klass.get("instance_methods")
         let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
         if (message === 'self') {
@@ -89,33 +79,13 @@ export default class ReflexObject {
                 return false; //this.methodMissing(message);
             }
         }
-        //let shared = this.klass.get("instance_methods")
-        //let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
-        //if (message === 'self') {
-        //    return true;
-        //} else if (this.get(message)) {
-        //    return true;
-        //} else if (shared && shared.get(message)) {
-        //    return true;
-        //} else if (supershared && supershared.get(message)) {
-        //    return true;
-        //} else {
-        //    // if (this instanceof ReflexClass) {
-        //        // this.sendClass(message)
-        //    if (this.surroundingObject &&
-        //        !(this === this.surroundingObject) && 
-        //        this.surroundingObject.respondsTo(message)) {
-        //        return true;
-        //    }
-        //}
-        //return false;
     }
 
     get className(): string {return this.klass ? (this.klass as ReflexObject & {name: string}).name : 'Unknown'}
     get displayName(): string { return this.className }
 
     inspect(): string {
-        return this.displayName //+ "(" + util.inspect(this.members) + ")"
+        return this.displayName
     }
 
     toString() { return this.displayName; }

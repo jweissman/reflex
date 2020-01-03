@@ -4,48 +4,52 @@ import { ReflexFunction } from "./types/ReflexFunction";
 import { ReflexNihil } from "./types/ReflexNihil";
 
 
-const classClass = ReflexClass.klass;
-classClass.set("class", classClass);
+const Class = ReflexClass.klass;
+Class.set("class", Class);
 
-const metaclassClass = ReflexClass.makeClass("Metaclass", ReflexObject.klass, false)
-metaclassClass.set("super", classClass);
-metaclassClass.set("meta", metaclassClass);
-export const classMetaclass = ReflexClass.makeClass("Meta(Class)", metaclassClass, false);
+const Metaclass = ReflexClass.makeClass("Metaclass", ReflexObject.klass, false)
+Metaclass.set("super", Class);
+Metaclass.set("meta", Metaclass);
+Metaclass.set("pre", Metaclass);
+export const ClassMeta = ReflexClass.makeClass("Meta(Class)", Metaclass, false);
 
-const objectClass = ReflexClass.makeClass("Object", ReflexObject.klass, false);
-objectClass.set("super", objectClass);
-classClass.set("super", objectClass);
-classClass.set("meta", classMetaclass);
+const RObject = ReflexClass.makeClass("Object", ReflexObject.klass, false);
+RObject.set("super", RObject);
+Class.set("super", RObject);
+Class.set("meta", ClassMeta);
 
-const objectMetaclass = ReflexClass.makeClass("Meta(Object)", classMetaclass, false);
-objectMetaclass.set("super", metaclassClass);
-objectMetaclass.set("pre", objectClass);
-classMetaclass.set("super", metaclassClass);
-classMetaclass.set("pre", classClass);
-classClass.set("meta", classMetaclass);
-objectClass.set("meta", objectMetaclass);
-ReflexObject.klass = objectClass;
-objectClass.wireClassMethods();
-classClass.wireClassMethods()
-metaclassClass.wireClassMethods();
+const ObjectMeta = ReflexClass.makeClass("Meta(Object)", ClassMeta, false);
+ObjectMeta.set("super", Metaclass);
+ObjectMeta.set("pre", RObject);
+ClassMeta.set("super", Metaclass);
+ClassMeta.set("pre", Class);
+Class.set("meta", ClassMeta);
+RObject.set("meta", ObjectMeta);
+ReflexObject.klass = RObject;
+Metaclass.wireClassMethods();
+RObject.wireClassMethods();
+Class.wireClassMethods()
+ObjectMeta.wireClassMethods();
+ClassMeta.wireClassMethods();
 
-const functionClass = ReflexClass.makeClass("Function");
-ReflexFunction.klass = functionClass;
+const RFunction = ReflexClass.makeClass("Function");
+ReflexFunction.klass = RFunction;
 
-const nihilClass = ReflexClass.makeClass("Nihil");
-ReflexNihil.klass = nihilClass;
+const Nihil = ReflexClass.makeClass("Nihil");
+ReflexNihil.klass = Nihil;
 
-let mainClass = ReflexClass.makeClass("Main")
-mainClass.get("instance_methods").set("defineMethod", mainClass.eigenclass.get("instance_methods").get("defineMethod"))
+let Main = ReflexClass.makeClass("Main")
+Main.get("instance_methods").set("defineMethod", Main.eigenclass.get("instance_methods").get("defineMethod"))
 let main = new ReflexObject()
-main.set('class', mainClass)
+main.set('class', Main)
 
 export const bootLocals = {
-  Object: objectClass,
-  Class: classClass,
-  Function: functionClass,
-  Main: mainClass, 
-  Nihil: nihilClass,
+  Object: RObject,
+  Class,
+  Function: RFunction,
+  Main, 
+  Nihil,
+  Metaclass,
 }
 
 export default main;
