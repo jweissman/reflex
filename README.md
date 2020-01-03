@@ -22,6 +22,7 @@ A reflecting language, inspired by Ruby, Eiffel, Self, Smalltalk.
 This repo contains the grammar, the vm and the cli harness.
 Implemented in Typescript.
 
+
 # Status
 `reflex` is still highly experimental! Lots of things are still in progress.
 
@@ -110,3 +111,35 @@ Support a tree literal notation which can capture most of the XHTML structure a 
 (I keep thinking this could be a literal AST structure too, permitting some meta-circular logic, but that feels
 decidedly for further on.)
 A graph literal notation (basically a hash literal with a different brace which allows for key repetition) could be interesting too. 
+
+## Principles
+
+0. *Humanity matters.*
+   Programming is a human activity, a social one, even if often performed in "isolation". 
+   Language design choices seem abstract yet they are profoundly aesthetic and cultural,
+   but beyond even this they have ethical and social meanings.
+   Prefer not just DX, prioritize not only readability (although a deep concern with linguistics is part of
+   this, i.e., part of the human-centric focus), but favor also deep consistency with human values.
+   Design human-centered systems.
+
+   Joy matters.
+   Systems and processes organizing themselves around people and interactions is preferrable to the opposite.
+   Computers promise enormous liberation from human futility, slavery, fear, indigence and drudgery.
+   So:
+   Liberate people. 
+   
+
+1. *Eloquence is brevity.*
+  Don't seek a terminal minimalism of pure concatenative expressions or convoluted algebrae.
+  Find expressive pathways through reflection and reification.
+  Embrace the power of point-free programming while retaining the harness of an object model.
+  Message dispatch is a universal model of communicating dynamic processes, so:
+  Communicate dynamically. Capture ideas as languages. Get better at writing less.
+  Think about cells.
+  Embrace metalanguage where necessary to empower users, but keep reflective tools well isolated
+  from object code.
+  Avoid verbosity through seeking elegant and flexible languages for expressing problems.
+  (Focus on the expression of problems rather than solutions.)
+  A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.
+  You can travel further if you are carrying less.
+

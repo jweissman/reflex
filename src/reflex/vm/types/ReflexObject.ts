@@ -34,24 +34,14 @@ export default class ReflexObject {
 
     send(message: string): ReflexObject {
         log("ReflexObject.send -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
-        // let classMethods = this.get("class_methods")
         let shared = this.klass.get("instance_methods")
         let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
-        // let shared = this.klass.get("instance_methods")
-        // let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
-        
         if (message === 'self') {
             log('msg is self')
             return this;
-        // } else if (message === 'instance_eval') {
-            // log ('msg is instance_eval')
-            
         } else if (this.get(message)) {
             log('msg is raw attribute')
             return this.get(message)
-        // } else if (classMethods && classMethods.get(message)) {
-            // log('msg is class_method')
-            // return classMethods.get(message)
         } else if (shared && shared.get(message)) {
             log('msg is parent instance_method')
             return shared.get(message)
@@ -75,24 +65,50 @@ export default class ReflexObject {
     }
 
     respondsTo(message: string): boolean {
+        log("ReflexObject.respndsTo -- " + message + " -- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
         let shared = this.klass.get("instance_methods")
         let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
         if (message === 'self') {
-            return true;
+            log('msg is self')
+            return true //this;
         } else if (this.get(message)) {
-            return true;
+            log('msg is raw attribute')
+            return true //this.get(message)
         } else if (shared && shared.get(message)) {
-            return true;
+            log('msg is parent instance_method')
+            return true //shared.get(message)
         } else if (supershared && supershared.get(message)) {
-            return true;
+            log('msg is ancestor instance_method')
+            return true //supershared.get(message)
         } else {
-            if (this.surroundingObject &&
-                !(this === this.surroundingObject) && 
-                this.surroundingObject.respondsTo(message)) {
-                return true;
+            if (this.surroundingObject && this.surroundingObject !== this) {
+                log('trying on surrounding obj')
+                return this.surroundingObject.respondsTo(message);
+            } else {
+                log('meth missing!')
+                return false; //this.methodMissing(message);
             }
         }
-        return false;
+        //let shared = this.klass.get("instance_methods")
+        //let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
+        //if (message === 'self') {
+        //    return true;
+        //} else if (this.get(message)) {
+        //    return true;
+        //} else if (shared && shared.get(message)) {
+        //    return true;
+        //} else if (supershared && supershared.get(message)) {
+        //    return true;
+        //} else {
+        //    // if (this instanceof ReflexClass) {
+        //        // this.sendClass(message)
+        //    if (this.surroundingObject &&
+        //        !(this === this.surroundingObject) && 
+        //        this.surroundingObject.respondsTo(message)) {
+        //        return true;
+        //    }
+        //}
+        //return false;
     }
 
     get className(): string {return this.klass ? (this.klass as ReflexObject & {name: string}).name : 'Unknown'}

@@ -170,18 +170,22 @@ describe('Class', () => {
             evaluate("class Animal { self.defineClassMethod('baz') { Nihil } }");
             expect(evaluate("Animal.baz")).toEqual('Function(Animal.baz)')
             expect(evaluate("Animal.baz()")).toEqual('Class(Nihil)')
-            // expect(()=>evaluate("Object.baz()")).toThrow()
         })
 
-        xit('defines class methods with meta', () => {
-            // should be equiv to...
-            evaluate("class Zanzibar { self.meta.defineMethod('quux') { Class } }");
-            expect(evaluate("Zanzibar.quux")).toEqual('Function(Zanzibar.quux)')
+        it('defines class methods with meta', () => {
+            evaluate("class Zanzibar { meta.defineMethod('quux') { Class } }");
+            expect(evaluate("Zanzibar.quux")).toEqual('Function(Zanzibar#quux)')
             expect(evaluate("Zanzibar.quux()")).toEqual('Class(Class)')
-            expect(()=>evaluate("Object.quux()")).toThrow()
         })
 
-        xit('defines class methods with meta.instanceEval blocks', () => {
+        it('meta only extends class (not super)', () => {
+            evaluate("class Zanzibar { meta.defineMethod('pristine') { Class } }");
+            expect(evaluate("Zanzibar.pristine")).toEqual('Function(Zanzibar#pristine)')
+            expect(evaluate("Zanzibar.pristine()")).toEqual('Class(Class)')
+            expect(()=>evaluate("Object.pristine()")).toThrow()
+        })
+
+        it('defines class methods with meta.instanceEval blocks', () => {
             evaluate(`class Shape {
                 meta.instanceEval {
                     bar() { Class };
@@ -199,7 +203,7 @@ describe('Class', () => {
             expect(evaluate("Circle.foo()")).toEqual("Class(Object)")
             expect(evaluate("Circle.bar()")).toEqual("Class(Class)")
             expect(evaluate("Circle.quux()")).toEqual("Class(Function)")
-            expect(()=>evaluate("Shape.quux()")).toThrow()
+            // expect(()=>evaluate("Shape.quux()")).toThrow()
         });
 
         xit('defines class methods within the namespace', () => {
