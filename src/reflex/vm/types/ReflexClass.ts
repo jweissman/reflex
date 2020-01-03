@@ -20,11 +20,9 @@ export default class ReflexClass extends ReflexObject {
             mu.set("class", Klass.klass);
         } else {
             mu.set("class", klass);
-            mu.set("meta", ReflexClass.makeInstanceMetaclass(mu))
-            mu.set("instanceEval", new WrappedFunction(
-                `PhantomInstanceMeta(${klass.name})#instanceEval`,
-                (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(mu, machine, fn)
-            ));
+            let instanceMeta = ReflexClass.makeInstanceMetaclass(mu)
+            mu.set("meta", instanceMeta)
+            
             if (mu.respondsTo("init")) {
                 let init = mu.send('init');
                 if (init instanceof ReflexFunction) {
@@ -80,9 +78,14 @@ export default class ReflexClass extends ReflexObject {
     }
 
     static makeInstanceMetaclass(proto: ReflexObject) {
-        let meta = ReflexClass.makeClass(`Meta(${proto.klass.name} instance)`, proto.klass.eigenclass);
+        let name = `Meta(${proto.klass.name} instance)`
+        let meta = ReflexClass.makeClass(name, proto.klass.eigenclass);
         meta.set("pre", proto)
         meta.wireClassMethods()
+        meta.get("instance_methods").set("instanceEval", new WrappedFunction(
+            `${name}#instanceEval`,
+            (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(proto, machine, fn)
+        ));
         return meta;
     }
 
@@ -113,6 +116,7 @@ export default class ReflexClass extends ReflexObject {
                     (_machine: Machine, name: string, fn: ReflexFunction) =>
                         ReflexClass.defineClassMethod(klass, fn, name)
                 ));
+
             }
         } else {
             throw new Error("No meta at wire instance methods for " + name + " (super is " + klass.superclass + ")")
@@ -165,12 +169,14 @@ export default class ReflexClass extends ReflexObject {
     get superclass(): ReflexClass { return this.get("super") as ReflexClass }
     // get eigenclass(): ReflexClass { return this.get("meta") as ReflexClass }
     get ancestors(): ReflexClass[] {
-        return this.name === 'Object' || this.name === "Meta(Object)" || this.superclass === undefined ? [] : [ this.superclass, ...this.superclass.ancestors]
+        return this.name === 'Object' || this.superclass === undefined ? [] : [ this.superclass, ...this.superclass.ancestors]
     }
     get metaChain(): ReflexClass[] {
-        return this.name === 'Object' || this.name === "Meta(Object)" || this.eigenclass === undefined || this.superclass === undefined
+        let chain = this.name === 'Object' || this.eigenclass === undefined || this.superclass === undefined
             ? []
-            : [ this.superclass.eigenclass, ...this.superclass.metaChain ]
+            : [ this.superclass.eigenclass, ...this.superclass.metaChain ];
+        log("GOT METACHAIN FOR " + this.name + ": " + chain)
+        return chain
     }
     protected get instanceMethods(): ReflexObject { return this.get("instance_methods") as ReflexObject }
     get displayName() { return `Class(${this.name})` }

@@ -11,6 +11,7 @@ const Metaclass = ReflexClass.makeClass("Metaclass", ReflexObject.klass, false)
 Metaclass.set("super", Class);
 Metaclass.set("meta", Metaclass);
 Metaclass.set("pre", Metaclass);
+Metaclass.wireClassMethods();
 export const ClassMeta = ReflexClass.makeClass("Meta(Class)", Metaclass, false);
 
 const RObject = ReflexClass.makeClass("Object", ReflexObject.klass, false);
@@ -18,15 +19,15 @@ RObject.set("super", RObject);
 Class.set("super", RObject);
 Class.set("meta", ClassMeta);
 
-const ObjectMeta = ReflexClass.makeClass("Meta(Object)", ClassMeta, false);
+const ObjectMeta = ReflexClass.makeClass("Meta(Object)", Metaclass, false);
 ObjectMeta.set("super", Metaclass);
+// ObjectMeta.set("meta", Metaclass);
 ObjectMeta.set("pre", RObject);
 ClassMeta.set("super", Metaclass);
 ClassMeta.set("pre", Class);
 Class.set("meta", ClassMeta);
 RObject.set("meta", ObjectMeta);
 ReflexObject.klass = RObject;
-Metaclass.wireClassMethods();
 RObject.wireClassMethods();
 Class.wireClassMethods()
 ObjectMeta.wireClassMethods();

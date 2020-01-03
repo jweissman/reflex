@@ -1,5 +1,4 @@
 import { evaluate } from "./SpecHelper";
-import { isRegExp } from "util";
 
 describe('Object', () => {
     it('is a class', () => {
@@ -50,8 +49,18 @@ describe('Object', () => {
         it('has access to eigenobject', () => {
             evaluate("o=Object.new()")
             evaluate("o.meta.defineMethod('bar') { Function }")
-            // evaluate("o.instanceEval { meta.defineMethod('bar') { Function } }")
             expect(evaluate("o.bar()")).toEqual("Class(Function)")
+            expect(() => evaluate("Object.new().bar()")).toThrow()
+        })
+
+        // again just a sanity check, could be pruned
+        it('does not trash frame self', () => {
+            evaluate("o=Object.new()")
+            expect(evaluate("self")).toEqual("Main")
+            expect(evaluate("o.instanceEval { self }")).toEqual("Object")
+            expect(evaluate("self")).toEqual("Main")
+            expect(evaluate("o.instanceEval { self.x = Function }; o.x")).toEqual("Class(Function)")
+            expect(evaluate("self")).toEqual("Main")
         })
     })
 });

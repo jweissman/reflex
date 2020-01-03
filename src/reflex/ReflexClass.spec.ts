@@ -313,9 +313,26 @@ describe('Class', () => {
             expect(evaluate("class Bar{};Bar.meta.pre")).toEqual("Class(Bar)")
         })
 
-        xit('instances have eigenclass (eigenobject)', () => {
+        it('instances have eigenclass (eigenobject)', () => {
             evaluate("o=Object.new()")
-            expect(evaluate("o.meta")).toEqual("Meta(o)")
+            expect(evaluate("o.meta")).toEqual("Class(Meta(Object instance))")
+        })
+
+        it('class methods on Metaclass are methods on all metaclasses', () => {
+            evaluate("Metaclass.defineClassMethod('quintessence') {self}")
+            expect(evaluate("Class.meta.quintessence()")).toEqual("Class(Meta(Class))")
+            expect(evaluate("Object.meta.quintessence()")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Function.meta.quintessence()")).toEqual("Class(Meta(Function))")
+            expect(evaluate("Nihil.meta.quintessence()")).toEqual("Class(Meta(Nihil))")
+        })
+
+        // since metaclass is own meta...
+        it('instance methods on Metaclass are methods on all metaclasses', () => {
+            evaluate("Metaclass.defineMethod('foo') {Function}")
+            expect(evaluate("Class.meta.foo()")).toEqual("Class(Function)")
+            expect(evaluate("Object.meta.foo()")).toEqual("Class(Function)")
+            expect(evaluate("Function.meta.foo()")).toEqual("Class(Function)")
+            expect(evaluate("Nihil.meta.foo()")).toEqual("Class(Function)")
         })
     })
 
