@@ -170,3 +170,49 @@ B.new().foo # "baz"
 B.new().bar # nil
 B.new().bar = "quuz" # meth missing "bar=" on B
 ```
+
+
+----------------------------------------------------------------
+
+okay, this weird define method thing
+
+what i would LIKE is for some way to distinguish when we are calling 
+defineMethod on a metaclass versus a 'normal' class
+
+that way we can write the method name with a dot as in a class name
+
+at this point the difference is cosmetic, behaviorally it's close to what
+i want
+
+but i think understanding why this is hard to distinguish is helpful
+
+okay, so when we have situation like `class A{ meta.defineMethod('foo') {} }`
+we get back a function `A#foo` which is nevertheless a class method on A
+(i.e., not an instance method)
+
+we would want to distinguish somehow in define method between the fact that
+we got called on a metaclass
+
+but it's too late?
+
+or rather: meta's defineMethod instance is "also" class A's own instance method?
+this is closer to the circle that's making this hard to reason about
+
+okay, so MEMBERS of class A have instance methods, they live on A.instance_methods
+
+instances of class A (like 'A', or more precisely 'Class(A)') ALSO have 
+instance methods, like `new`, `defineMethod` etc
+
+where do these live? on the metaclass of A -- `Class(Meta(A))`
+
+Class(Meta(A)).instance_methods ARE Class(A)'s instance methods (i.e., class methods of A)
+(they are even defined that way; at class construction time, Class A's class methods
+are written to the instance methods of Class(Meta(A)) -- this is how defineClassMethod works,
+the only difference is that being explicitly called it can differentiate trivially...)
+
+okay, so what makes it hard to realize we're calling A.meta.defineMethod rather than A.defineClassMethod
+(which to be clear is not in this case the alternative -- which makes this all obscure somehow??)
+
+okay, so A and A.meta -- we want to define class methods on A, and we call A.meta.defineMethod('bar') {}
+this ends up getting a method `A.defineMethod` (that is Class(A)'s define-instance method)
+

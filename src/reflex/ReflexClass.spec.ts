@@ -174,13 +174,22 @@ describe('Class', () => {
 
         it('defines class methods with meta', () => {
             evaluate("class Zanzibar { meta.defineMethod('quux') { Class } }");
-            expect(evaluate("Zanzibar.quux")).toEqual('Function(Zanzibar#quux)')
+            expect(evaluate("Zanzibar.quux")).toEqual('Function(Zanzibar.quux)')
             expect(evaluate("Zanzibar.quux()")).toEqual('Class(Class)')
+        })
+
+        it('does not confuse instance methods and class methods', () => {
+            evaluate("class Aquarium { meta.defineMethod('create') { self.new() }}")
+            expect(evaluate("Aquarium.create()")).toEqual("Aquarium")
+            expect(()=>evaluate("Aquarium.new().create()")).toThrow()
+            evaluate("Aquarium.defineMethod('update') { Object }")
+            expect(evaluate("Aquarium.new().update()")).toEqual("Class(Object)")
+            expect(()=>evaluate("Aquarium.update()")).toThrow()
         })
 
         it('meta only extends class (not super)', () => {
             evaluate("class Zanzibar { meta.defineMethod('pristine') { Class } }");
-            expect(evaluate("Zanzibar.pristine")).toEqual('Function(Zanzibar#pristine)')
+            expect(evaluate("Zanzibar.pristine")).toEqual('Function(Zanzibar.pristine)')
             expect(evaluate("Zanzibar.pristine()")).toEqual('Class(Class)')
             expect(()=>evaluate("Object.pristine()")).toThrow()
         })
@@ -188,32 +197,37 @@ describe('Class', () => {
         it('defines class methods with meta.instanceEval blocks', () => {
             evaluate(`class Shape {
                 meta.instanceEval {
-                    bar() { Class };
+                    barge() { Class };
                     foo() { Object }
                 }
             }`)
+            expect(evaluate("Shape.foo")).toEqual("Function(Shape.foo)")
             expect(evaluate("Shape.foo()")).toEqual("Class(Object)")
-            expect(evaluate("Shape.bar()")).toEqual("Class(Class)")
+            expect(evaluate("Shape.barge")).toEqual("Function(Shape.barge)")
+            expect(evaluate("Shape.barge()")).toEqual("Class(Class)")
+            expect(()=>evaluate("Object.barge()")).toThrow()
 
             evaluate(`class Circle < Shape {
                 meta.instanceEval {
-                    quux() { Function }
+                    quark() { Function }
                 }
             }`)
+            expect(evaluate("Circle.foo")).toEqual("Function(Shape.foo)")
             expect(evaluate("Circle.foo()")).toEqual("Class(Object)")
-            expect(evaluate("Circle.bar()")).toEqual("Class(Class)")
-            expect(evaluate("Circle.quux()")).toEqual("Class(Function)")
-            // expect(()=>evaluate("Shape.quux()")).toThrow()
+            expect(evaluate("Circle.barge()")).toEqual("Class(Class)")
+            expect(evaluate("Circle.quark")).toEqual("Function(Circle.quark)")
+            expect(evaluate("Circle.quark()")).toEqual("Class(Function)")
+            expect(()=>evaluate("Shape.quark()")).toThrow()
         });
 
-        xit('defines class methods within the namespace', () => {
+        it('defines class methods within the namespace', () => {
             evaluate(`class A{
-                class.instanceEval {
-                    quux(){Class}
+                meta.instanceEval {
+                    quartz(){Class}
                 }
             }`)
-            expect(evaluate("A.quux()")).toEqual("Class(Class)")
-            expect(()=>evaluate("Object.quux()")).toThrow()
+            expect(evaluate("A.quartz()")).toEqual("Class(Class)")
+            expect(()=>evaluate("Object.quartz()")).toThrow()
         })
 
         xit('defines class methods with shorthand', () => {
@@ -257,15 +271,17 @@ describe('Class', () => {
             expect(evaluate("Bird.meta.super")).toEqual("Class(Meta(Animal))")
         });
 
-        it('metaclasses are their own metaclasses', () => {
+        it('metaclasses unfold up to metametaclasses', () => {
             evaluate("class Baron {}")
             expect(evaluate("Baron.meta")).toEqual("Class(Meta(Baron))")
-            expect(evaluate("Baron.meta.meta")).toEqual("Class(Meta(Baron))")
-            expect(evaluate("Baron.meta.meta.meta")).toEqual("Class(Meta(Baron))")
+            expect(evaluate("Baron.meta.meta")).toEqual("Class(Meta(Meta(Baron)))")
+            expect(evaluate("Baron.meta.meta.meta")).toEqual("Class(Metaclass)")
+            expect(evaluate("Baron.meta.meta.meta.meta")).toEqual("Class(Metaclass)")
 
             expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
-            expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Object))")
-            expect(evaluate("Object.meta.meta.meta")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
+            expect(evaluate("Object.meta.meta.meta")).toEqual("Class(Metaclass)")
+            expect(evaluate("Object.meta.meta.meta.meta")).toEqual("Class(Metaclass)")
         })
 
         it('metaclass is ancestor of all metaclasses', () => {
@@ -278,7 +294,8 @@ describe('Class', () => {
         it('metaclasses have a shared super, Metaclass', () => {
             expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
             expect(evaluate("Object.meta.super")).toEqual("Class(Metaclass)")
-            expect(evaluate("Object.meta.meta.super")).toEqual("Class(Metaclass)")
+            expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
+            expect(evaluate("Object.meta.meta.super")).toEqual("Class(Metaclass)") //Meta(Meta(Class)))")
             expect(evaluate("Object.meta.meta.super.super")).toEqual("Class(Class)")
             expect(evaluate("Object.meta.meta.super.super.super")).toEqual("Class(Object)")
         })

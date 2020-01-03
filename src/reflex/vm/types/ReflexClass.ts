@@ -2,6 +2,7 @@ import ReflexObject from "./ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
 import Machine from "../Machine";
 import { log } from "../util/log";
+import { classMetaclass } from "../Bootstrap";
 // import { metaMetaclass } from "../Bootstrap";
 
 const NATIVE_CLASSES: { [key: string]: any } = {
@@ -48,14 +49,23 @@ export default class ReflexClass extends ReflexObject {
         ));
         klass.set("instance_methods", new ReflexObject());
         let meta;
-        if (name.startsWith("Meta(")) {
+        if (name.startsWith("Meta(Meta(")) {
             log("Warning: make metaclass " + name)
             if (superclass) {
                 let supermeta = superclass.get("meta") as ReflexClass;
                 log("Warning: set meta of metaclass " + name + " to " + supermeta)
                 klass.set("super", supermeta);
                 // let metameta = klass.get("meta") as ReflexClass;
-                klass.set("meta", klass);
+
+                // if (name.startsWith("Meta(Meta(")) {
+                    // let eigen = classMetaclass
+                //     klass.set("meta", eigen);
+                // } else {
+                // let metaMeta = ReflexClass.makeClass(`Meta(${this.name})`, superclass.get("meta") as ReflexClass)
+                // metaMeta.wireClassMethods()
+                // this.set("meta", eigen)
+                klass.set("meta", supermeta);
+                // }
             }
             if (wireMethods) { ReflexClass.wireClassMethods(klass); }
         } else if (superclass && superclass.get("meta")) {
@@ -64,6 +74,10 @@ export default class ReflexClass extends ReflexObject {
             let supermeta = superclass.get("meta") as ReflexClass;
             log("SUPERMETA" + supermeta)
             meta = ReflexClass.makeClass(`Meta(${name})`, supermeta); //superclass.get("meta") as ReflexClass);
+            // let eigen = ReflexClass.makeClass(`Meta(${this.name})`, superclass.get("meta") as ReflexClass)
+            // eigen.wireClassMethods()
+            // this.set("meta", eigen)
+ 
             klass.set("meta", meta);
             if (wireMethods) { ReflexClass.wireClassMethods(klass); }
         } else {
@@ -90,12 +104,13 @@ export default class ReflexClass extends ReflexObject {
             classMethods.set("new", new WrappedFunction(name + '.new', newFn));
             classMethods.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
                 (_machine: Machine, name: string, fn: ReflexFunction) => {
-                    debugger;
-                    ReflexClass.defineInstanceMethod(klass, fn, name) //name.startsWith("Meta("))
+                    // debugger;
+                    ReflexClass.defineInstanceMethod(klass, fn, name, meta) //name.startsWith("Meta("))
                 }
             ));
             classMethods.set("defineClassMethod", new WrappedFunction(`${name}.defineClassMethod`,
-                (_machine: Machine, name: string, fn: ReflexFunction) => ReflexClass.defineClassMethod(klass, fn, name)
+                (_machine: Machine, name: string, fn: ReflexFunction) =>
+                  ReflexClass.defineClassMethod(klass, fn, name)
             ));
         } else {
             throw new Error("No meta at wire instance methods for " + name + " (super is " + klass.superclass + ")")
@@ -110,10 +125,22 @@ export default class ReflexClass extends ReflexObject {
         machine.doInvoke(undefined, block)
     }
 
-    static defineInstanceMethod = (klass: ReflexClass, fn: ReflexFunction, name: string, viaMeta: boolean = false) => {
-        log("DEFINE INSTANCE METHOD name=" + name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
+    get isMeta() { return this.name.startsWith("Meta(") }
+
+    static detachMeta(className: string) {
+        let prefix = "Meta("
+        let len = prefix.length
+        if (className.startsWith(prefix)) {
+            return className.slice(len, className.length-1)
+        } else {
+            return className
+        }
+    }
+
+    static defineInstanceMethod = (klass: ReflexClass, fn: ReflexFunction, name: string, meta: ReflexClass) => {
+        log("DEFINE INSTANCE METHOD name=" + name + " on " + klass.inspect() + " / meta is " + meta + " ==== \n   ---> fn: " + fn)
            // metaclass instance methods 'look like' class methods
-        fn.name = viaMeta ? `${klass.name}.${name}` : `${klass.name}#${name}` 
+        fn.name = klass.isMeta ? `${ReflexClass.detachMeta(klass.name)}.${name}` : `${klass.name}#${name}` 
         let methods = klass.get("instance_methods") || new ReflexObject();
         methods.set(name, fn);
         klass.set("instance_methods", methods)
@@ -153,13 +180,14 @@ export default class ReflexClass extends ReflexObject {
         log("ReflexClass.send self=" + this.inspect())
         debugger;
 
-        let ownMethods = this.get("instance_methods")
+        // let ownMethods = this.get("instance_methods")
         let classMethods = this.eigenclass && this.eigenclass.get("instance_methods")
         let supershared = this.metaChain.map(a => a && a.get("instance_methods")).find(a => a && a.get(message))
-        if (ownMethods && ownMethods.get(message)) {
-            log('msg is own class_method')
-            return ownMethods.get(message)
-        } else if (classMethods && classMethods.get(message)) {
+        // if (ownMethods && ownMethods.get(message)) {
+        //     log('msg is own class_method: ' + ownMethods.get(message))
+        //     return ownMethods.get(message)
+        // } else 
+        if (classMethods && classMethods.get(message)) {
             log('msg is eigen class_method')
             return classMethods.get(message)
         } else if (supershared && supershared.get(message)) {

@@ -118,18 +118,17 @@ A graph literal notation (basically a hash literal with a different brace which 
    Programming is a human activity, a social one, even if often performed in "isolation". 
    Language design choices seem abstract yet they are profoundly aesthetic and cultural,
    but beyond even this they have ethical and social meanings.
-   Prefer not just DX, prioritize not only readability (although a deep concern with linguistics is part of
+   Prefer not just DX, prioritize not only readability (although a serious concern with linguistics is part of
    this, i.e., part of the human-centric focus), but favor also deep consistency with human values.
    Design human-centered systems.
 
-   Joy matters.
+1. *Joy matters.*
    Systems and processes organizing themselves around people and interactions is preferrable to the opposite.
-   Computers promise enormous liberation from human futility, slavery, fear, indigence and drudgery.
+   Computers promise human beings an enormous liberation from drudgery.
    So:
-   Liberate people. 
-   
+   Liberate people.
 
-1. *Eloquence is brevity.*
+2. *Eloquence is brevity.*
   Don't seek a terminal minimalism of pure concatenative expressions or convoluted algebrae.
   Find expressive pathways through reflection and reification.
   Embrace the power of point-free programming while retaining the harness of an object model.
@@ -142,4 +141,3 @@ A graph literal notation (basically a hash literal with a different brace which 
   (Focus on the expression of problems rather than solutions.)
   A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.
   You can travel further if you are carrying less.
-
