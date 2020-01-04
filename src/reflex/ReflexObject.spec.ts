@@ -39,18 +39,20 @@ describe('Object', () => {
         test.todo("direct read access is disallowed outside self")
     })
 
+    describe("meta", () => {
+        it('is the eigenobject', () => {
+            evaluate("o=Object.new()")
+            evaluate("o.meta.defineMethod('bar') { Function }")
+            expect(evaluate("o.bar()")).toEqual("Class(Function)")
+            expect(() => evaluate("Object.new().bar()")).toThrow()
+        })
+    })
+
     describe("#instanceEval", () => {
         it('evaluates a block as self', () => {
             evaluate("o=Object.new()")
             expect(evaluate("o.instanceEval { self }")).toEqual("Object")
             expect(evaluate("o.instanceEval { self.x = Function }; o.x")).toEqual("Class(Function)")
-        })
-
-        it('has access to eigenobject', () => {
-            evaluate("o=Object.new()")
-            evaluate("o.meta.defineMethod('bar') { Function }")
-            expect(evaluate("o.bar()")).toEqual("Class(Function)")
-            expect(() => evaluate("Object.new().bar()")).toThrow()
         })
 
         // again just a sanity check, could be pruned
@@ -62,5 +64,9 @@ describe('Object', () => {
             expect(evaluate("o.instanceEval { self.x = Function }; o.x")).toEqual("Class(Function)")
             expect(evaluate("self")).toEqual("Main")
         })
+    })
+
+    describe("#eigen", () => {
+        test.todo('invokes meta.instanceEval on a block')
     })
 });

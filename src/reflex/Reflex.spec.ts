@@ -141,13 +141,14 @@ describe('Reflex', () => {
         })
 
         describe("super", () => {
-            xit("is the current method's superclass 'quasi'-instance", () => {
+            xit("is the super-instance", () => {
                 evaluate("class Animal {speak(){Object}}")
                 evaluate("class Bird < Animal {speak(){Function}}")
                 evaluate("class Flamingo < Bird { speak() {super.super.speak()}}")
                 expect(evaluate("Bird.new().speak()")).toEqual("Class(Function)")
                 expect(evaluate("Flamingo.new().speak()")).toEqual("Class(Object)")
             })
+            test.todo("[when called as a fn] is the current method's super-method")
         })
     })
 

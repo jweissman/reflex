@@ -272,17 +272,43 @@ describe('Class', () => {
         });
 
 
-        it('metaclasses unfold up to metametaclasses', () => {
-            evaluate("class Baron {}")
-            expect(evaluate("Baron.meta")).toEqual("Class(Meta(Baron))")
-            expect(evaluate("Baron.meta.meta")).toEqual("Class(Meta(Meta(Baron)))")
-            expect(evaluate("Baron.meta.meta.meta")).toEqual("Class(Metaclass)")
-            expect(evaluate("Baron.meta.meta.meta.meta")).toEqual("Class(Metaclass)")
+        describe('metaclasses unfold', () => {
+            it("object has infinite meta chain", () => {
+                expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
+                expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
+                expect(evaluate("Object.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Object))))")
+                expect(evaluate("Object.meta.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Meta(Object)))))")
+            })
 
-            expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
-            expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
-            expect(evaluate("Object.meta.meta.meta")).toEqual("Class(Metaclass)")
-            expect(evaluate("Object.meta.meta.meta.meta")).toEqual("Class(Metaclass)")
+            it("class has infinite meta chain", () => {
+                expect(evaluate("Class.meta")).toEqual("Class(Meta(Class))")
+                expect(evaluate("Class.meta.meta")).toEqual("Class(Meta(Meta(Class)))")
+                expect(evaluate("Class.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Class))))")
+                expect(evaluate("Class.meta.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Meta(Class)))))")
+            })
+
+            it("metaclass has infinite meta chain", () => {
+                expect(evaluate("Metaclass.meta")).toEqual("Class(Meta(Metaclass))")
+                expect(evaluate("Metaclass.meta.meta")).toEqual("Class(Meta(Meta(Metaclass)))")
+                expect(evaluate("Metaclass.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Metaclass))))")
+                expect(evaluate("Metaclass.meta.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Meta(Metaclass)))))")
+            })
+
+            it('arbitrary classes have infinite meta chain', () => {
+                evaluate("class Baron {}")
+                expect(evaluate("Baron.meta")).toEqual("Class(Meta(Baron))")
+                expect(evaluate("Baron.meta.meta")).toEqual("Class(Meta(Meta(Baron)))")
+                expect(evaluate("Baron.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Baron))))")
+                expect(evaluate("Baron.meta.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Meta(Baron)))))")
+            })
+            
+            it('instances have infinite meta chain', () => {
+                evaluate("o = Object.new()")
+                expect(evaluate("o.meta")).toEqual("Class(Meta(Object instance))")
+                expect(evaluate("o.meta.meta")).toEqual("Class(Meta(Meta(Object instance)))")
+                expect(evaluate("o.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Object instance))))")
+                expect(evaluate("o.meta.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Meta(Object instance)))))")
+            })
         })
 
         it('metaclass is ancestor of all metaclasses', () => {
@@ -290,21 +316,34 @@ describe('Class', () => {
             expect(evaluate("Class.meta.super")).toEqual("Class(Metaclass)")
             expect(evaluate("Class.meta.super.super")).toEqual("Class(Class)")
             expect(evaluate("Class.meta.super.super.super")).toEqual("Class(Object)")
+
+            expect(evaluate("Function.meta")).toEqual("Class(Meta(Function))")
+            expect(evaluate("Function.meta.super")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Function.meta.super.super")).toEqual("Class(Metaclass)")
+
+            expect(evaluate("Nihil.meta")).toEqual("Class(Meta(Nihil))")
+            expect(evaluate("Nihil.meta.super")).toEqual("Class(Meta(Object))")
+            expect(evaluate("Nihil.meta.super.super")).toEqual("Class(Metaclass)")
         })
 
-        it('metaclasses have a shared super, Metaclass', () => {
+        xit('metaclasses have a shared super, Metaclass', () => {
             expect(evaluate("Object.meta")).toEqual("Class(Meta(Object))")
             expect(evaluate("Object.meta.super")).toEqual("Class(Metaclass)")
             expect(evaluate("Object.meta.meta")).toEqual("Class(Meta(Meta(Object)))")
             expect(evaluate("Object.meta.meta.super")).toEqual("Class(Metaclass)") //Meta(Meta(Class)))")
             expect(evaluate("Object.meta.meta.super.super")).toEqual("Class(Class)")
             expect(evaluate("Object.meta.meta.super.super.super")).toEqual("Class(Object)")
+
+            expect(evaluate("Object.meta.meta.meta")).toEqual("Class(Meta(Meta(Meta(Object))))")
+            expect(evaluate("Object.meta.meta.meta.super")).toEqual("Class(Metaclass)") //Meta(Meta(Class)))")
+            expect(evaluate("Object.meta.meta.meta.super.super")).toEqual("Class(Class)")
+            expect(evaluate("Object.meta.meta.meta.super.super.super")).toEqual("Class(Object)")
         })
 
         it('Metaclass is in global namespace', () => {
             expect(evaluate("Metaclass")).toEqual("Class(Metaclass)")
-            expect(evaluate("Metaclass.meta")).toEqual("Class(Metaclass)")
-            expect(evaluate("Metaclass.pre")).toEqual("Class(Metaclass)")
+            expect(evaluate("Metaclass.meta")).toEqual("Class(Meta(Metaclass))")
+            expect(()=>evaluate("Metaclass.pre")).toThrow() //toEqual("Class(Metaclass)")
         })
 
         it('metaclasses have a .pre entry back to the protoclass', () => {
@@ -327,6 +366,7 @@ describe('Class', () => {
         })
 
         // since metaclass is own meta...
+        // why exactly is this still true?
         it('instance methods on Metaclass are methods on all metaclasses', () => {
             evaluate("Metaclass.defineMethod('foo') {Function}")
             expect(evaluate("Class.meta.foo()")).toEqual("Class(Function)")
@@ -347,6 +387,14 @@ describe('Class', () => {
             expect(evaluate("Class.meta.instanceEval { self }")).toEqual("Class(Meta(Class))")
             expect(evaluate("Object.meta.instanceEval { self }")).toEqual("Class(Meta(Object))")
             expect(evaluate("Function.meta.instanceEval { self }")).toEqual("Class(Meta(Function))")
+        })
+        
+        it('defines wrappers around instanceEval', () => {
+            evaluate("class Class { auto(&b) { meta.instanceEval(b) }}")
+            expect(evaluate("class Foo { self.auto { bar() { Class }}}; Foo.bar()")).toEqual("Class(Class)")
+            // maybe it needs an antonym
+            evaluate("class Metaclass { allo(&b) { pre.instanceEval(b) }}")
+            expect(evaluate("Foo.meta.allo { self }")).toEqual("Class(Foo)")
         })
     })
 });
