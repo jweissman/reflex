@@ -253,3 +253,56 @@ interesting results but beware i suppose?)
 
 ---
 
+what if graph lit is 'just' an ohm literal??
+(another route to meta-circ but maybe just helpful for dsls?)
+could they be dynamic *extensions* to the grammar??
+what would the reflex object look like to parse things??
+we'd need to fully reify the ast -- all this seems for later
+simple parsers though should be straightforward (~hand wave~)
+thinking of it as a possible route to language extension is interesting though
+beyond archetypes, 'concepts'?? custom little mixin dsls
+(speaks to the 'safe meta' kind of point....)
+would be interesting to have the xml extensions modelled this way...
+the question is like: what can you factor out?
+not for optimization necessarily but...
+conflicts/ambiguities between alien grammars, how do you sort that out?
+hopefully they just meld?
+(will have to try some things!!)
+
+---
+structural pattern matching -- ellipsis in xml?
+
+---------
+
+- would be interesting to have class literal notation be archetype
+- would be useful for implementing iterators to have notation
+  that captures a parameter as ast -- or wraps as a function that calls the expression
+  -- i can imagine notation on the calling-side that indicates this, but not sure
+  about the other way (some way the function notation can indicate 'this arg is an ast/should be converted to block')
+  -- mostly b/c by the time we get around to assigning the arg to the parameter it's already been resolved
+     so there has to be something that knows on the call side about it and prepares it, but...
+  -- it's almost like a macro, could we do a preprocessor?
+  -- basically needs to be done in assembler
+  -- should there be a slightly higher-order lang in between?
+  -- ```.while -- (test,work) {
+    .loop:
+    ...test
+    jump_if_false done
+    call work
+    jump loop
+    .done:
+    ret```
+  --}
+  -- i guess this really speaks to why it's simpler to build the loop
+     primitive into the language???
+  -- we can implement any higher order things we need with yield etc i think
+  -- okay, so there at least this one or two looping primitives -- while/until
+  -- it would be nice to be able to parse the asm-like language
+
+---
+
+okay, so does our meta map match up :)
+
+if so, then super! and maybe filling in nil / glancing at bool
+
+--
