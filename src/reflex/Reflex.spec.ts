@@ -179,6 +179,10 @@ describe('Reflex', () => {
         it('descends from object', () => {
             expect(evaluate("Main.super")).toEqual("Class(Object)")
         })
+        it('has metaclass', () => {
+            expect(evaluate("Main.meta")).toEqual("Class(Meta(Main))")
+        })
+
 
         it('local variables', () => {
             evaluate("Obj = Object")

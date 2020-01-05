@@ -105,6 +105,14 @@ Reflex {
     PipeVars = "|" ListOf<Param,","> "|"
 
     FunctionLit
+      = FormalFunctionLiteral 
+      | StabbyFunctionLiteral
+    
+    StabbyFunctionLiteral
+      = "->" Block
+      | "->" Expr
+      
+    FormalFunctionLiteral 
       = Params "=>" Block
       | Params "=>" Expr
       //| ident "=>" Expr

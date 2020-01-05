@@ -52,4 +52,9 @@ describe('Function', () => {
         expect(evaluate('grandparent(Class.new("Bar", Class.new("Baz")))')).toEqual("Class(Object)")
         expect(evaluate('grandparent(Class.new("Bar", Class.new("Baz", Class.new("Quux"))))')).toEqual("Class(Quux)")
     })
+
+    it('shorthand', () => {
+        evaluate("f=->Function")
+        expect(evaluate("f()")).toEqual("Class(Function)")
+    })
 })

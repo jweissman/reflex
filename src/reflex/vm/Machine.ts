@@ -16,7 +16,7 @@ import { State } from './State';
 export default class Machine {
     stack: Value[] = []
     frames: Frame[] = [{
-        ip: 0, self: main,
+        ip: 0, self: main(this),
         locals: bootLocals
     }];
 

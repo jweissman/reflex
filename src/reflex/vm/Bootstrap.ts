@@ -2,12 +2,14 @@ import ReflexClass from "./types/ReflexClass";
 import ReflexObject from "./types/ReflexObject";
 import { ReflexFunction } from "./types/ReflexFunction";
 import { ReflexNihil } from "./types/ReflexNihil";
+import Machine from "./Machine";
 
 const Class = ReflexClass.klass;
 Class.set("class", Class);
 const Metaclass = ReflexClass.makeClass("Metaclass", ReflexObject.klass, false)
 Metaclass.set("super", Class);
 export const ClassMeta = ReflexClass.makeClass("Meta(Class)", Metaclass, false);
+// ClassMeta.
 const RObject = ReflexClass.makeClass("Object")
 RObject.set("super", RObject);
 
@@ -32,8 +34,11 @@ ReflexNihil.klass = Nihil;
 
 let Main = ReflexClass.makeClass("Main")
 Main.get("instance_methods").set("defineMethod", Main.eigenclass.get("instance_methods").get("defineMethod"))
-let main = new ReflexObject()
-main.set('class', Main)
+const constructMain = (machine: Machine) => {
+  let main = ReflexClass.makeInstance(machine, Main, []) //new ReflexObject()
+  main.set('class', Main)
+  return main;
+}
 
 export const bootLocals = {
   Object: RObject,
@@ -44,4 +49,4 @@ export const bootLocals = {
   Metaclass,
 }
 
-export default main;
+export default constructMain;
