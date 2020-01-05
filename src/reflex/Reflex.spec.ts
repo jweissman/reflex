@@ -140,15 +140,45 @@ describe('Reflex', () => {
             })
         })
 
+        it('invokes parent methods as self', () => {
+            evaluate("class Crying{init(subject) { self.subject = subject }}")
+            evaluate("class Creature {speak() { cry(self) }; cry(subj){Crying.new(subj)}}")
+            evaluate("class Baby < Creature {}")
+            expect(evaluate("Baby.new().speak()")).toEqual("Crying")
+            expect(evaluate("Baby.new().speak().subject")).toEqual("Baby")
+        })
+
         describe("super", () => {
-            xit("is the super-instance", () => {
-                evaluate("class Animal {speak(){Object}}")
-                evaluate("class Bird < Animal {speak(){Function}}")
+            beforeEach(() => {
+                evaluate("class Cries{init(subject) { self.subject = subject }}")
+                evaluate("class Laughs{init(subject) { self.subject = subject }}")
+                evaluate("class Words{}")
+                evaluate("class Melody{}")
+                evaluate("class Animal {speak() { cry(self) }; cry(subj){Cries.new(subj)}}")
+                evaluate("class Person < Animal {speak(){Words.new()}}")
+                evaluate("class Child < Person {speak(){super.super.speak()}}")
+                evaluate("class Bird < Animal {speak(){Melody.new()}}")
                 evaluate("class Flamingo < Bird { speak() {super.super.speak()}}")
-                expect(evaluate("Bird.new().speak()")).toEqual("Class(Function)")
-                expect(evaluate("Flamingo.new().speak()")).toEqual("Class(Object)")
             })
-            test.todo("[when called as a fn] is the current method's super-method")
+            it("is the super-instance", () => {
+                expect(evaluate("Bird.new().speak()")).toEqual("Melody")
+                expect(evaluate("Flamingo.new().speak()")).toEqual("Cries")
+                expect(evaluate("Flamingo.new().speak().subject")).toEqual("Flamingo")
+                expect(evaluate("Person.new().speak()")).toEqual("Words")
+                expect(evaluate("Child.new().speak()")).toEqual("Cries")
+                expect(evaluate("Child.new().speak().subject")).toEqual("Child")
+            })
+            it('unfolds and collapses', () => {
+                expect(evaluate("super")).toEqual("Super(Main)")
+                expect(evaluate("super.self")).toEqual("Main")
+                expect(evaluate("super.class")).toEqual("Class(Object)")
+                expect(evaluate("super.super")).toEqual("Super(Super(Main))")
+                expect(evaluate("super.super.class")).toEqual("Class(Object)") // obj is own super...
+                expect(evaluate("super.super.self")).toEqual("Main") // obj is own super...
+            })
+            describe("when called as a fn", () => {
+                test.todo("is the current method's super-method")
+            })
         })
     })
 

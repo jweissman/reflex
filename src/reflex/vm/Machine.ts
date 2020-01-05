@@ -67,7 +67,7 @@ export default class Machine {
         if (step) {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
-            log(`init execution @${label}, ip = ${this.ip}`)
+            // log(`init execution @${label}, ip = ${this.ip}`)
             log(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
             this.executeLoop();
         } else {

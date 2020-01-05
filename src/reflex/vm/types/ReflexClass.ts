@@ -35,7 +35,7 @@ export default class ReflexClass extends ReflexObject {
     }
 
     static makeClass(name: string, superclass: ReflexClass = ReflexObject.klass, wireMethods: boolean = true) {
-        log("MAKE CLASS " + name + " SUBCLASS OF " + superclass)
+        // log("MAKE CLASS " + name + " SUBCLASS OF " + superclass)
         let klass = new ReflexClass(name);
         klass.set("super", superclass);
         klass.set("class", ReflexClass.klass);
@@ -46,7 +46,7 @@ export default class ReflexClass extends ReflexObject {
             klass.set("meta", meta);
             if (wireMethods) { ReflexClass.wireClassMethods(klass); }
         } else {
-            log("Warning: no superclass or no meta defined on class " + name)
+            // log("Warning: no superclass or no meta defined on class " + name)
         }
         return klass;
     }
@@ -83,7 +83,7 @@ export default class ReflexClass extends ReflexObject {
         if (meta) {
             let classMethods = meta.get("instance_methods");
             if (classMethods.get("new")) {
-                log("WARNING: not overriding class methods, already existed on... " + meta)
+                // log("WARNING: not overriding class methods, already existed on... " + meta)
             } else {
                 classMethods.set("new", new WrappedFunction(name + '.new', newFn));
                 classMethods.set("defineMethod", new WrappedFunction(`${name}.defineMethod`,
@@ -108,7 +108,7 @@ export default class ReflexClass extends ReflexObject {
     wireClassMethods() { ReflexClass.wireClassMethods(this); }
 
     static instanceEval(self: ReflexObject, machine: Machine, block: ReflexFunction) {
-        log("INSTANCE EVAL " + block + " -- SELF IS " + this)
+        // log("INSTANCE EVAL " + block + " -- SELF IS " + this)
         block.frame.self = self;
         machine.doInvoke(undefined, block)
     }
@@ -127,7 +127,7 @@ export default class ReflexClass extends ReflexObject {
     }
 
     static defineInstanceMethod = (klass: ReflexClass, fn: ReflexFunction, name: string, meta: ReflexClass) => {
-        log("DEFINE INSTANCE METHOD name=" + name + " on " + klass.inspect() + " / meta is " + meta + " ==== \n   ---> fn: " + fn)
+        // log("DEFINE INSTANCE METHOD name=" + name + " on " + klass.inspect() + " / meta is " + meta + " ==== \n   ---> fn: " + fn)
         // metaclass instance methods 'look like' class methods
         fn.name = klass.isMeta ? `${ReflexClass.detachMeta(klass.name)}.${name}` : `${klass.name}#${name}` 
         let methods = klass.get("instance_methods") || new ReflexObject();
@@ -136,7 +136,7 @@ export default class ReflexClass extends ReflexObject {
     }
 
     static defineClassMethod = (klass: ReflexClass, fn: ReflexFunction, name: string) => {
-        log("DEFINE CLASS METHOD name=" + name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
+        // log("DEFINE CLASS METHOD name=" + name + " on " + klass.inspect() + " ==== \n   ---> fn: " + fn)
         let meta = klass.get("meta")
         if (meta) {
             fn.name = `${klass.name}.${name}`
@@ -151,7 +151,7 @@ export default class ReflexClass extends ReflexObject {
 
     assembleMeta() {
         if (this.get("meta")) {
-            log("asked to assembleMeta but meta already present")
+            // log("asked to assembleMeta but meta already present")
         } else {
             let meta = ReflexClass.makeMetaclass(this, false);
            this.set("meta", meta);
@@ -167,24 +167,22 @@ export default class ReflexClass extends ReflexObject {
         let chain = this.name === 'Object' || this.eigenclass === undefined || this.superclass === undefined
             ? []
             : [this.superclass.eigenclass, ...this.superclass.metaChain];
-        log("GOT METACHAIN FOR " + this.name + ": " + chain)
+        // log("GOT METACHAIN FOR " + this.name + ": " + chain)
         return chain
     }
     protected get instanceMethods(): ReflexObject { return this.get("instance_methods") as ReflexObject }
     get displayName() { return `Class(${this.name})` }
 
     send(message: string): ReflexObject {
-        log("ReflexClass.send self=" + this.inspect())
-        if (!this.eigenclass) {
-            this.assembleMeta()
-        }
+        // log("ReflexClass.send self=" + this.inspect())
+        if (!this.eigenclass) { this.assembleMeta() }
         let classMethods = this.eigenclass && this.eigenclass.get("instance_methods")
         let supershared = this.metaChain.map(a => a && a.get("instance_methods")).find(a => a && a.get(message))
         if (classMethods && classMethods.get(message)) {
-            log('msg is eigen class_method')
+            // log('msg is eigen class_method')
             return classMethods.get(message)
         } else if (supershared && supershared.get(message)) {
-            log('msg is eigen-ancestor class_method')
+            // log('msg is eigen-ancestor class_method')
             return supershared.get(message)
         } else {
             return super.send(message);

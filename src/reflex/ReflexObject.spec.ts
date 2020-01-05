@@ -65,8 +65,4 @@ describe('Object', () => {
             expect(evaluate("self")).toEqual("Main")
         })
     })
-
-    describe("#eigen", () => {
-        test.todo('invokes meta.instanceEval on a block')
-    })
 });

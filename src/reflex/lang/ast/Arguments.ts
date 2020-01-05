@@ -2,7 +2,6 @@ import Tree from "./Tree";
 import { Sequence } from "./Sequence";
 import { Code } from "../../vm/instruction/Instruction";
 import { PipedBlock } from "./PipedBlock";
-import { log } from "console";
 
 export class Argument extends Tree {
   constructor(public value: Tree, public isReference: boolean = false) { super();}

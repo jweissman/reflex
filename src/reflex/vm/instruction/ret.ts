@@ -11,16 +11,16 @@ export function ret(stack: Stack, frames: Frame[], machine: Machine) {
     frames.pop();
     frames.pop();
     if (frame.retValue) {
-        log("RETURN retValue: " + frame.retValue)
+        // log("RETURN retValue: " + frame.retValue)
         stack.push(frame.retValue);
     } else {
         if (stack.length) {
             // leave whatever is there? implicit return
-            log("RETURN something on stack, leaving alone: " + dump(stack))
+            // log("RETURN something on stack, leaving alone: " + dump(stack))
         } else {
             let nil = ReflexClass.makeInstance(machine, ReflexNihil.klass, []);
             stack.push(nil);
-            log("RETURN creating nihil: " + dump(stack))
+            // log("RETURN creating nihil: " + dump(stack))
         }
     }
 }

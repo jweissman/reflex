@@ -14,16 +14,16 @@ import { ReflexNihil } from "../types/ReflexNihil";
 import { dump } from "../util/dump";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
-    log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
-    log('args ' + args)
-    log('params ' + top.params)
-    log('stack at invoke: ' + dump(stack))
+    // log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
+    // log('args ' + args)
+    // log('params ' + top.params)
+    // log('stack at invoke: ' + dump(stack))
     let frame = frames[frames.length - 1];
     let block;
     if (hasBlock) {
         block = stack[stack.length - 1] as ReflexFunction;
         pop(stack);
-        log('block ' + block.inspect())
+        // log('block ' + block.inspect())
     }
     let self = frame.self;
     if (top.frame.self) {
@@ -56,11 +56,11 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
     if (hasBlock) {
         let line = newFrame.ip;
         let next = nextOperativeCommand(code.slice(line));
-        log("!!! next operative command: " + next);
+        // log("!!! next operative command: " + next);
         if (next) {
             let [nextOp] = next;
             let exhausted = nextOp === 'ret'
-            log("got a block, checking if it's exhausted (instruction is at ret): " + exhausted + " / " + nextOp);
+            // log("got a block, checking if it's exhausted (instruction is at ret): " + exhausted + " / " + nextOp);
             if (exhausted) {
                 nihilate = true;
             }
@@ -76,7 +76,7 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
     } else {
         // let block = top.frame.block;
         if (block) {
-            log("NIHILATE")
+            // log("NIHILATE")
             let nil = ReflexClass.makeInstance(machine, ReflexNihil.klass, []);
             // stack.push(nil);
             // stack.push(block);
@@ -96,7 +96,7 @@ export function invoke(
     machine: Machine,
     ensureReturns?: ReflexObject
 ) {
-    log("INVOKE "+arity + "-- stack " + dump(stack))
+    // log("INVOKE "+arity + "-- stack " + dump(stack))
     let top = stack[stack.length - 1];
     pop(stack);
     let args = [];
@@ -118,7 +118,7 @@ export function invoke(
         invokeReflex(top, args, stack, frames, code, machine, hasBlock, ensureReturns);
     }
     else {
-        log("invoke -- error, top not a function but " + top)
+        // warn("invoke -- error, top not a function but " + top)
         fail("invoke -- expected top to be a function!");
     }
 }

@@ -24,13 +24,26 @@ describe('Function', () => {
         expect(evaluate("f=()=>{Object}")).toEqual("Function(->Object)")
         expect(evaluate("f()")).toEqual("Class(Object)")
     });
-    describe('.new', () => {
-        it('returns its arg', () => {
-            expect(evaluate("fn=Function.new(()=>{Class})")).toMatch("Function")
-            expect(evaluate("fn.class")).toMatch("Class(Function)")
-            expect(evaluate("fn()")).toMatch("Class(Class)")
+
+    describe('class methods', () => {
+        describe('.new', () => {
+            it('returns its arg', () => {
+                expect(evaluate("fn=Function.new(()=>{Class})")).toMatch("Function")
+                expect(evaluate("fn.class")).toMatch("Class(Function)")
+                expect(evaluate("fn()")).toMatch("Class(Class)")
+            })
         })
-    })
+    });
+    describe('instance methods', () => {
+        describe('.call', () => {
+            // to do this properly we need lists! (b/c we need destructuring array args...)
+            xit('invokes itself', () => {
+                expect(evaluate("fn=Function.new((a,b)=>b)")).toMatch("Function")
+                expect(evaluate("fn.call(Object,Class)")).toMatch("Class(Class)")
+            })
+        })
+    });
+
     it('binds locals', () => {
         expect(evaluate("class A{bar(){b=self;()=>{b}}}; A")).toEqual("Class(A)")
         expect(evaluate("baz=A.new()")).toEqual("A")

@@ -12,7 +12,7 @@ import { Parameter } from "../../lang/ast/Parameter";
 
 export let lambdaCount = 0;
 export function compile(ast: Tree, stack: Stack, machine: Machine) {
-    log("COMPILE " + ast.inspect());
+    // log("COMPILE " + ast.inspect());
     if (ast instanceof Defun || ast instanceof FunctionLiteral) {
         let label = `lambda-${lambdaCount++}`;
         let name = label;
@@ -36,7 +36,7 @@ export function compile(ast: Tree, stack: Stack, machine: Machine) {
                         throw new Error("should only have one block param, found " + param.name + " and " + fn.blockParamName)
                     }
                     fn.blockParamName = param.name;
-                    log("Found block param " + param.name)
+                    // log("Found block param " + param.name)
                     return [];
                 } else {
                     return [param.name];
@@ -48,7 +48,7 @@ export function compile(ast: Tree, stack: Stack, machine: Machine) {
         fn.arity = fn.params.length;
         let frame = machine.frames[machine.frames.length - 1]
         fn.frame = { ...frame };
-        log("COMPILE'D " + fn.inspect() + " / arity: " + fn.arity + " / params: " + fn.params);
+        // log("COMPILE'D " + fn.inspect() + " / arity: " + fn.arity + " / params: " + fn.params);
         stack.push(fn);
     }
     else {

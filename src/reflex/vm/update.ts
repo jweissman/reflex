@@ -77,7 +77,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             let top = stack[stack.length - 1];
             pop(stack)
             if (top instanceof ReflexObject) {
-                log(`LOCAL VAR SET ${key}=${top.inspect()}`);
+                // log(`LOCAL VAR SET ${key}=${top.inspect()}`);
                 let localFrame: Frame = findFrameWithLocal(key, frames);
                 localFrame.locals[key] = top;
             } else {
@@ -92,7 +92,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 let localFrame: Frame = findFrameWithLocal(k, frames);
                 if (localFrame === frame &&
                     !frame.locals[k]) {
-                    log(`LOCAL VAR OR EQ -- assign ${k}=${t.inspect()}`);
+                    // log(`LOCAL VAR OR EQ -- assign ${k}=${t.inspect()}`);
                     frame.locals[k] = t;
                 }
             } else {
@@ -105,15 +105,15 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             if (Object.keys(localFrame.locals).includes(v)) {
                 stack.push(localFrame.locals[v]);
             } else if (v === 'self') {
-                log("bare self fell back to frame self -- " + frame.self.inspect())
-                stack.push(frame.self)
+                // log("bare self fell back to frame self -- " + frame.self.inspect())
+                stack.push(frame.self.self)
             } else if (v === 'yield') {
                 if (frame.currentMethod && frame.block) {
                     let yieldFn = new WrappedFunction('yielder', (...args: ReflexObject[]) => {;
                         frame.currentMethod!.frame = { ...frame };
                         ret(stack, frames, machine);
                         let fn = frame.block as ReflexFunction;
-                        log("yield to block " + fn)
+                        // log("yield to block " + fn)
                         args.forEach(arg => stack.push(arg))
                         stack.push(fn);
                         invoke(fn.arity, !!fn.blockParamName, stack, frames, machine.currentProgram, machine)
@@ -122,6 +122,8 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 } else {
                     throw new Error("tried to yield from outermost scope or without a block on frame?")
                 }
+            } else if (v === 'super') {
+                stack.push(frame.self.super)
             } else {
                 let dispatched = frame.self.send(value as string)
                 stack.push(dispatched);
