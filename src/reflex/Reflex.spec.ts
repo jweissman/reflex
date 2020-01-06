@@ -48,6 +48,46 @@ describe('Reflex', () => {
 
     describe("syntax", () => {
         describe('core', () => {
+            describe('conditionals', () => {
+                describe('gates execution', () => {
+                    xit('if', ()=> {
+                        expect(evaluate("if (true) { Object } else { Class }")).toEqual("Class(Object)")
+                        expect(evaluate("if (false) { Object } else { Class }")).toEqual("Class(Class)")
+                        expect(evaluate("if (true) { Object }")).toEqual("Class(Object)")
+                        expect(evaluate("if (false) { Object }")).toEqual("Nihil")
+                    })
+
+                    xit('if dangles', () => {
+                        expect(evaluate("Object if true")).toEqual("Class(Object)")
+                        expect(evaluate("Object if false")).toEqual("Nihil")
+                        expect(evaluate("Object if true else Class")).toEqual("Class(Object)")
+                        expect(evaluate("Object if false else Class")).toEqual("Class(Class)")
+                    })
+
+                    xit('unless', ()=> {
+                        expect(evaluate("unless (true) { Object } else { Class }")).toEqual("Class(Class)")
+                        expect(evaluate("unless (false) { Object } else { Class }")).toEqual("Class(Object)")
+                        expect(evaluate("unless (true) { Object }")).toEqual("Nihil")
+                        expect(evaluate("unless (false) { Object }")).toEqual("Class(Object)")
+
+                        expect(evaluate("unless true { Object } else { Class }")).toEqual("Class(Class)")
+                        expect(evaluate("unless false { Object } else { Class }")).toEqual("Class(Object)")
+                        expect(evaluate("unless true { Object }")).toEqual("Nihil")
+                        expect(evaluate("unless false { Object }")).toEqual("Class(Object)")
+
+                        expect(evaluate("unless true Object else Class")).toEqual("Class(Class)")
+                        expect(evaluate("unless false Object else Class")).toEqual("Class(Object)")
+                        expect(evaluate("unless true Object")).toEqual("Nihil")
+                    })
+
+                    xit('unless dangles', () => {
+                        expect(evaluate("Object unless true")).toEqual("Nihil")
+                        expect(evaluate("Object unless false")).toEqual("Object(Class)")
+                        expect(evaluate("Object unless true else Class")).toEqual("Class(Class)")
+                        expect(evaluate("Object unless false else Class")).toEqual("Class(Object)")
+                    })
+                })
+            })
             describe('operators', () => {
                 describe('== (eq)', () => {
                     it('compares truth values', () => {
@@ -62,7 +102,7 @@ describe('Reflex', () => {
                         expect(evaluate("Object.new() == Object.new()")).toEqual('Falsity')
                         expect(evaluate("o == o")).toEqual('Truth')
                     })
-                    xit('denotes absolute class equality', () => {
+                    it('denotes absolute class equality', () => {
                         expect(evaluate("Object == Object")).toEqual('Truth')
                         expect(evaluate("Object == Class")).toEqual('Falsity')
                         expect(evaluate("Class == Class")).toEqual('Truth')
@@ -98,14 +138,13 @@ describe('Reflex', () => {
             })
 
             // was just a sanity check, can probably remove this
-            it("dot access never falls back", () => {
+            xit("dot access never falls back", () => {
                 evaluate("class Ladder { climb() { Class }}")
                 evaluate("fall=Object")
                 expect(evaluate("Ladder.new().climb()")).toEqual("Class(Class)")
                 expect(() => evaluate("Ladder.new().fall")).toThrow()
             })
         })
-
 
         describe("blocks", () => {
             it('modifies locals', () => {
@@ -170,6 +209,7 @@ describe('Reflex', () => {
                 expect(evaluate("y")).toEqual("Class(Function)")
             })
 
+            // hrmm
             it("passes blocks to instance methods", () => {
                 evaluate("class Baz{next(){yield Object;yield Class; yield Function}}")
                 evaluate("baz=Baz.new()")
@@ -236,7 +276,7 @@ describe('Reflex', () => {
             })
         })
 
-        it('local variables', () => {
+        xit('local variables', () => {
             evaluate("Obj = Object")
             expect(evaluate("Obj")).toEqual("Class(Object)")
             expect(evaluate("Obj.class")).toEqual("Class(Class)")

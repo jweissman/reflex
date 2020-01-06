@@ -1,4 +1,4 @@
-import { Code, indexForLabel, prettyCode, nextOperativeCommand } from "./Instruction";
+import { Code, indexForLabel, nextOperativeCommand } from "./Instruction";
 import ReflexObject from '../types/ReflexObject';
 import { ReflexFunction, WrappedFunction } from '../types/ReflexFunction';
 import { Frame } from '../Frame';
@@ -7,12 +7,9 @@ import { fail } from '../util/fail';
 import { zip } from '../util/zip';
 import { pop } from './pop';
 import Machine from '../Machine';
-import { log } from "../util/log";
 import { Value } from './Value';
-import ReflexClass, { classRegistry } from "../types/ReflexClass";
+import { makeReflexObject } from "../types/ReflexClass";
 import { ReflexNihil } from "../types/ReflexNihil";
-import { dump } from "../util/dump";
-import { call } from "./call";
 import { instantiate } from "../update";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
@@ -79,7 +76,7 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
         // let block = top.frame.block;
         if (block) {
             // log("NIHILATE")
-            let nil = ReflexClass.makeInstance(machine, ReflexNihil.klass, []);
+            let nil = makeReflexObject(machine, ReflexNihil.klass, []);
             // stack.push(nil);
             // stack.push(block);
             invokeReflex(block, [nil], stack, frames, code, machine, false);
@@ -108,52 +105,28 @@ export function invoke(
         pop(stack);
     }
     if (top instanceof WrappedFunction) {
-        log("CALL WRAPPED FN " + top.name)
         if (hasBlock) {
-            // pass block as arg
             args.push(stack[stack.length - 1]); pop(stack);
         }
-        // machine.self = top.frame.self
-        // frames.push({
-        //     ip: -1,
-        //     self: machine.self,
-        //     // self: stack[stack.length-1] as ReflexObject,
-        //     locals: {}
-        // })
-        // debugger;
-        // what is the receiver?? what should it be???
-        // it's got to be a bound self at get time really...
         if (top.boundSelf) {
-            // let newFrame = { ...frames[stack.length - 1] }
-            // newFrame.self = top.boundSelf
-            // frames.push(newFrame)
             machine.bindSelf(top.boundSelf)
         }
         let result = top.impl(machine, ...args);
-        log("CALL WRAPPED FN " + top.name + " === RESULT " + result)
         if (result !== undefined) {
             if (result === true || result === false) {
                 let className = result ? 'Truth' : 'Falsity'
-                log("WOULD PUSH BOOL: "+ result + " / " + className)
                 instantiate(className, stack, frames, code, machine)
-                // stack.push(classRegistry[className])
-                // stack.push("new" as string)
-                // call(stack, frames);
             } else {
                 stack.push(result);
             }
         }
         if (top.boundSelf) {
             machine.unbindSelf()
-        //     frames.pop()
         }
-            // machine.ungraft() //top.boundSelf)
-        // frames.pop()
     } else if (top instanceof ReflexFunction) {
         invokeReflex(top, args, stack, frames, code, machine, hasBlock, ensureReturns);
     }
     else {
-        // warn("invoke -- error, top not a function but " + top)
         fail("invoke -- expected top to be a function!");
     }
 }

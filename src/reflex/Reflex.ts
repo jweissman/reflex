@@ -1,6 +1,6 @@
 import Parser from "./lang/Parser";
 import Machine from "./vm/Machine";
-import { Code } from "./vm/instruction/Instruction";
+import { Code, prettyCode } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
 
  const preamble = `
@@ -19,6 +19,7 @@ class Falsity < Boolean {
 };
 true = Truth.new();
 false = Falsity.new();
+instanceEval { self.defineMethod = meta.defineMethod };
 `;
 
 export default class Reflex {
@@ -27,10 +28,14 @@ export default class Reflex {
     parser: Parser = new Parser();
     machine: Machine = new Machine()
 
-    constructor() {this.evaluate(preamble); }
+    constructor() {
+        // log("EVAL PREAMBLE")
+        this.evaluate(preamble);
+    }
 
     evaluate(input: string) {
         let code: Code = this.parser.analyze(input)
+        // log("RUN CODE", prettyCode(code))
         this.machine.run(code)
         let result = this.machine.top
         this.machine.stack = [];

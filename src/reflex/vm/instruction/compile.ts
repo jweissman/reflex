@@ -5,9 +5,8 @@ import { Defun } from '../../lang/ast/Defun';
 import { FunctionLiteral } from '../../lang/ast/FunctionLiteral';
 import { Stack } from '../Stack';
 import { fail } from '../util/fail';
-import ReflexClass from '../types/ReflexClass';
+import { makeReflexObject } from '../types/ReflexClass';
 import Machine from '../Machine';
-import { log } from "../util/log";
 import { Parameter } from "../../lang/ast/Parameter";
 
 export let lambdaCount = 0;
@@ -24,7 +23,7 @@ export function compile(ast: Tree, stack: Stack, machine: Machine) {
             ...ast.shell,
         ];
         machine.sideload(code);
-        let fn = ReflexClass.makeInstance(machine, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
+        let fn = makeReflexObject(machine, ReflexFunction.klass, []) as ReflexFunction; //, [name, label])
         fn.name = name;
         fn.label = label;
         fn.source = ast.inspect()

@@ -1,5 +1,6 @@
 import ReflexObject from "./ReflexObject";
 import { Frame } from "../Frame";
+import { log } from "../util/log";
 
 export class ReflexFunction extends ReflexObject {
     public name?: string;
@@ -23,7 +24,8 @@ export class ReflexFunction extends ReflexObject {
 // a js function
 export class WrappedFunction extends ReflexObject {
     wrapped = true;
-    boundSelf?: any;
+    bound = false;
+    boundSelf?: ReflexObject;
     constructor(public name: string, public impl: Function) {
         super();
     }
@@ -31,4 +33,24 @@ export class WrappedFunction extends ReflexObject {
     get displayName() { return `Function(${this.name}[wrap])`; }
 
     get arity() { return this.impl.length; }
+
+    bind(self: ReflexObject) {
+        log("BIND WRAPPED FN " + this.name + " TO " + self.inspect());
+        let mu = new WrappedFunction(this.name, this.impl);
+        mu.bound = true;
+        mu.boundSelf = self;
+        return mu;
+    }
 }
+
+// export class BoundFunction extends WrappedFunction {
+//     bound = true;
+//     // wrapped = true;
+//     private boundSelf?: any;
+//     constructor(public fn: WrappedFunction, public self: ReflexObject) {
+//         super();
+//     }
+
+//     get displayName() { return `Function(${this.name}[wrap])`; }
+//     get arity() { return this.impl.length; }
+// }

@@ -102,6 +102,7 @@ export default class Machine {
 
     execute(instruction: Instruction) {
         let { stack, frames } = this.state
+        log('frames: ' + frames.flatMap(frame => frame.self.inspect()).join(","))
         let frame = frames[frames.length - 1]
         trace(`exec @${this.ip}`, instruction, frame, stack)
         update(this.state, instruction, this.currentProgram)

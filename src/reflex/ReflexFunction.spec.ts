@@ -11,10 +11,10 @@ describe('Function', () => {
         expect(evaluate("Function.super")).toEqual("Class(Object)")
     })
     it('creates functions', () => {
-        expect(evaluate("foo() { Object }; foo")).toEqual("Function(Main#foo)")
+        expect(evaluate("foo() { Object }; foo")).toEqual("Function(Main instance.foo)")
     });
     it('invokes functions', () => {
-        expect(evaluate("foo() { Object }; foo")).toEqual("Function(Main#foo)")
+        expect(evaluate("foo() { Object }; foo")).toEqual("Function(Main instance.foo)")
         expect(evaluate("foo()")).toEqual("Class(Object)")
     })
     it('creates lambdas', () => {

@@ -376,8 +376,6 @@ describe('Class', () => {
 
         })
 
-        // since metaclass is own meta...
-        // why exactly is this still true?
         it('instance methods on Metaclass are methods on all metaclasses', () => {
             evaluate("Metaclass.defineMethod('levity') {Function}")
             expect(evaluate("Function.meta.levity()")).toEqual("Class(Function)")
