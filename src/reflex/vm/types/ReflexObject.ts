@@ -50,7 +50,7 @@ export default class ReflexObject {
             // log('msg is ancestor instance_method')
             return supershared.get(message)
         } else {
-            if (this.surroundingObject && this.surroundingObject !== this) {
+            if (this.surroundingObject) { //} && this.surroundingObject !== this) {
                 // log('trying on surrounding obj')
                 return this.surroundingObject.send(message);
             } else {
@@ -85,7 +85,7 @@ export default class ReflexObject {
             // log('msg is ancestor instance_method')
             return true //supershared.get(message)
         } else {
-            if (this.surroundingObject && this.surroundingObject !== this) {
+            if (this.surroundingObject) { //} && this.surroundingObject !== this) {
                 // log('trying on surrounding obj')
                 return this.surroundingObject.respondsTo(message);
             } else {
@@ -118,13 +118,14 @@ class SuperFacade extends ReflexObject {
     }
     get displayName(): string { return `Super(${this.iso.displayName})`; }
 
-    set(k: string,v: ReflexObject) { this.self.set(k,v) } //members[k] = v }
+    // should have better tests of this?
+    // set(k: string,v: ReflexObject) { this.self.set(k,v) } //members[k] = v }
     get(k: string): ReflexObject {
         if (k === "class") {
             return this.klass;
         } else {
             return this.self.get(k)
         }
-    } // members[k] }
+    }
 
 }

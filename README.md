@@ -1,16 +1,16 @@
 # reflex
 
-🤖 GENERAL-PURPOSE programming language
+🤖 Explore a new GENERAL-PURPOSE language
 
 💎 Write code with CRYSTALLINE ELEGANCE 
 
 🕵🏻‍ Employ reification and REFLECTION
 
-🎉 Syntax for XML LITERALS
+🎉 Use XML LITERALS
 
 🥂 Interoperate with JAVASCRIPT 
 
-🥳 Enjoy METAPROGRAMMING!
+🥳 Enjoy METAPROGRAMMING
 
 # Synopsis
 
@@ -48,16 +48,34 @@ Instance methods are distinguished function-valued members of an object which ar
 
 ### Class
 Every entity in the system also has a `Class`, which has a member `super` that is its parent class. The root of every object's ancestor chain is `Class(Object)`.
-A special kind of class is a `Metaclass`, represents the class as an instance of an object. They are intended to be largely 'transparent'. The metaclass is accessible on a class object through the member `meta`.
-Classes have a `new` function which generates a new object. Note the `new` for Class itself generates a new class object (`new(name, superclass)`).
+Classes have a `new` function which generates a new object, although note that the `new` method for Class itself can be used to create a new class.
+
+### Metaclass
+A special kind of class is a `Metaclass`, meaning an object that hold information about another class;
+in particular, metaclasses carry details about the class method (instance methods 'of' classes). 
+The metaclass is accessible on a class object through the member `meta`.
+The metaclass of an object is likewise a singleton class that holds instance methods defined
+exactly on that object, accessible via `meta` as well.
 
 ### Function
 A `Function` is a callable entity that can wrap a raw JS function or have a Reflex implementation.
 Reflex functions can access locals both in their enclosing context and their context at definition.
+Functions have a few different valid forms:
+```
+f=()=>{}    // define a local variable f
+g=->{}      // define a local variable g
+h(){}       // define an instance method h
+```
+
 ### Nihil
 `nil` is the object of class Nihil.
 It is the (implicit) return value of empty functions, and the piped value of an exhausted generator.
 ## Syntax
+### self and super
+A bare `self` is a references to the current context's object. 
+`super` as a member on a class object is a reference to the superclass.
+In instance methods, `super` refers to a facade that permits calling superclass methods 'as written' on the current object.
+
 ### Blocks/Yielding
 A block is marked off by braces and can optionally have piped values passed to it.
 Blocks may be given to functions, which can interact structurally with the block.
@@ -129,15 +147,17 @@ A graph literal notation (basically a hash literal with a different brace which 
    Liberate people.
 
 2. *Eloquence is brevity.*
-  Don't seek a terminal minimalism of pure concatenative expressions or convoluted algebrae.
-  Find expressive pathways through reflection and reification.
-  Embrace the power of point-free programming while retaining the harness of an object model.
-  Message dispatch is a universal model of communicating dynamic processes, so:
-  Communicate dynamically. Capture ideas as languages. Get better at writing less.
-  Think about cells.
-  Embrace metalanguage where necessary to empower users, but keep reflective tools well isolated
-  from object code.
-  Avoid verbosity through seeking elegant and flexible languages for expressing problems.
-  (Focus on the expression of problems rather than solutions.)
-  A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.
-  You can travel further if you are carrying less.
+   You can travel further if you are carrying less.
+   Don't seek a terminal minimalism of pure concatenative expressions or convoluted algebrae.
+   (Seek ways to capture categoreal concepts through other means...)
+   Find expressive pathways through reflection and reification.
+
+3. *Communicate dynamically.*
+   Embrace the power of point-free programming while retaining the harness of an object model.
+   Message dispatch is a universal model of communicating dynamic processes, so:
+   Communicate dynamically. Capture ideas as languages. Get better at writing less.
+   Think about cells.
+   Embrace metalanguage where necessary to empower users, but keep reflective tools well isolated from object code.
+   Avoid verbosity through seeking elegant and flexible languages for expressing problems.
+   (Focus on the expression of problems rather than solutions.)
+   A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.

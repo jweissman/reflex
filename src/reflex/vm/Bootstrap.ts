@@ -34,11 +34,7 @@ ReflexNihil.klass = Nihil;
 
 let Main = ReflexClass.makeClass("Main")
 Main.get("instance_methods").set("defineMethod", Main.eigenclass.get("instance_methods").get("defineMethod"))
-const constructMain = (machine: Machine) => {
-  let main = ReflexClass.makeInstance(machine, Main, []) //new ReflexObject()
-  main.set('class', Main)
-  return main;
-}
+const constructMain = (machine: Machine) =>  ReflexClass.makeInstance(machine, Main, [])
 
 export const bootLocals = {
   Object: RObject,
