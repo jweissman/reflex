@@ -52,7 +52,7 @@ export default class ReflexObject {
             let source = eigen.get(message) || shared.get(message) || (supershared && supershared.get(message))
             if (source.wrapped) {
                 let src = source as WrappedFunction //ReflexObject & { boundSelf: ReflexObject };
-                return src.bind(this) //boundSelf = this;
+                return src.bind(this as unknown as ReflexClass) //boundSelf = this;
             }
             return source
         } else {

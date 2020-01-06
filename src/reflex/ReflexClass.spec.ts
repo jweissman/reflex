@@ -408,4 +408,13 @@ describe('Class', () => {
             expect(evaluate("Roll.meta.allo { self }")).toEqual("Class(Roll)")
         })
     })
+
+    describe(".isAncestorOf/isDescendantOf", () => {
+        it('describes superclass relationships', () => {
+            expect(evaluate("Class.isAncestorOf(Object)")).toEqual("Falsity")
+            expect(evaluate("Object.isAncestorOf(Class)")).toEqual("Truth")
+            expect(evaluate("Class.isDescendantOf(Object)")).toEqual("Truth")
+            expect(evaluate("Object.isDescendantOf(Class)")).toEqual("Falsity")
+        })
+    })
 });

@@ -23,9 +23,6 @@ Class.set("meta", ClassMeta);
 RObject.set("meta", ObjectMeta);
 ReflexObject.klass = RObject;
 
-RObject.wireClassMethods();
-Class.wireClassMethods()
-
 const RFunction = ReflexClass.make("Function");
 ReflexFunction.klass = RFunction;
 
@@ -47,7 +44,6 @@ objectMethods.set("isInstanceOf", new WrappedFunction(
           let self = machine.boundSelf!
             let isInstance = self.get("class") === klass ||
                 self.get("class").ancestors.find(a => a === klass)
-            log("IS " + self.className + " INSTANCE OF " + klass.name + "??? " + isInstance)
             return !!isInstance
         }
     ))
@@ -68,11 +64,6 @@ classMethods.set("new", new WrappedFunction(
   (machine: Machine, ...args: ReflexObject[]) => makeReflexObject(machine, machine.boundSelf! as ReflexClass, args))
 )
 
-classMethods.set("isAncestorOf", new WrappedFunction(
-  `Class.isAncestorOf`,
-  (machine: Machine, other: ReflexClass) => other.ancestors.find(o => o === machine.boundSelf!)
-));
-
 classMethods.set("defineMethod", new WrappedFunction(`Class.defineMethod`,
   (machine: Machine, name: string, fn: ReflexFunction) => {
     defineInstanceMethod(machine.boundSelf! as ReflexClass, fn, name)
@@ -84,6 +75,11 @@ classMethods.set("defineClassMethod", new WrappedFunction(`Class.defineClassMeth
     defineClassMethod(machine.boundSelf! as ReflexClass, fn, name)
   }
 ))
+
+classMethods.set("isAncestorOf", new WrappedFunction(
+  `Class.isAncestorOf`,
+  (machine: Machine, other: ReflexClass) => !!other.ancestors.find(o => o === machine.boundSelf!)
+));
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>

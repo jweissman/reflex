@@ -4,6 +4,9 @@ import { Code, prettyCode } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
 
  const preamble = `
+class Class {
+    isDescendantOf(other) { other.isAncestorOf(self) }
+};
 nil = Nihil.new();
 class Boolean {
     false() {self.negate(self.true())};

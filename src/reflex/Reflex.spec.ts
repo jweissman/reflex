@@ -138,7 +138,7 @@ describe('Reflex', () => {
             })
 
             // was just a sanity check, can probably remove this
-            xit("dot access never falls back", () => {
+            it("dot access never falls back", () => {
                 evaluate("class Ladder { climb() { Class }}")
                 evaluate("fall=Object")
                 expect(evaluate("Ladder.new().climb()")).toEqual("Class(Class)")
@@ -276,7 +276,7 @@ describe('Reflex', () => {
             })
         })
 
-        xit('local variables', () => {
+        it('local variables', () => {
             evaluate("Obj = Object")
             expect(evaluate("Obj")).toEqual("Class(Object)")
             expect(evaluate("Obj.class")).toEqual("Class(Class)")
