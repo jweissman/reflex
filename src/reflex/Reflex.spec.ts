@@ -1,50 +1,111 @@
-import reflex, { evaluate } from "./SpecHelper"
+import { evaluate } from "./SpecHelper"
 describe('Reflex', () => {
-    describe("concepts", () => {
-        // waiting at least on strings/symbols and equality...
-        describe("message dispatch", () => {
-            test.todo("method_missing")
-            test.todo("responds_to")
+    describe('structures', () => {
+        describe('Boolean', () => {
+            it('is the class of truth-values', () => {
+                expect(evaluate('Boolean')).toEqual("Class(Boolean)")
+            })
+            it('is a class', () => {
+                expect(evaluate('Boolean.class')).toEqual("Class(Class)")
+            })
+            describe('true', () => {
+                it('is a Boolean', () => {
+                    expect(evaluate("true.class")).toEqual("Class(Truth)")
+                    expect(evaluate("true.class.super")).toEqual("Class(Boolean)")
+                })
+                it('has a positive truth-value', () => {
+                    expect(evaluate("true.true()")).toEqual("Truth")
+                    expect(evaluate("true.false()")).toEqual("Falsity")
+                })
+                it('eq itself', () => {
+                    expect(evaluate("true.eq(true)")).toEqual("Truth")
+                })
+                it('neq false', () => {
+                    expect(evaluate("true.eq(false)")).toEqual("Falsity")
+                })
+            })
+            describe('false', () => {
+                it('is a Boolean', () => {
+                    expect(evaluate("false.class")).toEqual("Class(Falsity)")
+                    expect(evaluate("false.class.super")).toEqual("Class(Boolean)")
+                })
+                it('has a negative truth-value', () => {
+                    expect(evaluate("false.true()")).toEqual("Falsity")
+                    expect(evaluate("false.false()")).toEqual("Truth")
+                })
+                it('eq itself', () => {
+                    expect(evaluate("false.eq(false)")).toEqual("Truth")
+                })
+                it('neq true', () => {
+                    expect(evaluate("false.eq(true)")).toEqual("Falsity")
+                })
+            })
         })
+        test.todo('Number')
+        test.todo('Array')
+        test.todo('String')
     })
+
     describe("syntax", () => {
-        it('permits bare args', () => {
-            expect(evaluate("Bar = Class.new 'Bar'")).toEqual("Class(Bar)")
-            expect(evaluate("Baz = Class.new 'Baz', Bar")).toEqual("Class(Baz)")
-            expect(evaluate("Baz.super")).toEqual("Class(Bar)")
+        describe('core', () => {
+            describe('operators', () => {
+                describe('== (eq)', () => {
+                    it('compares truth values', () => {
+                        expect(evaluate("true == true")).toEqual('Truth')
+                        expect(evaluate("true == false")).toEqual('Falsity')
+                        expect(evaluate("false == true")).toEqual('Falsity')
+                        expect(evaluate("false == false")).toEqual('Truth')
+                    })
+                    it('denotes absolute object equality', () => {
+                        evaluate("o = Object.new()")
+                        expect(evaluate("o == Object.new()")).toEqual('Falsity')
+                        expect(evaluate("Object.new() == Object.new()")).toEqual('Falsity')
+                        expect(evaluate("o == o")).toEqual('Truth')
+                    })
+                    xit('denotes absolute class equality', () => {
+                        expect(evaluate("Object == Object")).toEqual('Truth')
+                        expect(evaluate("Object == Class")).toEqual('Falsity')
+                        expect(evaluate("Class == Class")).toEqual('Truth')
+                    })
+                    test.todo("!= (neq)")
+                })
+            })
         })
 
-        it('permits bare params', () => {
-            expect(evaluate("parent=klass=>klass.super")).toMatch("Function")
-            expect(evaluate("parent(Object)")).toMatch("Class(Object)")
-            expect(evaluate("parent(Class.new('Bar', Class.new('Baz')))")).toMatch("Class(Baz)")
-        });
+        describe('sugar', () => {
+            it('permits bare args', () => {
+                expect(evaluate("Bar = Class.new 'Bar'")).toEqual("Class(Bar)")
+                expect(evaluate("Baz = Class.new 'Baz', Bar")).toEqual("Class(Baz)")
+                expect(evaluate("Baz.super")).toEqual("Class(Bar)")
+            })
 
-        it('barecalls fall back to self', () => {
-            evaluate("class Bar{there(){Function}}")
-            evaluate("class Bar{baz(){there()}}")
-            expect(() => evaluate("Bar.new().baz()")).not.toThrow()
-            expect(evaluate("Bar.new().baz()")).toEqual("Class(Function)")
+            it('permits bare params', () => {
+                expect(evaluate("parent=klass=>klass.super")).toMatch("Function")
+                expect(evaluate("parent(Object)")).toMatch("Class(Object)")
+                expect(evaluate("parent(Class.new('Bar', Class.new('Baz')))")).toMatch("Class(Baz)")
+            });
+
+            it('barecalls fall back to self', () => {
+                evaluate("class Bar{there(){Function}}")
+                evaluate("class Bar{baz(){there()}}")
+                expect(() => evaluate("Bar.new().baz()")).not.toThrow()
+                expect(evaluate("Bar.new().baz()")).toEqual("Class(Function)")
+            })
+
+            it('barewords fall back to self', () => {
+                evaluate("class Bar{baz(){self.there=Class; there}}")
+                expect(evaluate("Bar.new().baz()")).toEqual("Class(Class)")
+            })
+
+            // was just a sanity check, can probably remove this
+            it("dot access never falls back", () => {
+                evaluate("class Ladder { climb() { Class }}")
+                evaluate("fall=Object")
+                expect(evaluate("Ladder.new().climb()")).toEqual("Class(Class)")
+                expect(() => evaluate("Ladder.new().fall")).toThrow()
+            })
         })
 
-        it('defines multiple functions in a class stmt', () => {
-            evaluate("class Bar{a(){b()};b(){c()};c(){Class}}");
-            evaluate("bar=Bar.new()");
-            expect(evaluate("bar.a()")).toEqual("Class(Class)")
-        })
-
-        it('barewords fall back to self', () => {
-            evaluate("class Bar{baz(){self.there=Class; there}}")
-            expect(evaluate("Bar.new().baz()")).toEqual("Class(Class)")
-        })
-
-        // was just a sanity check, can probably remove this
-        it("dot access never falls back", () => {
-            evaluate("class Ladder { climb() { Class }}")
-            evaluate("fall=Object")
-            expect(evaluate("Ladder.new().climb()")).toEqual("Class(Class)")
-            expect(()=>evaluate("Ladder.new().fall")).toThrow()
-        })
 
         describe("blocks", () => {
             it('modifies locals', () => {
@@ -140,61 +201,9 @@ describe('Reflex', () => {
             })
         })
 
-        it('invokes parent methods as self', () => {
-            evaluate("class Crying{init(subject) { self.subject = subject }}")
-            evaluate("class Creature {speak() { cry(self) }; cry(subj){Crying.new(subj)}}")
-            evaluate("class Baby < Creature {}")
-            expect(evaluate("Baby.new().speak()")).toEqual("Crying")
-            expect(evaluate("Baby.new().speak().subject")).toEqual("Baby")
-        })
 
-        describe("super", () => {
-            beforeEach(() => {
-                evaluate("class Cries{init(subject) { self.subject = subject }}")
-                evaluate("class Laughs{init(subject) { self.subject = subject }}")
-                evaluate("class Words{}")
-                evaluate("class Melody{}")
-                evaluate("class Animal {speak() { cry(self) }; cry(subj){Cries.new(subj)}}")
-                evaluate("class Person < Animal {speak(){Words.new()}}")
-                evaluate("class Child < Person {speak(){super.super.speak()}}")
-                evaluate("class Bird < Animal {speak(){Melody.new()}}")
-                evaluate("class Flamingo < Bird { speak() {super.super.speak()}}")
-            })
-            it("is the super-instance", () => {
-                expect(evaluate("Bird.new().speak()")).toEqual("Melody")
-                expect(evaluate("Flamingo.new().speak()")).toEqual("Cries")
-                expect(evaluate("Flamingo.new().speak().subject")).toEqual("Flamingo")
-                expect(evaluate("Person.new().speak()")).toEqual("Words")
-                expect(evaluate("Child.new().speak()")).toEqual("Cries")
-                expect(evaluate("Child.new().speak().subject")).toEqual("Child")
-            })
-            it('unfolds and collapses', () => {
-                expect(evaluate("super")).toEqual("Super(Main)")
-                expect(evaluate("super.self")).toEqual("Main")
-                expect(evaluate("super.class")).toEqual("Class(Object)")
-                expect(evaluate("super.super")).toEqual("Super(Super(Main))")
-                expect(evaluate("super.super.class")).toEqual("Class(Object)") // obj is own super...
-                expect(evaluate("super.super.self")).toEqual("Main") // obj is own super...
-            })
-            describe("when called as a fn", () => {
-                test.todo("is the current method's super-method")
-            })
-        })
     })
 
-    describe('structures', () => {
-        xdescribe('Boolean', () => {
-            it('is the class of truth-values', () => {
-                expect(evaluate('Boolean')).toEqual("Class(Boolean)")
-            })
-            it('is a class', () => {
-                expect(evaluate('Boolean.class')).toEqual("Class(Class)")
-            })
-        })
-        test.todo('Number')
-        test.todo('Array')
-        test.todo('String')
-    })
 
     describe('main', () => {
         it('is an object', () => {
@@ -236,8 +245,7 @@ describe('Reflex', () => {
             expect(evaluate("o.class")).toEqual("Class(Object)")
             // they are not defined on main but 'merely' in local scope / frame 
             // (so inherited into child scopes but not living on the object as such...)
-            expect(()=>evaluate("self.o")).toThrow()
+            expect(() => evaluate("self.o")).toThrow()
         })
     })
-
 })

@@ -6,7 +6,20 @@ Reflex {
       = Expr
       
     Expr
-      = SendMessageEq
+      = AlgExpr
+
+    AlgExpr = CmpExpr
+
+    CmpExpr
+      = CmpExpr "==" CmpExpr -- eq
+      | CmpExpr "!=" CmpExpr -- neq
+      | PriExpr
+
+    PriExpr
+      = 
+      // | "(" Expr ")" -- parens
+      // | "!" Expr -- log_not
+      | SendMessageEq
       | SendMessage
       | Defun
       | Defclass

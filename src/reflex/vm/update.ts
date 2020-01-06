@@ -17,6 +17,8 @@ import { sendEq } from './instruction/sendEq';
 import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
 import { Stack } from './Stack';
 import { Frame } from './Frame';
+import Machine from './Machine';
+import { classRegistry } from './types/ReflexClass';
 
 function mark(stack: Stack, value: string) {
     stack.push(new Stone(value));
@@ -33,6 +35,14 @@ function findFrameWithLocal(key: string, frames: Frame[]) {
         }
     }
     return top
+}
+
+export function instantiate(className: string, stack: Stack, frames: Frame[], code: Code, machine: Machine) {
+    // lookup class name, create & push???
+    stack.push(classRegistry[className])
+    stack.push("new" as string)
+    call(stack, frames);
+    invoke(0, false, stack, frames, code, machine);
 }
 
 export function update(state: State, instruction: Instruction, code: Code): State {

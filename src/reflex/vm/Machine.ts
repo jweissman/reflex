@@ -12,6 +12,7 @@ import { trace } from './instruction/trace';
 import { update } from './update';
 import Reflex from '../Reflex';
 import { State } from './State';
+import { ReflexNihil } from './types/ReflexNihil';
 
 export default class Machine {
     stack: Value[] = []
@@ -113,4 +114,8 @@ export default class Machine {
     }
 
     get state(): State { return { stack: this.stack, frames: this.frames, machine: this } }
+
+    boundSelf: ReflexObject | null = null
+    bindSelf(self: ReflexObject) { this.boundSelf = self; }
+    unbindSelf() { this.boundSelf = null; }
 }

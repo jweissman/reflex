@@ -22,6 +22,8 @@ export class ReflexFunction extends ReflexObject {
 
 // a js function
 export class WrappedFunction extends ReflexObject {
+    wrapped = true;
+    boundSelf?: any;
     constructor(public name: string, public impl: Function) {
         super();
     }

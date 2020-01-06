@@ -1,5 +1,6 @@
 import ReflexClass from "./ReflexClass";
-import { debug } from "../util/log";
+import { debug, log } from "../util/log";
+import { WrappedFunction } from "./ReflexFunction";
 
 class MethodMissing extends Error {}
 type Store = {[key: string]: ReflexObject} 
@@ -14,10 +15,14 @@ export default class ReflexObject {
     get superclass(): ReflexClass { return this.klass.get('super') as ReflexClass }
     get eigenclass(): ReflexClass { return this.get('meta') as ReflexClass }
     get ancestors(): ReflexClass[] { return [ this.klass, ...this.klass.ancestors] }
-    get super() {
-        // phantom super instance
-        // throw new Error("ReflexObject#super not impl")
-        return new SuperFacade(this)
+    get super() { return new SuperFacade(this) }
+
+    static count: number = 0;
+    id: number = ReflexObject.count++;
+
+    isEqual(other: ReflexObject): boolean {
+        log("IS EQ: " + other + " / " + this)
+        return this.id === other.id
     }
 
     set(k: string,v: ReflexObject) { this.members[k] = v }
@@ -25,6 +30,8 @@ export default class ReflexObject {
 
     private surroundingObject: ReflexObject | null = null;
     within(obj: ReflexObject) { this.surroundingObject = obj; return this; }
+
+    wrapped: boolean = false;
 
     send(message: string): ReflexObject {
         debug("ReflexObject.send -- " + message + "-- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
@@ -40,17 +47,23 @@ export default class ReflexObject {
         } else if (this.get(message)) {
             // log('msg is raw attribute')
             return this.get(message)
-        } else if (eigen && eigen.get(message)) {
+        } else if (eigen.get(message) || shared.get(message) || (supershared && supershared.get(message))) { //eigen || shared || supershared) { //} && eigen.get(message)) {
+            let source = eigen.get(message) || shared.get(message) || (supershared && supershared.get(message))
+            if (source.wrapped) {
+                let src = source as ReflexObject & { boundSelf: ReflexObject };
+                src.boundSelf = this; // wrapped fns may need a binding back here?
+            }
+            return source //.get(message)
             // log('msg is own eigen attribute')
-            return eigen.get(message)
-        } else if (shared && shared.get(message)) {
-            // log('msg is parent instance_method')
-            return shared.get(message)
-        } else if (supershared && supershared.get(message)) {
-            // log('msg is ancestor instance_method')
-            return supershared.get(message)
+        //     return eigen.get(message)
+        // } else if (shared && shared.get(message)) {
+        //     // log('msg is parent instance_method')
+        //     return shared.get(message)
+        // } else if (supershared && supershared.get(message)) {
+        //     // log('msg is ancestor instance_method')
+        //     return supershared.get(message)
         } else {
-            if (this.surroundingObject) { //} && this.surroundingObject !== this) {
+            if (this.surroundingObject && this.surroundingObject !== this) {
                 // log('trying on surrounding obj')
                 return this.surroundingObject.send(message);
             } else {
@@ -85,7 +98,7 @@ export default class ReflexObject {
             // log('msg is ancestor instance_method')
             return true //supershared.get(message)
         } else {
-            if (this.surroundingObject) { //} && this.surroundingObject !== this) {
+            if (this.surroundingObject && this.surroundingObject !== this) {
                 // log('trying on surrounding obj')
                 return this.surroundingObject.respondsTo(message);
             } else {

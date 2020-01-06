@@ -2,10 +2,13 @@ import ReflexObject from "./ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
 import Machine from "../Machine";
 import { log } from "../util/log";
+// import { log } from "../util/log";
 
 const NATIVE_CLASSES: { [key: string]: any } = {
     "Function": ReflexFunction,
 }
+
+export const classRegistry: { [key: string]: ReflexClass } = {}
 
 export default class ReflexClass extends ReflexObject {
     isClass: boolean = true;
@@ -37,6 +40,7 @@ export default class ReflexClass extends ReflexObject {
     static makeClass(name: string, superclass: ReflexClass = ReflexObject.klass, wireMethods: boolean = true) {
         // log("MAKE CLASS " + name + " SUBCLASS OF " + superclass)
         let klass = new ReflexClass(name);
+        classRegistry[name] = klass;
         klass.set("super", superclass);
         klass.set("class", ReflexClass.klass);
         klass.set("instance_methods", new ReflexObject());
@@ -66,6 +70,18 @@ export default class ReflexClass extends ReflexObject {
             `${name}#instanceEval`,
             (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(proto, machine, fn)
         ));
+        // meta.get("instance_methods").set("eq", new WrappedFunction(
+        //     `${name}#eq`,
+        //     (_machine: Machine, obj: ReflexObject) => ReflexObject.isEqual(obj, proto)
+        // ));
+        meta.get("instance_methods").set("isInstanceOf", new WrappedFunction(
+            `${name}#isInstanceOf`,
+            (_machine: Machine, klass: ReflexClass) => {
+                let isInstance = proto.klass === klass || proto.klass.ancestors.find(a => a === klass)
+                log("IS " + proto.klass.name + " INSTANCE OF " + klass.name + "??? " + isInstance)
+                return !!isInstance
+            }
+        ))
         return meta;
     }
 
@@ -98,6 +114,11 @@ export default class ReflexClass extends ReflexObject {
                 classMethods.set("instanceEval", new WrappedFunction(
                     `${name}.instanceEval`,
                     (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(klass, machine, fn)
+                ));
+                classMethods.set("isAncestorOf", new WrappedFunction(
+                    `${name}.isAncestorOf`,
+                    (_machine: Machine, other: ReflexClass) =>
+                        other.ancestors.find(o => o === klass)
                 ));
             }
         } else {

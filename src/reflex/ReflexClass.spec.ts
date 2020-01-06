@@ -243,6 +243,12 @@ describe('Class', () => {
             expect(evaluate("Bird.foo()")).toEqual("Class(Object)")
             expect(evaluate("Bird.bar()")).toEqual("Class(Class)")
         });
+
+        it('defines multiple functions in a class stmt', () => {
+            evaluate("class Bar{a(){b()};b(){c()};c(){Class}}");
+            evaluate("bar=Bar.new()");
+            expect(evaluate("bar.a()")).toEqual("Class(Class)")
+        })
     })
     
     describe('super', () => {

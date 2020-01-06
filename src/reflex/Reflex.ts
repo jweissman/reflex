@@ -5,6 +5,20 @@ import { Configuration } from "./Configuration";
 
  const preamble = `
 nil = Nihil.new();
+class Boolean {
+    false() {self.negate(self.true())};
+    eq(other) { self.isInstanceOf(other.class)};
+};
+class Truth < Boolean {
+    true() { Truth.new() };
+    negate() { Falsity.new() };
+};
+class Falsity < Boolean {
+    true() { Falsity.new() };
+    negate() { Truth.new() };
+};
+true = Truth.new();
+false = Falsity.new();
 `;
 
 export default class Reflex {
