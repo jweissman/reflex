@@ -50,6 +50,7 @@ Interacts via messages dispatched through its native `send` method.
 Objects have members whose values are other objects and which are distinguished by their attribute names.
 By default object member attributes are readonly. That is, objects accept raw attribute writes only when the context is self (e.g., when inside an instance method).
 Instance methods are distinguished function-valued members of an object which are inherited.
+
 Object instances can be created by calling the `new` method on an instance of `Class`.
 
 ```
@@ -58,15 +59,20 @@ o.inspect() // => "Object"
 ```
 
 ### Class
-Every entity in the system also has a `Class`, which has a member `super` that is its parent class. The root of every object's ancestor chain is `Class(Object)`.
+Every entity in the system also has a `Class`, which has a member `super` that is its parent class.
+The root of every object's ancestor chain is `Class(Object)`.
+
 Classes have a `new` function which generates a new object, although note that the `new` method for Class itself can be used to create a new class.
 
+Since classes are themselves objects, they may respond to messages. Their instance methods are sometimes called "class methods" to distinguish them from the `instance_methods` member on class objects which specifies the shared implementations of methods on instances of a class.
+
 ### Metaclass
-A special kind of class is a `Metaclass`, meaning an object that hold information about another class;
-in particular, metaclasses carry details about the class method (instance methods 'of' classes). 
+A special kind of class is a `Metaclass`, meaning an object that holds onto information about another class.
+In general metaclasses carry the details about class methods (instance methods of the class).
+The singleton metaclass of an object is likewise a class that holds instance methods defined on that object "exactly".
+
 The metaclass is accessible on a class object through the member `meta`.
-The metaclass of an object is likewise a singleton class that holds instance methods defined
-exactly on that object, accessible via `meta` as well.
+Eigenobjects are also accessible via `meta` on object instances.
 
 ### Function
 A `Function` is a callable entity that can wrap a raw JS function or have a Reflex implementation.
@@ -106,7 +112,7 @@ methods on the object and then on parents/ancestors.
 Symbols may be provided as block references (`arr.map(&:to_s)`) to permit tacit programming.
 
 ### First-class Functions
-Any function you can invoke, you should be able to pass it around as an object in the system.
+Any function you can invoke, you should be able to pass around as an object in the system.
 Functions can be turned into blocks, and methods receiving blocks can treat those blocks like functions
 (as well as `yield`ing to them.)
 Functions are created as the interpreter encounters them; their AST representation is in the bytecode the VM executes.

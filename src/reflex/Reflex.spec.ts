@@ -200,19 +200,32 @@ describe('Reflex', () => {
         it('is an object', () => {
             expect(evaluate("self")).toEqual("Main")
         })
-        it('has a class', () => {
-            expect(evaluate("Main")).toEqual("Class(Main)")
+        it('has class', () => {
+            expect(evaluate("class")).toEqual("Class(Main)")
         })
-        it('has a class that is a class', () => {
-            expect(evaluate("Main.class")).toEqual("Class(Class)")
+        it('has eigenobj', () => {
+            expect(evaluate("meta")).toEqual("Class(Meta(Main instance))")
         })
-        it('descends from object', () => {
-            expect(evaluate("Main.super")).toEqual("Class(Object)")
-        })
-        it('has metaclass', () => {
-            expect(evaluate("Main.meta")).toEqual("Class(Meta(Main))")
+        it('has super facade', () => {
+            expect(evaluate("super")).toEqual("Super(Main)")
+            expect(evaluate("super.class")).toEqual("Class(Object)")
         })
 
+
+        describe('Main', () => {
+            it('has a class', () => {
+                expect(evaluate("Main")).toEqual("Class(Main)")
+            })
+            it('has a class that is a class', () => {
+                expect(evaluate("Main.class")).toEqual("Class(Class)")
+            })
+            it('descends from object', () => {
+                expect(evaluate("Main.super")).toEqual("Class(Object)")
+            })
+            it('has metaclass', () => {
+                expect(evaluate("Main.meta")).toEqual("Class(Meta(Main))")
+            })
+        })
 
         it('local variables', () => {
             evaluate("Obj = Object")
