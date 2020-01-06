@@ -107,7 +107,14 @@ export const makeReflexObject = (machine: Machine, klass: ReflexClass, args: Ref
         let init = mu.send('init');
         if (init instanceof ReflexFunction) {
             init.frame.self = mu;
+            // init.bind(mu)
+            log("DO INVOKE INIT " + init + " WITH ARGS: " + args)
+            // if (args.length) {
             machine.doInvoke(mu, init, ...args)
+            // }
+            // else {
+                // machine.doInvoke(mu, init) //, ...args)
+            // }
         }
     }
     return mu
@@ -139,9 +146,10 @@ export const defineClassMethod = (klass: ReflexClass, fn: ReflexFunction, name: 
     let meta = klass.get("meta")
     if (meta) {
         fn.name = `${klass.name}.${name}`
-        let methods = klass.get("meta").get("instance_methods") || new ReflexObject();
-        methods.set(name, fn);
-        klass.get("meta").set("instance_methods", methods)
+        klass.eigenclass.get("instance_methods").set(name, fn);
+        // let methods = klass.get("meta").get("instance_methods") || new ReflexObject();
+        // methods.set(name, fn);
+        // klass.get("meta").set("instance_methods", methods)
     } else {
         throw new Error("undefined meta at class method def")
     }
@@ -159,29 +167,25 @@ export const makeMetaclass = (proto: ReflexObject) => {
 }
 
 export const wireClassMethods = (klass: ReflexClass) => {
-    let name = klass.name;
-    let meta = klass.eigenclass;
-    let newFn: Function = (machine: Machine, ...args: ReflexObject[]) => makeReflexObject(machine, klass, args);
-    if (name === 'Class') {
-        newFn = (_machine: Machine, name: string, customSuper?: ReflexClass) =>
-            ReflexClass.make(
-                name || 'Anonymous',
-                customSuper || ReflexObject.klass
-            );
-    }
-    if (meta) {
-        let classMethods = meta.get("instance_methods");
-        if (classMethods.get("new")) {
-            // log("WARNING: not overriding .new, already existed on... " + meta)
-        } else {
-            classMethods.set("new", new WrappedFunction(name + '.new', newFn));
-            // classMethods.set("defineClassMethod", new WrappedFunction(`${name}.defineClassMethod`,
-            //     (_machine: Machine, name: string, fn: ReflexFunction) =>
-            //         defineClassMethod(klass, fn, name)
-            // ));
-        }
-    } else {
-        throw new Error("No meta at wire instance methods for " + name + " (super is " + klass.superclass + ")")
-    }
+    //let name = klass.name;
+    //let meta = klass.eigenclass;
+    //let newFn: Function = (machine: Machine, ...args: ReflexObject[]) => makeReflexObject(machine, klass, args);
+    //if (name === 'Class') {
+    //    newFn = (_machine: Machine, name: string, customSuper?: ReflexClass) =>
+    //        ReflexClass.make(
+    //            name || 'Anonymous',
+    //            customSuper || ReflexObject.klass
+    //        );
+    //}
+    //if (meta) {
+    //    let classMethods = meta.get("instance_methods");
+    //    if (classMethods.get("new")) {
+    //        // log("WARNING: not overriding .new, already existed on... " + meta)
+    //    } else {
+    //        classMethods.set("new", new WrappedFunction(name + '.new', newFn))
+    //    }
+    //} else {
+    //    throw new Error("No meta at wire instance methods for " + name + " (super is " + klass.superclass + ")")
+    //}
 }
 

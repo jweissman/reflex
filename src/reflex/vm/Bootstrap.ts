@@ -52,7 +52,22 @@ objectMethods.set("isInstanceOf", new WrappedFunction(
         }
     ))
 
+let metaclassMethods = ClassMeta.get("instance_methods")
+metaclassMethods.set("new", new WrappedFunction(
+  `Meta(Class).new`,
+  (_machine: Machine, name: string, customSuper?: ReflexClass) =>
+    ReflexClass.make(
+      name || 'Anonymous',
+      customSuper || ReflexObject.klass
+    )
+))
+
 let classMethods = Class.get("instance_methods")
+classMethods.set("new", new WrappedFunction(
+  `Class.new`,
+  (machine: Machine, ...args: ReflexObject[]) => makeReflexObject(machine, machine.boundSelf! as ReflexClass, args))
+)
+
 classMethods.set("isAncestorOf", new WrappedFunction(
   `Class.isAncestorOf`,
   (machine: Machine, other: ReflexClass) => other.ancestors.find(o => o === machine.boundSelf!)
@@ -71,16 +86,8 @@ classMethods.set("defineClassMethod", new WrappedFunction(`Class.defineClassMeth
 ))
 
 let Main = ReflexClass.make("Main")
-const constructMain = (machine: Machine) => {
-  let main = makeReflexObject(machine, Main, [])
-  // Main.set("instance", main); //.set("instance")
-  // main.set("defineMethod", new WrappedFunction(`main.defineMethod`,
-  //   (_machine: Machine, name: string, fn: ReflexFunction) => {
-  //     defineInstanceMethod(main.eigenclass, fn, name)
-  //   }
-  // ))
-  return main;
-}
+const constructMain = (machine: Machine) =>
+  makeReflexObject(machine, Main, [])
 
 export const bootLocals = {
   Object: RObject,
