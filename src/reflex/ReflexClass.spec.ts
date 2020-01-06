@@ -394,10 +394,11 @@ describe('Class', () => {
             expect(evaluate("Function.meta.instanceEval { self }")).toEqual("Class(Meta(Function))")
         })
         
-        xit('defines wrappers around instanceEval', () => {
-            evaluate("class Class { auto(&b) { meta.instanceEval(b) }}")
-            evaluate("class Roll { self.auto { barrel() { Class }}}")
+        it('defines wrappers around instanceEval', () => {
+            evaluate("class Class { auto(&b) { meta.instanceEval(b) }} ")
+            evaluate("class Roll { auto { barrel() { Class }}}")
             expect(evaluate("Roll.barrel()")).toEqual("Class(Class)")
+            expect(()=>evaluate("Class.barrel()")).toThrow()
             // maybe it needs an antonym
             evaluate("class Metaclass { allo(&b) { pre.instanceEval(b) }}")
             expect(evaluate("Roll.meta.allo { self }")).toEqual("Class(Roll)")

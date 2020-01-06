@@ -125,8 +125,11 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             } else if (v === 'super') {
                 stack.push(frame.self.super)
             } else {
-                let dispatched = frame.self.send(value as string)
-                stack.push(dispatched);
+                // let dispatched = frame.self.send(value as string)
+                // stack.push(dispatched);
+                stack.push(frame.self)
+                stack.push(value as string)
+                call(stack, frames)
             }
             break;
         case 'invoke_block':
