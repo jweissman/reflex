@@ -2,9 +2,11 @@ import ReflexObject from "./ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./ReflexFunction";
 import Machine from "../Machine";
 import { log } from "../util/log";
+import { ReflexNumber } from "../ReflexNumber";
 
 const NATIVE_CLASSES: { [key: string]: any } = {
     "Function": ReflexFunction,
+    "Number": ReflexNumber,
 }
 
 export const classRegistry: { [key: string]: ReflexClass } = {}
@@ -89,7 +91,8 @@ export const makeReflexObject = (machine: Machine, klass: ReflexClass, args: Ref
     let mu = new ReflexObject()
     if (Object.keys(NATIVE_CLASSES).includes(klass.name)) {
         let Klass = NATIVE_CLASSES[klass.name];
-        mu = args[0] || new Klass();
+        if (args[0] instanceof Klass) { mu = args[0]; }
+        else { mu = new Klass(...args); }
         mu.set("class", Klass.klass);
     } else {
         mu.set("class", klass);

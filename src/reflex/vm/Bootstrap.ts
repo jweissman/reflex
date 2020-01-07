@@ -4,6 +4,7 @@ import { ReflexFunction, WrappedFunction } from "./types/ReflexFunction";
 import { ReflexNihil } from "./types/ReflexNihil";
 import Machine from "./Machine";
 import { log } from "./util/log";
+import { ReflexNumber } from "./ReflexNumber";
 
 const Class = ReflexClass.klass;
 Class.set("class", Class);
@@ -28,6 +29,19 @@ ReflexFunction.klass = RFunction;
 
 const Nihil = ReflexClass.make("Nihil");
 ReflexNihil.klass = Nihil;
+
+const RNumber = ReflexClass.make("Number");
+ReflexNumber.klass = RNumber;
+let numberMethods = RNumber.get("instance_methods");
+numberMethods.set("add", new WrappedFunction("Number.add",
+  (machine: Machine, other: ReflexNumber) => {
+    let left =  (machine.boundSelf! as ReflexNumber).value 
+    let right =  other.value
+    let result = left + right;
+    log("Number.add res="+ result + " left="+ left + " right="+ right)
+    return makeReflexObject(machine, RNumber, [result as unknown as ReflexObject]);
+  }
+))
 
 // 
 let objectMethods = RObject.get("instance_methods")

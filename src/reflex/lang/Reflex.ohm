@@ -35,11 +35,12 @@ Reflex {
       | SendMessage
 	    | CondExpr
 	    | Defun
-      | StringLit
       | FunctionLit
 	    | "(" Expr ")" -- parens
       | Barecall
       | Bareword
+      | NumberLit
+      | StringLit
       
     CondTernary
       = Expr "?" Expr ":" Expr
@@ -104,7 +105,7 @@ Reflex {
       | Message "=" Expr -- local
 
     SendMessage
-      = (SendMessage | Funcall | Bareword) "." Message Arguments -- call
+      = Receiver "." Message Arguments -- call
       | Receiver "." Message -- attr
 
     Funcall
@@ -118,6 +119,12 @@ Reflex {
       | Funcall
       | SendMessage
       | Bareword
+      | StringLit
+      | FunctionLit
+	    //| "(" Expr ")" -- parens
+      | Barecall
+      | Bareword
+      | NumberLit
 
     Message
       = ~Keyword ident
@@ -178,6 +185,9 @@ Reflex {
       = Params "=>" Block
       | Params "=>" Expr
     
+    NumberLit
+      = digit+
+    
     StringLit
       = "'" #singleStringCharacter* "'"
       | "\"" #doubleStringCharacter* "\""
@@ -212,7 +222,7 @@ Reflex {
       = "\n"
       | "\r"
   
-      whitespace = #" " | " " | "\t"
+    whitespace = #" " | " " | "\t"
       
       
     

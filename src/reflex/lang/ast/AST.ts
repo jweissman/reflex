@@ -17,42 +17,21 @@ import { PipedBlock } from "./PipedBlock";
 import { Arguments, Argument } from "./Arguments";
 import { Parameter } from "./Parameter";
 import { Compare } from "./Compare";
+import { Conditional } from "./Conditional";
 import { Code } from "../../vm/instruction/Instruction";
 
-type ConditionConjunction = 'if' | 'unless'
-class Conditional extends Tree {
-  static count: number = 0;
-  constructor(public conj: ConditionConjunction, public test: Tree, public left: Tree, public right: Tree) {
-    super();
-  }
+class NumberLiteral extends Tree {
+  constructor(public value: number) { super(); }
   inspect(): string {
-    return `${this.conj} ${this.test.inspect()} ${this.left.inspect()} else ${this.right.inspect()}`
+    return this.value.toString();
   }
   get code(): Code {
-    let name = `cond-${Conditional.count++}`
-    let prefix = (msg: string) => `${name}-${msg}`
-    let labelTest = prefix('test')
-    let labelLeft = prefix('left')
-    let labelRight = prefix('right')
-    let labelDone = prefix('done')
-    let conjunct: Code = this.conj === 'unless' ? [['dispatch', 'negate']] : []
     return [
-      ['jump', labelTest],
-      ['label', labelLeft],
-      ...this.left.code,
-      ['jump', labelDone],
-      ['label', labelRight],
-      ...this.right.code,
-      ['jump', labelDone],
-      ['label', labelTest],
-      ...this.test.code,
-      ...conjunct,
-      ['jump_if', labelLeft],
-      ['jump', labelRight],
-      ['label', labelDone],
-
+      [ 'push', this.value ],
+      [ 'local_var_get', 'Number'],
+      [ 'dispatch', 'new' ],
     ]
-    // throw new Error("Conditional.code -- Method not implemented.");
+    // throw new Error("NumberLiteral.code -- Method not implemented.");
   }
 }
 
@@ -99,7 +78,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
   Param: (parameter: Node) => {
     if (parameter.tree instanceof Bareword) {
-      return new Parameter((parameter.tree as Bareword).word)
+      return new Parameter(parameter.tree.word)
     } else if (parameter.tree instanceof Parameter) {
       return parameter.tree;
     } else {
@@ -117,11 +96,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Bareword: (word: Node) => new Bareword(word.sourceString),
   Barecall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
   PriExpr_parens: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
-
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),
   CmpExpr_neq: (left: Node, _eq: Node, right: Node) => new Compare('!=', left.tree, right.tree),
-
-  // = Conj Condition Then? CondBlock Else CondBlock -- conjElse
   CondStmt_ifThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
     new Conditional('if', cond.tree, left.tree, right.tree),
   CondTernary: (cond: Node, _q: Node, left: Node, _colon: Node, right: Node) =>
@@ -136,21 +112,18 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Conditional('if', cond.tree, left.tree, right.tree),
   CondParticle_unlessElse: (left: Node, _unless: Node, cond: Node, _else: Node, right: Node) =>
     new Conditional('unless', cond.tree, left.tree, right.tree),
-  // no particulate unless-else, i think it's confusing? but maybe it should be there just so it doesn't parse REALLY wrong?
   CondStmt_unlessThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
     new Conditional('unless', cond.tree, left.tree, right.tree),
   CondStmt_unlessThen: (_unless: Node, cond: Node, _then: Node, left: Node) =>
-    new Conditional('unless', cond.tree, left.tree, new Bareword('nil')), //right.tree),
-  // If: (_if: Node) => 'if',
-
+    new Conditional('unless', cond.tree, left.tree, new Bareword('nil')),
   BoolExpr_bool_or: (left: Node, _or: Node, right: Node) =>
     new Conditional('if', left.tree, left.tree, right.tree),
   BoolExpr_bool_and: (left: Node, _or: Node, right: Node) =>
-    new Conditional('if', left.tree, right.tree, new Bareword('false')), //right.tree),
-
+    new Conditional('if', left.tree, right.tree, new Bareword('false')),
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),
+  NumberLit: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),
   EmptyListOf: () => new Sequence([]),
 }

@@ -6,6 +6,7 @@ import { Configuration } from "./Configuration";
 const preamble = `
 class Class { isDescendantOf(other) { other.isAncestorOf(self) } };
 nil = Nihil.new();
+
 /***
  * Boolean
  * 
@@ -21,6 +22,14 @@ class Truth < Boolean { true() { true }; negate() { false }; };
 class Falsity < Boolean { true() { false }; negate() { true }; };
 true = Truth.new();
 false = Falsity.new();
+
+/********************************
+ * Number
+ * 
+ * The class of numeric values
+ */
+class Number {}
+
 // wire up main so it can define instance methods on itself...
 self.defineMethod = meta.defineMethod
 `;

@@ -1,57 +1,24 @@
 import { evaluate } from "./SpecHelper"
 describe('Reflex', () => {
     describe('structures', () => {
-        describe('Boolean', () => {
-            it('is the class of truth-values', () => {
-                expect(evaluate('Boolean')).toEqual("Class(Boolean)")
+        describe('Number', () => {
+            it('is the class of numeric values', () => {
+                expect(evaluate("Number")).toEqual("Class(Number)")
+                expect(evaluate("Number.class")).toEqual("Class(Class)")
             })
-            it('is a class', () => {
-                expect(evaluate('Boolean.class')).toEqual("Class(Class)")
-            })
-            describe('Truth', () => {
-                it('descends from boolean', () => expect(evaluate('Truth.isDescendantOf(Boolean)')).toEqual('Truth'))
-            })
-            describe('Falsity', () => {
-                it('descends from boolean', () => expect(evaluate('Falsity.isDescendantOf(Boolean)')).toEqual('Truth'))
-            })
-            describe('true', () => {
-                it('is a Boolean', () => {
-                    expect(evaluate("true.class")).toEqual("Class(Truth)")
-                    expect(evaluate("true.class.super")).toEqual("Class(Boolean)")
+            describe('zero', () => {
+                it('is a number', () => {
+                    expect(evaluate("0")).toEqual("0")
+                    expect(evaluate("0.class")).toEqual("Class(Number)")
                 })
-                it('has a positive truth-value', () => {
-                    expect(evaluate("true.true()")).toEqual("Truth")
-                    expect(evaluate("true.false()")).toEqual("Falsity")
-                })
-                it('eq itself', () => {
-                    expect(evaluate("true.eq(true)")).toEqual("Truth")
-                    expect(evaluate("true.eq(false)")).toEqual("Falsity")
-                })
-                it('neq false', () => {
-                    expect(evaluate("true.neq(true)")).toEqual("Falsity")
-                    expect(evaluate("true.neq(false)")).toEqual("Truth")
-                })
-            })
-            describe('false', () => {
-                it('is a Boolean', () => {
-                    expect(evaluate("false.class")).toEqual("Class(Falsity)")
-                    expect(evaluate("false.class.super")).toEqual("Class(Boolean)")
-                })
-                it('has a negative truth-value', () => {
-                    expect(evaluate("false.true()")).toEqual("Falsity")
-                    expect(evaluate("false.false()")).toEqual("Truth")
-                })
-                it('eq itself', () => {
-                    expect(evaluate("false.eq(false)")).toEqual("Truth")
-                    expect(evaluate("false.eq(true)")).toEqual("Falsity")
-                })
-                it('neq true', () => {
-                    expect(evaluate("false.neq(true)")).toEqual("Truth")
-                    expect(evaluate("false.neq(false)")).toEqual("Falsity")
+                it('is an additive identity', () => {
+                    expect(evaluate("0.add(0)")).toEqual("0")
+                    expect(evaluate("1.add(0)")).toEqual("1")
+                    expect(evaluate("2.add(0)")).toEqual("2")
+                    expect(evaluate("2.add(0).add(0).add(0)")).toEqual("2")
                 })
             })
         })
-        test.todo('Number')
         test.todo('Array')
         test.todo('String')
     })
@@ -124,9 +91,11 @@ describe('Reflex', () => {
                         })
                         it('short-circuits', () => {
                             evaluate('x=nil')
-                            evaluate('never=()=>x=Object.new()')
-                            expect(evaluate("true || never()")).toEqual("Truth")
+                            evaluate('assign=->{x=Object.new();true}')
+                            expect(evaluate("true || assign()")).toEqual("Truth")
                             expect(evaluate("x")).toEqual("Nihil")
+                            expect(evaluate("false || false || assign()")).toEqual("Truth")
+                            expect(evaluate("x")).toEqual("Object")
                         })
                     })
                     describe('boolean and', () => {
@@ -139,9 +108,11 @@ describe('Reflex', () => {
                         })
                         it('short-circuits', () => {
                             evaluate('x=nil')
-                            evaluate('never=()=>x=Object.new()')
-                            expect(evaluate("false && never()")).toEqual("Falsity")
+                            evaluate('assign=()=>{x=Object.new(); true}')
+                            expect(evaluate("false && assign()")).toEqual("Falsity")
                             expect(evaluate("x")).toEqual("Nihil")
+                            expect(evaluate("true && true && true && assign()")).toEqual("Truth")
+                            expect(evaluate("x")).toEqual("Object")
                         })
                     })
                 })
@@ -317,8 +288,6 @@ describe('Reflex', () => {
                 })
             })
         })
-
-
     })
 
 
