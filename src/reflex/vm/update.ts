@@ -58,7 +58,8 @@ function findFrameWithLocal(key: string, frames: Frame[]) {
     return top
 }
 
-export function instantiate(className: string, stack: Stack, frames: Frame[], code: Code, machine: Machine) {
+export function instantiate(className: string, args: ReflexObject[], stack: Stack, frames: Frame[], code: Code, machine: Machine) {
+    args.forEach(arg => { stack.push(arg)})
     // lookup class name, create & push???
     stack.push(classRegistry[className])
     stack.push("new" as string)

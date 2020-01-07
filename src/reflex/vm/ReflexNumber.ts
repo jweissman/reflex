@@ -1,5 +1,6 @@
 import ReflexObject from "./types/ReflexObject";
 export class ReflexNumber extends ReflexObject {
+    name = 'Number';
   constructor(public value: number) {
     super();
   }

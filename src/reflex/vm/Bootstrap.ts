@@ -30,7 +30,7 @@ ReflexFunction.klass = RFunction;
 const Nihil = ReflexClass.make("Nihil");
 ReflexNihil.klass = Nihil;
 
-const RNumber = ReflexClass.make("Number");
+export const RNumber = ReflexClass.make("Number");
 ReflexNumber.klass = RNumber;
 let numberMethods = RNumber.get("instance_methods");
 numberMethods.set("add", new WrappedFunction("Number.add",
@@ -39,7 +39,18 @@ numberMethods.set("add", new WrappedFunction("Number.add",
     let right =  other.value
     let result = left + right;
     log("Number.add res="+ result + " left="+ left + " right="+ right)
-    return makeReflexObject(machine, RNumber, [result as unknown as ReflexObject]);
+    return result
+    // return makeReflexObject(machine, RNumber, [result as unknown as ReflexObject]);
+  }
+))
+numberMethods.set("eq", new WrappedFunction("Number.eq",
+  (machine: Machine, other: ReflexNumber) => {
+    let left =  (machine.boundSelf! as ReflexNumber).value 
+    let right =  other.value
+    let result = left === right;
+    log("Number.eq res="+ result + " left="+ left + " right="+ right)
+    return result
+    // return makeReflexObject(machine, RNumber, [result as unknown as ReflexObject]);
   }
 ))
 
@@ -77,19 +88,16 @@ classMethods.set("new", new WrappedFunction(
   `Class.new`,
   (machine: Machine, ...args: ReflexObject[]) => makeReflexObject(machine, machine.boundSelf! as ReflexClass, args))
 )
-
 classMethods.set("defineMethod", new WrappedFunction(`Class.defineMethod`,
   (machine: Machine, name: string, fn: ReflexFunction) => {
     defineInstanceMethod(machine.boundSelf! as ReflexClass, fn, name)
   }
 ));
-
 classMethods.set("defineClassMethod", new WrappedFunction(`Class.defineClassMethod`,
   (machine: Machine, name: string, fn: ReflexFunction) => {
     defineClassMethod(machine.boundSelf! as ReflexClass, fn, name)
   }
 ))
-
 classMethods.set("isAncestorOf", new WrappedFunction(
   `Class.isAncestorOf`,
   (machine: Machine, other: ReflexClass) => !!other.ancestors.find(o => o === machine.boundSelf!)

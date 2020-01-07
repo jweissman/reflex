@@ -13,6 +13,8 @@ import { ReflexNihil } from "../types/ReflexNihil";
 import { instantiate, getLocal } from "../update";
 import { log } from "../util/log";
 import { dump } from "../util/dump";
+import { RNumber } from "../Bootstrap";
+import { ReflexNumber } from "../ReflexNumber";
 // import { log, dump } from "../util";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
@@ -94,7 +96,8 @@ export function invoke(
     let args = [];
     for (let i = 0; i < arity; i++) {
         let newTop = stack[stack.length - 1];
-        args.push(newTop);
+        // could try to convert for it??
+        args.push(newTop) // instanceof ReflexNumber ? newTop.value : newTop);
         pop(stack);
     }
     if (top instanceof WrappedFunction) {
@@ -106,7 +109,11 @@ export function invoke(
         }
         let result = top.impl(machine, ...args);
         if (result !== undefined) {
-            if (result === true || result === false) {
+            if (typeof result === "number") {
+                stack.push(
+                    makeReflexObject(machine, RNumber, [result as unknown as ReflexObject])
+                )
+            } else if (result === true || result === false) {
                 let varName = result ? 'true' : 'false'
                 stack.push(getLocal(varName, frames))
             } else {

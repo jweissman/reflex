@@ -17,6 +17,16 @@ describe('Reflex', () => {
                     expect(evaluate("2.add(0)")).toEqual("2")
                     expect(evaluate("2.add(0).add(0).add(0)")).toEqual("2")
                 })
+                it('eq itself', () => {
+                    expect(evaluate("0.eq(0)")).toEqual("Truth")
+                    expect(evaluate("0.eq(1)")).toEqual("Falsity")
+                })
+                it('can tautology', () => {
+                    expect(evaluate("2.add(2).eq(4)")).toEqual("Truth")
+                    expect(evaluate("2.add(2).eq(5)")).toEqual("Falsity")
+                    expect(evaluate("1.add(2).add(3).add(4).eq(10)")).toEqual("Truth")
+                    expect(evaluate("1.add(2).add(3).add(4).eq(11)")).toEqual("Falsity")
+                })
             })
         })
         test.todo('Array')

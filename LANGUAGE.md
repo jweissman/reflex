@@ -85,8 +85,17 @@ h(){}       // define an instance method h
 ```
 
 ### Nihil
-`nil` is the object of class Nihil.
+`nil` is the object of class `Nihil`.
 It is the (implicit) return value of empty functions, and the piped value of an exhausted generator.
+
+### Boolean
+`Boolean` is the class of truth-values.
+There are two members, `true` and `false`.
+Booleans respond to methods `true()`, `false()` and `negate()`.
+
+### Number
+`Number` is the class of numeric values.
+
 ## Syntax
 ### self and super
 A bare `self` is a references to the current context's object. 
