@@ -20,22 +20,22 @@ import { Code } from "../../vm/instruction/Instruction";
 
 const self = new Bareword('self')
 
-type Comparator = '=='
+type Comparator = '==' | '!='
 class Compare extends Tree {
   constructor(public op: Comparator, public left: Tree, public right: Tree) { super();}
   inspect(): string {
     return [this.left.inspect(), this.op, this.right.inspect()].join()
   }
   get code(): Code {
+    let ops: { [key in Comparator]: string } = { '==': 'eq', '!=': 'neq' }
     return [
       ...this.left.code,
       ...this.right.code,
-      ['push', 'eq'],
+      ['push', ops[this.op]],
       ['call', null],
       ['invoke', 1],
     ]
   }
-  // why isn't [push, message], [send] -- the same as call??
 }
 
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
@@ -98,6 +98,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Barecall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
 
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),
+  CmpExpr_neq: (left: Node, _eq: Node, right: Node) => new Compare('!=', left.tree, right.tree),
 
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),

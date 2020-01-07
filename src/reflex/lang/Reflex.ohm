@@ -3,7 +3,8 @@ Reflex {
       = ListOf<Stmt, delim*> delim*
     
     Stmt
-      = Expr
+      = Defclass
+      | Expr
       
     Expr
       = AlgExpr
@@ -17,22 +18,17 @@ Reflex {
 
     PriExpr
       = 
-      
-     // | "!" Expr -- log_not
       | CondExpr
       | SendMessageEq
       | SendMessage
-      
-      
-      | Defclass
+      // | Defclass
       | Defun
-     
       | StringLit
       | FunctionLit
-     | "(" Expr ")" -- parens
-     
-     | Barecall
-     | Bareword
+      | "(" Expr ")" -- parens
+      // | "!" Expr -- log_not
+      | Barecall
+      | Bareword
       
     CondExpr
       = CondStmt

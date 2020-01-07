@@ -25,9 +25,11 @@ describe('Reflex', () => {
                 })
                 it('eq itself', () => {
                     expect(evaluate("true.eq(true)")).toEqual("Truth")
+                    expect(evaluate("true.eq(false)")).toEqual("Falsity")
                 })
                 it('neq false', () => {
-                    expect(evaluate("true.eq(false)")).toEqual("Falsity")
+                    expect(evaluate("true.neq(true)")).toEqual("Falsity")
+                    expect(evaluate("true.neq(false)")).toEqual("Truth")
                 })
             })
             describe('false', () => {
@@ -41,9 +43,11 @@ describe('Reflex', () => {
                 })
                 it('eq itself', () => {
                     expect(evaluate("false.eq(false)")).toEqual("Truth")
+                    expect(evaluate("false.eq(true)")).toEqual("Falsity")
                 })
                 it('neq true', () => {
-                    expect(evaluate("false.eq(true)")).toEqual("Falsity")
+                    expect(evaluate("false.neq(true)")).toEqual("Truth")
+                    expect(evaluate("false.neq(false)")).toEqual("Falsity")
                 })
             })
         })
@@ -113,7 +117,26 @@ describe('Reflex', () => {
                         expect(evaluate("Object == Class")).toEqual('Falsity')
                         expect(evaluate("Class == Class")).toEqual('Truth')
                     })
-                    test.todo("!= (neq)")
+                })
+
+                describe("!= (neq)", () => {
+                    it('distinguishes truth values', () => {
+                        expect(evaluate("true != true")).toEqual('Falsity')
+                        expect(evaluate("true != false")).toEqual('Truth')
+                        expect(evaluate("false != true")).toEqual('Truth')
+                        expect(evaluate("false != false")).toEqual('Falsity')
+                    })
+                    xit('distinguishes objects absolutely', () => {
+                        evaluate("o = Object.new()")
+                        expect(evaluate("o != Object.new()")).toEqual('Truth')
+                        expect(evaluate("Object.new() != Object.new()")).toEqual('Truth')
+                        expect(evaluate("o != o")).toEqual('Falsity')
+                    })
+                    xit('distinguishes classes absolutely', () => {
+                        expect(evaluate("Object != Object")).toEqual('Truth')
+                        expect(evaluate("Object != Class")).toEqual('Falsity')
+                        expect(evaluate("Class != Class")).toEqual('Truth')
+                    })
                 })
             })
         })

@@ -15,6 +15,7 @@ class Boolean {
     true() { self };
     false() { self.negate(self.true()) };
     eq(other) { self.isInstanceOf(other.class) };
+    neq(other) { self.eq(other).negate() };
 };
 class Truth < Boolean { negate() { Falsity.new() }; };
 class Falsity < Boolean { negate() { Truth.new() }; };
