@@ -124,6 +124,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   // = Conj Condition Then? CondBlock Else CondBlock -- conjElse
   CondStmt_ifThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
     new Conditional('if', cond.tree, left.tree, right.tree),
+  CondTernary: (cond: Node, _q: Node, left: Node, _colon: Node, right: Node) =>
+    new Conditional('if', cond.tree, left.tree, right.tree),
   CondStmt_ifThen: (_if: Node, cond: Node, _then: Node, left: Node) =>
     new Conditional('if', cond.tree, left.tree, new Bareword('nil')),
   CondParticle_if: (left: Node, _if: Node, cond: Node) =>

@@ -352,3 +352,16 @@ Hologram -- transparent proxy ('thinks' it is the object? -- 'pass through' mirr
 
    -- the idea is that when we call a method on an image, we are calling methods on the underlying class,
      but from the perspective of the image,
+
+-- (super facade could be a mirror image/hologram?? i guess it would need to be a hologram)
+
+// archetype Archetype {}
+
+self.defineArchetype('class') { |name, superclass, block|
+  klass = Class.new(name, superclass)
+  klass.defineMethod(:_setup,&block)
+  klass._setup()
+  klass
+}
+
+class Bar {...}

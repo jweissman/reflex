@@ -3,13 +3,22 @@ Reflex {
       = ListOf<Stmt, delim*> delim*
     
     Stmt
-      = Defclass
+      =
       | Expr
       
-    Expr
-      = AlgExpr
+    Expr =
+      | CondTernary
+      //| Expr "?" Stmt ":" Stmt -- tern
+	  | SendMessageEq
+	  | Defclass
+	  | AlgExpr
 
-    AlgExpr = CmpExpr
+	CondExpr =
+      | CondParticle
+	  | CondStmt
+      
+    AlgExpr =
+      | CmpExpr
 
     CmpExpr
       = CmpExpr "==" CmpExpr -- eq
@@ -18,21 +27,18 @@ Reflex {
 
     PriExpr
       = 
-      | CondExpr
-      | SendMessageEq
+	  | CondExpr
+	  | SendMessageEq
       | SendMessage
-      // | Defclass
-      | Defun
+	  | Defun
       | StringLit
       | FunctionLit
-      | "(" Expr ")" -- parens
-      // | "!" Expr -- log_not
-      | Barecall
-      | Bareword
+	  | "(" Expr ")" -- parens
+      | Barecall //&(~"?")
+      | Bareword //&(~"?")
       
-    CondExpr
-      = CondStmt
-      | CondParticle
+    CondTernary
+      = Expr "?" Expr ":" Expr
       
     CondStmt
       = If Condition Then? CondBlock Else CondBlock -- ifThenElse
@@ -41,7 +47,7 @@ Reflex {
       | Unless Condition Then? CondBlock -- unlessThen
 
     CondParticle
-     = PriExpr If Condition Else Expr -- ifElse
+     = PriExpr If Condition Else Expr  -- ifElse
      | PriExpr Unless Condition Else Expr -- unlessElse
      | PriExpr If Condition -- if
      | PriExpr Unless Condition -- unless

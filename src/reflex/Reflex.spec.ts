@@ -110,9 +110,9 @@ describe('Reflex', () => {
                 })
 
                 describe('shorthand', () => {
-                    xit('ternary', () => {
+                    it('ternary', () => {
                         expect(evaluate("true == false ? Object : Class")).toEqual("Class(Class)")
-                        expect(evaluate("true == true ? Object : Class")).toEqual("Class(Class)")
+                        expect(evaluate("true == true ? Object : Class")).toEqual("Class(Object)")
                     })
                     test.todo('short circuits')
                 })
