@@ -114,7 +114,36 @@ describe('Reflex', () => {
                         expect(evaluate("true == false ? Object : Class")).toEqual("Class(Class)")
                         expect(evaluate("true == true ? Object : Class")).toEqual("Class(Object)")
                     })
-                    test.todo('short circuits')
+                    describe('boolean or', () => {
+                        it('has ORs truth table', () => {
+                            expect(evaluate("true || true")).toEqual("Truth")
+                            expect(evaluate("true || false")).toEqual("Truth")
+                            expect(evaluate("false || true")).toEqual("Truth")
+                            expect(evaluate("false || false")).toEqual("Falsity")
+                            expect(evaluate("false || false || true")).toEqual("Truth")
+                        })
+                        it('short-circuits', () => {
+                            evaluate('x=nil')
+                            evaluate('never=()=>x=Object.new()')
+                            expect(evaluate("true || never()")).toEqual("Truth")
+                            expect(evaluate("x")).toEqual("Nihil")
+                        })
+                    })
+                    describe('boolean and', () => {
+                        it('has ANDs truth table', () => {
+                            expect(evaluate("true && true")).toEqual("Truth")
+                            expect(evaluate("true && true && false")).toEqual("Falsity")
+                            expect(evaluate("true && false")).toEqual("Falsity")
+                            expect(evaluate("false && true")).toEqual("Falsity")
+                            expect(evaluate("false && false")).toEqual("Falsity")
+                        })
+                        it('short-circuits', () => {
+                            evaluate('x=nil')
+                            evaluate('never=()=>x=Object.new()')
+                            expect(evaluate("false && never()")).toEqual("Falsity")
+                            expect(evaluate("x")).toEqual("Nihil")
+                        })
+                    })
                 })
             })
             describe('operators', () => {

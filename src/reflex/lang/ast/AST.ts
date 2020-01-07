@@ -143,6 +143,11 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Conditional('unless', cond.tree, left.tree, new Bareword('nil')), //right.tree),
   // If: (_if: Node) => 'if',
 
+  BoolExpr_bool_or: (left: Node, _or: Node, right: Node) =>
+    new Conditional('if', left.tree, left.tree, right.tree),
+  BoolExpr_bool_and: (left: Node, _or: Node, right: Node) =>
+    new Conditional('if', left.tree, right.tree, new Bareword('false')), //right.tree),
+
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),

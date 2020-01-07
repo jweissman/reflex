@@ -7,17 +7,21 @@ Reflex {
       | Expr
       
     Expr =
+	    | SendMessageEq
+	    | Defclass
       | CondTernary
-      //| Expr "?" Stmt ":" Stmt -- tern
-	  | SendMessageEq
-	  | Defclass
-	  | AlgExpr
+	    | AlgExpr
 
-	CondExpr =
+	  CondExpr =
       | CondParticle
-	  | CondStmt
+	    | CondStmt
       
     AlgExpr =
+      | BoolExpr
+
+    BoolExpr
+      = BoolExpr "||" BoolExpr -- bool_or
+      | BoolExpr "&&" BoolExpr -- bool_and
       | CmpExpr
 
     CmpExpr
@@ -27,15 +31,15 @@ Reflex {
 
     PriExpr
       = 
-	  | CondExpr
-	  | SendMessageEq
+	    | SendMessageEq
       | SendMessage
-	  | Defun
+	    | CondExpr
+	    | Defun
       | StringLit
       | FunctionLit
-	  | "(" Expr ")" -- parens
-      | Barecall //&(~"?")
-      | Bareword //&(~"?")
+	    | "(" Expr ")" -- parens
+      | Barecall
+      | Bareword
       
     CondTernary
       = Expr "?" Expr ":" Expr
@@ -71,8 +75,7 @@ Reflex {
       = "else"
       | "otherwise"
     Condition 
-      = //Bareword
-      | Expr
+      = Expr
 
     Defclass
       = Class ClassName ExtendsClass Block -- extends
@@ -111,7 +114,7 @@ Reflex {
       = Message Arguments
     
     Receiver
-      = //SendMessage
+      =
       | Funcall
       | SendMessage
       | Bareword
@@ -174,7 +177,6 @@ Reflex {
     FormalFunctionLiteral 
       = Params "=>" Block
       | Params "=>" Expr
-      //| ident "=>" Expr
     
     StringLit
       = "'" #singleStringCharacter* "'"
@@ -203,7 +205,6 @@ Reflex {
     
     delim
       = delimiter
-      //| lineTerminator
       
     delimiter = ";"
     
