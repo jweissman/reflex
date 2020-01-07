@@ -1,6 +1,6 @@
 Reflex {
     Program
-      = ListOf<Stmt, delim> delim*
+      = ListOf<Stmt, delim?> delim*
     
     Stmt
       = Expr
@@ -19,10 +19,12 @@ Reflex {
       = 
       // | "(" Expr ")" -- parens
       // | "!" Expr -- log_not
+      
       | SendMessageEq
       | SendMessage
-      | Defun
+      
       | Defclass
+      | Defun
       | StringLit
       | FunctionLit
       | Invocation
@@ -156,10 +158,33 @@ Reflex {
     idChar = alnum | "_"
     
     delim
-      = ";"
-      | lineTerminator
+      = delimiter
+      //| lineTerminator
+      
+    delimiter = ";"
     
     lineTerminator
       = "\n"
       | "\r"
+  
+      whitespace = #" " | " " | "\t"
+      
+      
+    
+    comment = shortComment | formalComment
+    
+    formalComment = formalCommentStart (~formalCommentEnd any)* formalCommentEnd
+    formalCommentStart = "/*"
+    formalCommentEnd = "*/"
+    
+    shortComment
+      = commentMark #(~lineTerminator any)* lineTerminator?
+    
+	commentMark
+      = octothorpe
+      | doubleSlash
+    octothorpe = #"#"
+    doubleSlash = #"/" #"/"
+	  space := comment | whitespace | lineTerminator
+
 }

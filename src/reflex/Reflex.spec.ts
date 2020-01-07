@@ -8,6 +8,12 @@ describe('Reflex', () => {
             it('is a class', () => {
                 expect(evaluate('Boolean.class')).toEqual("Class(Class)")
             })
+            describe('Truth', () => {
+                it('descends from boolean', () => expect(evaluate('Truth.isDescendantOf(Boolean)')).toEqual('Truth'))
+            })
+            describe('Falsity', () => {
+                it('descends from boolean', () => expect(evaluate('Falsity.isDescendantOf(Boolean)')).toEqual('Truth'))
+            })
             describe('true', () => {
                 it('is a Boolean', () => {
                     expect(evaluate("true.class")).toEqual("Class(Truth)")

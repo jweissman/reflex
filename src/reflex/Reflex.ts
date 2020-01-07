@@ -1,28 +1,27 @@
 import Parser from "./lang/Parser";
 import Machine from "./vm/Machine";
-import { Code, prettyCode } from "./vm/instruction/Instruction";
+import { Code } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
 
  const preamble = `
-class Class {
-    isDescendantOf(other) { other.isAncestorOf(self) }
-};
+class Class { isDescendantOf(other) { other.isAncestorOf(self) } };
 nil = Nihil.new();
+/***
+ * Boolean
+ * 
+ * The class of truth-values.
+ */
 class Boolean {
-    false() {self.negate(self.true())};
-    eq(other) { self.isInstanceOf(other.class)};
+    true() { self };
+    false() { self.negate(self.true()) };
+    eq(other) { self.isInstanceOf(other.class) };
 };
-class Truth < Boolean {
-    true() { Truth.new() };
-    negate() { Falsity.new() };
-};
-class Falsity < Boolean {
-    true() { Falsity.new() };
-    negate() { Truth.new() };
-};
+class Truth < Boolean { negate() { Falsity.new() }; };
+class Falsity < Boolean { negate() { Truth.new() }; };
 true = Truth.new();
 false = Falsity.new();
-instanceEval { self.defineMethod = meta.defineMethod };
+// wire up main so it can define instance methods on itself...
+self.defineMethod = meta.defineMethod
 `;
 
 export default class Reflex {
