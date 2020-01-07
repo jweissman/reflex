@@ -124,8 +124,21 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   // = Conj Condition Then? CondBlock Else CondBlock -- conjElse
   CondStmt_ifThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
     new Conditional('if', cond.tree, left.tree, right.tree),
+  CondStmt_ifThen: (_if: Node, cond: Node, _then: Node, left: Node) =>
+    new Conditional('if', cond.tree, left.tree, new Bareword('nil')),
+  CondParticle_if: (left: Node, _if: Node, cond: Node) =>
+    new Conditional('if', cond.tree, left.tree, new Bareword('nil')),
+  CondParticle_unless: (left: Node, _if: Node, cond: Node) =>
+    new Conditional('unless', cond.tree, left.tree, new Bareword('nil')),
+  CondParticle_ifElse: (left: Node, _if: Node, cond: Node, _else: Node, right: Node) =>
+    new Conditional('if', cond.tree, left.tree, right.tree),
+  CondParticle_unlessElse: (left: Node, _unless: Node, cond: Node, _else: Node, right: Node) =>
+    new Conditional('unless', cond.tree, left.tree, right.tree),
+  // no particulate unless-else, i think it's confusing? but maybe it should be there just so it doesn't parse REALLY wrong?
   CondStmt_unlessThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
     new Conditional('unless', cond.tree, left.tree, right.tree),
+  CondStmt_unlessThen: (_unless: Node, cond: Node, _then: Node, left: Node) =>
+    new Conditional('unless', cond.tree, left.tree, new Bareword('nil')), //right.tree),
   // If: (_if: Node) => 'if',
 
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),

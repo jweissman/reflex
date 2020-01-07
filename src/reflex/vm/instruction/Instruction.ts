@@ -40,7 +40,11 @@ export const prettyValue = (v: Value) => {
 export type Instruction = [ Op, Value ]
 export const prettyInstruct = (inst: Instruction) => {
   let [op, value] = inst
-  return [chalk.green(op), chalk.cyan(prettyValue(value))].join(' ')
+  if (op === 'label') {
+    return "." + chalk.white(prettyValue(value)) + ":"
+  } else {
+    return [chalk.green(op), chalk.cyan(prettyValue(value))].join(' ')
+  }
 }
 export type Code = Instruction[]
 export const prettyCode = (code: Code) => {

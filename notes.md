@@ -306,3 +306,49 @@ okay, so does our meta map match up :)
 if so, then super! and maybe filling in nil / glancing at bool
 
 --
+
+
+okay, so maybe mirror api
+
+Mirror
+  conjure(klassName) -- instantiate class by name
+  bind -- give a binding
+  reflect(obj) -- create object image (instance of class of images of this class, Image(Klass))
+
+Binding
+  dispatch -- send message call
+  local vars
+  yield? / flow ctrl?
+  inspect/manip frames, stack?
+  modify code? exec raw instructions?
+
+Image  -- by default a simple delegating proxy...
+  filter/intercept -- 'fix' messages in flight, redirect
+  imbue -- construct a 'real' object with attributes set from the pov of this image
+  project(obj) -- create a Hologram of the underlying object
+  compose(obj) -- ...add to stack of image elements??
+
+(Is the idea you can treat images 'like' an object? You could extend them like a view but...)
+
+Hologram -- transparent proxy ('thinks' it is the object? -- 'pass through' mirror?)
+  solidify -- construct a 'real' object with attributes set from the pov of this hologram?
+            -- is the image 'bound' permanently??
+
+-- are messages objects, like in smalltalk? seems like a LOT
+
+-- could we do mixins/traits with mirror things??
+-- maybe even modules? (maybe mixins are JUST modules)
+-- archetype keyword stuff could add more sugar but 
+
+
+-- okay, so images are like proxies, wrappers around objects that define various ways of manipulating
+   messages -- maybe one thing to consider would be attribute handling, this is where we could make images
+   not try to set attributes on the underlying object...
+-- and holograms are images that 'hide'/obscure the fact they are images, maybe useful for test doubles??
+
+   maybe images/holograms could be 'wired' back to their objects so that setting attributes on them
+   actually modifies the underlying object -- otherwise maybe by default they just set 'local' attributes
+   on the projection
+
+   -- the idea is that when we call a method on an image, we are calling methods on the underlying class,
+     but from the perspective of the image,

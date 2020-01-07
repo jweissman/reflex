@@ -38,11 +38,13 @@ Reflex {
       = If Condition Then? CondBlock Else CondBlock -- ifThenElse
       | Unless Condition Then? CondBlock Else CondBlock -- unlessThenElse
       | If Condition Then? CondBlock -- ifThen
+      | Unless Condition Then? CondBlock -- unlessThen
 
     CondParticle
-     = PriExpr If Condition Else Then? Expr -- particleIfElse
-     | PriExpr If Condition -- particleIf
-     | PriExpr Unless Condition -- particleUnless
+     = PriExpr If Condition Else Expr -- ifElse
+     | PriExpr Unless Condition Else Expr -- unlessElse
+     | PriExpr If Condition -- if
+     | PriExpr Unless Condition -- unless
 
     CondBlock
       = Block
@@ -63,7 +65,8 @@ Reflex {
       = "else"
       | "otherwise"
     Condition 
-      = Expr
+      = //Bareword
+      | Expr
 
     Defclass
       = Class ClassName ExtendsClass Block -- extends
@@ -110,7 +113,7 @@ Reflex {
     Message
       = ~Keyword ident
       
-    Keyword = If | Else | Then
+    Keyword = If | Else | Unless | Then
 
     Bareword
       = Message
