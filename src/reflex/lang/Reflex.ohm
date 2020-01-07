@@ -1,6 +1,6 @@
 Reflex {
     Program
-      = ListOf<Stmt, delim?> delim*
+      = ListOf<Stmt, delim*> delim*
     
     Stmt
       = Expr
@@ -17,21 +17,44 @@ Reflex {
 
     PriExpr
       = 
-      // | "(" Expr ")" -- parens
-      // | "!" Expr -- log_not
       
+     // | "!" Expr -- log_not
+      | CondExpr
       | SendMessageEq
       | SendMessage
       
+      
       | Defclass
       | Defun
+     
       | StringLit
       | FunctionLit
-      | Invocation
+     | "(" Expr ")" -- parens
+     
+     | Barecall
+     | Bareword
       
-    Invocation
-      = Barecall
-      | Bareword
+    CondExpr
+      = CondStmt
+      | CondParticle
+      
+    CondStmt
+      = Conj Condition Then? CondBlock Else CondBlock -- conjElse
+      | Conj Condition Then? CondBlock -- conjOnly
+    CondParticle
+     = PriExpr If Condition Else Expr -- particleIfElse
+     | PriExpr If Condition -- particleIf
+     | PriExpr Unless Condition -- particleUnless
+    CondBlock
+      = Block
+      | Expr
+    Conj = If | Unless
+    If = "if"
+    Unless = "unless"
+    Then = "then"
+    Else = "else" | "otherwise"
+    Condition 
+      = Expr
 
     Defclass
       = Class ClassName ExtendsClass Block -- extends
@@ -50,7 +73,7 @@ Reflex {
       = "<"
 
     Defun
-      = "def"? FunctionName FormalParams Block
+      = FunctionName FormalParams Block
 
     FunctionName
       = ident
@@ -76,10 +99,12 @@ Reflex {
       | Bareword
 
     Message
-      = ident
+      = ~Keyword ident
+      
+    Keyword = If | Else | Then
 
     Bareword
-      = ident
+      = Message
       
     Arguments
       = Args? PipedBlock -- block
@@ -113,8 +138,9 @@ Reflex {
       = "&" Bareword -- ref
       | Bareword
 
-    Block
+    Block 
       = "{" Program "}"
+    
       
     PipedBlock = "{" PipeVars? Program "}"
     PipeVars = "|" ListOf<Param,","> "|"
@@ -180,7 +206,7 @@ Reflex {
     shortComment
       = commentMark #(~lineTerminator any)* lineTerminator?
     
-	commentMark
+	  commentMark
       = octothorpe
       | doubleSlash
     octothorpe = #"#"

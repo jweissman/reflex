@@ -49,7 +49,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Defclass(name.tree, block.tree, superclass.tree),
   ClassName: (id: Node) => new Message(id.sourceString),
   ExtendsClass: (_extends: Node, name: Node) => name.tree,
-  Defun: (_def: Node, name: Node, args: Node, block: Node) =>
+  Defun: (name: Node, args: Node, block: Node) =>
     new Defun(name.tree, args.tree, block.tree),
   FunctionName: (id: Node) => new Message(id.sourceString),
   PipedBlock: (_lb: Node, pipeVars: Node, block: Node, _rb: Node) => {
