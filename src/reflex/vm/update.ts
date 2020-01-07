@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import { Instruction, Code } from "./instruction/Instruction";
+import { Instruction, Code, indexForLabel } from "./instruction/Instruction";
 import { Stone } from "./instruction/Stone";
 import ReflexObject from './types/ReflexObject';
 import Tree from '../lang/ast/Tree';
@@ -19,6 +19,27 @@ import { Stack } from './Stack';
 import { Frame } from './Frame';
 import Machine from './Machine';
 import { classRegistry } from './types/ReflexClass';
+import { trace } from './instruction/trace';
+
+function hasLocal(key: string, frames: Frame[]) {
+    let v: string = key as string;
+    let localFrame = findFrameWithLocal(v, frames);
+    if (Object.keys(localFrame.locals).includes(v)) {
+        return true;
+                // stack.push(localFrame.locals[v]);
+    } 
+    return false;
+}
+
+export function getLocal(key: string, frames: Frame[]) {
+    let v: string = key as string;
+    let localFrame = findFrameWithLocal(v, frames);
+    if (Object.keys(localFrame.locals).includes(v)) {
+        return localFrame.locals[v];
+    }  else {
+        throw new Error('Unknown local variable ' + v);
+    }
+}
 
 function mark(stack: Stack, value: string) {
     stack.push(new Stone(value));
@@ -45,10 +66,25 @@ export function instantiate(className: string, stack: Stack, frames: Frame[], co
     invoke(0, false, stack, frames, code, machine);
 }
 
+export function dispatch(message: string, object: ReflexObject, stack: Stack, frames: Frame[], machine: Machine, doRet: boolean = false) {
+    let fn = object.send(message) as ReflexFunction;
+    stack.push(fn);
+
+    // stack.push(object) //classRegistry[className])
+    // stack.push(message as string)
+    // call(stack, frames);
+    // let fn = object.send stack[stack.length - 1] as ReflexFunction
+    invoke(fn.arity, !!fn.blockParamName, stack, frames, machine.currentProgram, machine)
+    if (doRet) {
+        ret(stack, frames, machine); //?
+    }
+}
+
 export function update(state: State, instruction: Instruction, code: Code): State {
     let [op, value] = instruction;
     let { machine, stack, frames } = state;
     let frame = frames[frames.length - 1];
+    let top = stack[stack.length - 1];
     switch (op) {
         case 'push':
             stack.push(value);
@@ -74,17 +110,16 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             compile(value as Tree, stack, machine);
             break;
         case 'local_var_get':
-            let frameLoc: Frame = findFrameWithLocal(value as string, frames);
-            let variable = frameLoc.locals[value as string]
-            if (variable) {
-                stack.push(variable)
+            // let frameLoc: Frame = findFrameWithLocal(value as string, frames);
+            // let variable = frameLoc.locals[value as string]
+            if (hasLocal(value as string, frames)) {
+                stack.push(getLocal(value as string, frames))
             } else {
                 throw new Error("no such local variable '" + value as string)
             }
             break;
         case 'local_var_set':
             let key = value as string;
-            let top = stack[stack.length - 1];
             pop(stack)
             if (top instanceof ReflexObject) {
                 // log(`LOCAL VAR SET ${key}=${top.inspect()}`);
@@ -111,12 +146,8 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             break;
         case 'bare':
             let v: string = value as string;
-            let localFrame = findFrameWithLocal(v, frames);
-            if (Object.keys(localFrame.locals).includes(v)) {
-                stack.push(localFrame.locals[v]);
-            } else if (v === 'self') {
-                // log("bare self fell back to frame self -- " + frame.self.inspect())
-                stack.push(frame.self.self)
+            if (hasLocal(v, frames)) {
+                stack.push(getLocal(v, frames));
             } else if (v === 'yield') {
                 if (frame.currentMethod && frame.block) {
                     let yieldFn = new WrappedFunction('yielder', (...args: ReflexObject[]) => {;
@@ -132,11 +163,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 } else {
                     throw new Error("tried to yield from outermost scope or without a block on frame?")
                 }
-            } else if (v === 'super') {
-                stack.push(frame.self.super)
             } else {
-                // let dispatched = frame.self.send(value as string)
-                // stack.push(dispatched);
                 stack.push(frame.self)
                 stack.push(value as string)
                 call(stack, frames)
@@ -163,7 +190,34 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                 sendEq(value as string, stack, frames, code, machine);
             }
             break;
-
+        case 'jump':
+            let theLabel = value as string;
+            log('jump to ' + theLabel);
+            machine.jump(indexForLabel(code, theLabel));
+            break;
+        case 'jump_if': // jump if true...
+            dispatch('true', top as ReflexObject, stack, frames, machine, true);
+            // ret(stack, frames, machine); //?
+            // now top should be Truth
+            let nowTop = stack[stack.length - 1];
+            pop(stack);
+            let shouldJump = (nowTop as ReflexObject).className === 'Truth';
+            log("JUMP IF -- now top is " + nowTop + " / should jump? " + shouldJump);
+            if (shouldJump) {
+                let theLabel = value as string;
+                log('jump to ' + theLabel);
+                machine.jump(indexForLabel(code, theLabel));
+            }
+            break;
+        case 'dispatch':
+            let msg = value as string;
+            let recv = top as ReflexObject;
+            pop(stack);
+            log("DISPATCH " + msg + " to " + recv.inspect());
+            // log("STACK IS");
+            dispatch(value as string, top as ReflexObject, stack, frames, machine);
+            log("AFTER DISPATCH " + msg + " to " + recv + " -- top is " + stack[stack.length - 1]);
+            break;
         default: assertNever(op);
     }
     return { stack, frames, machine: machine };

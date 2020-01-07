@@ -102,7 +102,7 @@ export default class Machine {
 
     execute(instruction: Instruction) {
         let { stack, frames } = this.state
-        log('frames: ' + frames.flatMap(frame => frame.self.inspect()).join(","))
+        // log('frames: ' + frames.flatMap(frame => frame.self.inspect()).join(","))
         let frame = frames[frames.length - 1]
         trace(`exec @${this.ip}`, instruction, frame, stack)
         update(this.state, instruction, this.currentProgram)
@@ -112,6 +112,11 @@ export default class Machine {
         args.forEach(arg => this.stack.push(arg))
         this.stack.push(fn)
         invoke(fn.arity, false, this.stack, this.frames, this.currentProgram, this, ret);
+    }
+
+    jump(newIp: number) {
+        this.frame.ip = newIp;
+        // throw new Error("Machine.jump -- Method not implemented.");
     }
 
     get state(): State { return { stack: this.stack, frames: this.frames, machine: this } }

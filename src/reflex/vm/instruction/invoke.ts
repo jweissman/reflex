@@ -10,7 +10,10 @@ import Machine from '../Machine';
 import { Value } from './Value';
 import { makeReflexObject } from "../types/ReflexClass";
 import { ReflexNihil } from "../types/ReflexNihil";
-import { instantiate } from "../update";
+import { instantiate, getLocal } from "../update";
+import { log } from "../util/log";
+import { dump } from "../util/dump";
+// import { log, dump } from "../util";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
     // log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
@@ -22,7 +25,6 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
     if (hasBlock) {
         block = stack[stack.length - 1] as ReflexFunction;
         pop(stack);
-        // log('block ' + block.inspect())
     }
     let self = frame.self;
     if (top.frame.self) {
@@ -44,22 +46,17 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
         ...(hasBlock ? { block } : {}),
     };
 
-    // let topFrameBlock = !!top.frame.block;
-    let nihilate = false; //!!top.frame.block;
+    let nihilate = false;
     if (top.frame.block) {
         newFrame.ip = top.frame.ip;
-        // if the instruction at this ip is ret...
-        // we can invoke the block with nihil
     }
 
     if (hasBlock) {
         let line = newFrame.ip;
         let next = nextOperativeCommand(code.slice(line));
-        // log("!!! next operative command: " + next);
         if (next) {
             let [nextOp] = next;
             let exhausted = nextOp === 'ret'
-            // log("got a block, checking if it's exhausted (instruction is at ret): " + exhausted + " / " + nextOp);
             if (exhausted) {
                 nihilate = true;
             }
@@ -73,12 +70,8 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
         frames.push(top.frame);
         frames.push(newFrame);
     } else {
-        // let block = top.frame.block;
         if (block) {
-            // log("NIHILATE")
             let nil = makeReflexObject(machine, ReflexNihil.klass, []);
-            // stack.push(nil);
-            // stack.push(block);
             invokeReflex(block, [nil], stack, frames, code, machine, false);
         } else {
             throw new Error("tried to pass nihil to a block, but there wasn't a block??")
@@ -95,8 +88,8 @@ export function invoke(
     machine: Machine,
     ensureReturns?: ReflexObject
 ) {
-    // log("INVOKE "+arity + "-- stack " + dump(stack))
     let top = stack[stack.length - 1];
+    // log("INVOKE "+ top + " -- " + arity + "-- stack " + dump(stack))
     pop(stack);
     let args = [];
     for (let i = 0; i < arity; i++) {
@@ -114,8 +107,8 @@ export function invoke(
         let result = top.impl(machine, ...args);
         if (result !== undefined) {
             if (result === true || result === false) {
-                let className = result ? 'Truth' : 'Falsity'
-                instantiate(className, stack, frames, code, machine)
+                let varName = result ? 'true' : 'false'
+                stack.push(getLocal(varName, frames))
             } else {
                 stack.push(result);
             }

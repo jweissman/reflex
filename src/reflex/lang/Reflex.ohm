@@ -35,20 +35,33 @@ Reflex {
       | CondParticle
       
     CondStmt
-      = Conj Condition Then? CondBlock Else CondBlock -- conjElse
-      | Conj Condition Then? CondBlock -- conjOnly
+      = If Condition Then? CondBlock Else CondBlock -- ifThenElse
+      | Unless Condition Then? CondBlock Else CondBlock -- unlessThenElse
+      | If Condition Then? CondBlock -- ifThen
+
     CondParticle
-     = PriExpr If Condition Else Expr -- particleIfElse
+     = PriExpr If Condition Else Then? Expr -- particleIfElse
      | PriExpr If Condition -- particleIf
      | PriExpr Unless Condition -- particleUnless
+
     CondBlock
       = Block
       | Expr
-    Conj = If | Unless
-    If = "if"
-    Unless = "unless"
-    Then = "then"
-    Else = "else" | "otherwise"
+
+    Conj
+      = If
+      | Unless
+    
+    If
+      = "if"
+    
+    Unless
+      = "unless"
+    Then
+      = "then"
+    Else
+      = "else"
+      | "otherwise"
     Condition 
       = Expr
 

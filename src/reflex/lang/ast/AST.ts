@@ -16,27 +16,47 @@ import { Barecall } from "./Barecall";
 import { PipedBlock } from "./PipedBlock";
 import { Arguments, Argument } from "./Arguments";
 import { Parameter } from "./Parameter";
+import { Compare } from "./Compare";
 import { Code } from "../../vm/instruction/Instruction";
 
-const self = new Bareword('self')
-
-type Comparator = '==' | '!='
-class Compare extends Tree {
-  constructor(public op: Comparator, public left: Tree, public right: Tree) { super();}
+type ConditionConjunction = 'if' | 'unless'
+class Conditional extends Tree {
+  static count: number = 0;
+  constructor(public conj: ConditionConjunction, public test: Tree, public left: Tree, public right: Tree) {
+    super();
+  }
   inspect(): string {
-    return [this.left.inspect(), this.op, this.right.inspect()].join()
+    return `${this.conj} ${this.test.inspect()} ${this.left.inspect()} else ${this.right.inspect()}`
   }
   get code(): Code {
-    let ops: { [key in Comparator]: string } = { '==': 'eq', '!=': 'neq' }
+    let name = `cond-${Conditional.count++}`
+    let prefix = (msg: string) => `${name}-${msg}`
+    let labelTest = prefix('test')
+    let labelLeft = prefix('left')
+    let labelRight = prefix('right')
+    let labelDone = prefix('done')
+    let conjunct: Code = this.conj === 'unless' ? [['dispatch', 'negate']] : []
     return [
+      ['jump', labelTest],
+      ['label', labelLeft],
       ...this.left.code,
+      ['jump', labelDone],
+      ['label', labelRight],
       ...this.right.code,
-      ['push', ops[this.op]],
-      ['call', null],
-      ['invoke', 1],
+      ['jump', labelDone],
+      ['label', labelTest],
+      ...this.test.code,
+      ...conjunct,
+      ['jump_if', labelLeft],
+      ['jump', labelRight],
+      ['label', labelDone],
+
     ]
+    // throw new Error("Conditional.code -- Method not implemented.");
   }
 }
+
+const self = new Bareword('self')
 
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Program: (list: Node, _delim: Node) =>
@@ -96,9 +116,17 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Message: (contents: Node) => new Message(contents.sourceString),
   Bareword: (word: Node) => new Bareword(word.sourceString),
   Barecall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
+  PriExpr_parens: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
 
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),
   CmpExpr_neq: (left: Node, _eq: Node, right: Node) => new Compare('!=', left.tree, right.tree),
+
+  // = Conj Condition Then? CondBlock Else CondBlock -- conjElse
+  CondStmt_ifThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
+    new Conditional('if', cond.tree, left.tree, right.tree),
+  CondStmt_unlessThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
+    new Conditional('unless', cond.tree, left.tree, right.tree),
+  // If: (_if: Node) => 'if',
 
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),

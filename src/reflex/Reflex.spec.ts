@@ -60,9 +60,12 @@ describe('Reflex', () => {
         describe('core', () => {
             describe('conditionals', () => {
                 describe('gates execution', () => {
-                    xit('if', ()=> {
+                    it('if-else', ()=> {
                         expect(evaluate("if (true) { Object } else { Class }")).toEqual("Class(Object)")
                         expect(evaluate("if (false) { Object } else { Class }")).toEqual("Class(Class)")
+                    });
+
+                    xit('if', ()=> {
                         expect(evaluate("if (true) { Object }")).toEqual("Class(Object)")
                         expect(evaluate("if (false) { Object }")).toEqual("Nihil")
                     })
@@ -74,20 +77,20 @@ describe('Reflex', () => {
                         expect(evaluate("Object if false else Class")).toEqual("Class(Class)")
                     })
 
-                    xit('unless', ()=> {
+                    it('unless', ()=> {
                         expect(evaluate("unless (true) { Object } else { Class }")).toEqual("Class(Class)")
                         expect(evaluate("unless (false) { Object } else { Class }")).toEqual("Class(Object)")
-                        expect(evaluate("unless (true) { Object }")).toEqual("Nihil")
-                        expect(evaluate("unless (false) { Object }")).toEqual("Class(Object)")
+                        // expect(evaluate("unless (true) { Object }")).toEqual("Nihil")
+                        // expect(evaluate("unless (false) { Object }")).toEqual("Class(Object)")
 
-                        expect(evaluate("unless true { Object } else { Class }")).toEqual("Class(Class)")
-                        expect(evaluate("unless false { Object } else { Class }")).toEqual("Class(Object)")
-                        expect(evaluate("unless true { Object }")).toEqual("Nihil")
-                        expect(evaluate("unless false { Object }")).toEqual("Class(Object)")
+                        // expect(evaluate("unless true { Object } else { Class }")).toEqual("Class(Class)")
+                        // expect(evaluate("unless false { Object } else { Class }")).toEqual("Class(Object)")
+                        // expect(evaluate("unless true { Object }")).toEqual("Nihil")
+                        // expect(evaluate("unless false { Object }")).toEqual("Class(Object)")
 
-                        expect(evaluate("unless true Object else Class")).toEqual("Class(Class)")
-                        expect(evaluate("unless false Object else Class")).toEqual("Class(Object)")
-                        expect(evaluate("unless true Object")).toEqual("Nihil")
+                        // expect(evaluate("unless true Object else Class")).toEqual("Class(Class)")
+                        // expect(evaluate("unless false Object else Class")).toEqual("Class(Object)")
+                        // expect(evaluate("unless true Object")).toEqual("Nihil")
                     })
 
                     xit('unless dangles', () => {

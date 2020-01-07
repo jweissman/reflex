@@ -3,7 +3,7 @@ import Machine from "./vm/Machine";
 import { Code } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
 
- const preamble = `
+const preamble = `
 class Class { isDescendantOf(other) { other.isAncestorOf(self) } };
 nil = Nihil.new();
 /***
@@ -12,13 +12,13 @@ nil = Nihil.new();
  * The class of truth-values.
  */
 class Boolean {
-    true() { self };
+    //true() { self };
     false() { self.negate(self.true()) };
     eq(other) { self.isInstanceOf(other.class) };
     neq(other) { self.eq(other).negate() };
 };
-class Truth < Boolean { negate() { Falsity.new() }; };
-class Falsity < Boolean { negate() { Truth.new() }; };
+class Truth < Boolean { true() { true }; negate() { false }; };
+class Falsity < Boolean { true() { false }; negate() { true }; };
 true = Truth.new();
 false = Falsity.new();
 // wire up main so it can define instance methods on itself...

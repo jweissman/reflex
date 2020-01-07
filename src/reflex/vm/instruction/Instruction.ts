@@ -12,14 +12,17 @@ export type Op
   // | 'barecall'
   // | 'barecall_block'
   | 'label' 
-  | 'call' // todo with block??
+  | 'jump' // unconditional
+  | 'jump_if' // ie jump to label if top is truthy
+  | 'call' // call second with top
   | 'ret'
   | 'halt'
-  | 'send'
+  | 'send' // send message to self
   | 'send_eq'
   | 'send_or_eq'
-  | 'invoke'
+  | 'invoke' // call top
   | 'invoke_block'
+  | 'dispatch' // send message to top and call
   | 'compile' 
   | 'mark'
   | 'sweep'
