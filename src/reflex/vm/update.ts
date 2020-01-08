@@ -1,9 +1,8 @@
 import assertNever from 'assert-never';
 import { Instruction, Code, indexForLabel } from "./instruction/Instruction";
-import { Stone } from "./instruction/Stone";
 import ReflexObject from './types/ReflexObject';
 import Tree from '../lang/ast/Tree';
-import { log } from './util/log';
+import { log, debug } from './util/log';
 import { fail } from './util/fail';
 import { pop } from './instruction/pop';
 import { State } from './State';
@@ -15,71 +14,12 @@ import { sweep } from './instruction/sweep';
 import { ret } from './instruction/ret';
 import { sendEq } from './instruction/sendEq';
 import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
-import { Stack } from './Stack';
 import { Frame } from './Frame';
-import Machine from './Machine';
-import { classRegistry } from './types/ReflexClass';
-import { trace } from './instruction/trace';
-
-function hasLocal(key: string, frames: Frame[]) {
-    let v: string = key as string;
-    let localFrame = findFrameWithLocal(v, frames);
-    if (Object.keys(localFrame.locals).includes(v)) {
-        return true;
-                // stack.push(localFrame.locals[v]);
-    } 
-    return false;
-}
-
-export function getLocal(key: string, frames: Frame[]) {
-    let v: string = key as string;
-    let localFrame = findFrameWithLocal(v, frames);
-    if (Object.keys(localFrame.locals).includes(v)) {
-        return localFrame.locals[v];
-    }  else {
-        throw new Error('Unknown local variable ' + v);
-    }
-}
-
-function mark(stack: Stack, value: string) {
-    stack.push(new Stone(value));
-}
-
-function findFrameWithLocal(key: string, frames: Frame[]) {
-    let top = frames[frames.length - 1];
-    if (!top.locals[key] && frames.length > 1) {
-        for (let i = frames.length-1; i >= 0; i--) {
-            let nextFrame = frames[i];
-            if (nextFrame.locals[key]) {
-                return nextFrame;
-            }
-        }
-    }
-    return top
-}
-
-export function instantiate(className: string, args: ReflexObject[], stack: Stack, frames: Frame[], code: Code, machine: Machine) {
-    args.forEach(arg => { stack.push(arg)})
-    // lookup class name, create & push???
-    stack.push(classRegistry[className])
-    stack.push("new" as string)
-    call(stack, frames);
-    invoke(0, false, stack, frames, code, machine);
-}
-
-export function dispatch(message: string, object: ReflexObject, stack: Stack, frames: Frame[], machine: Machine, doRet: boolean = false) {
-    let fn = object.send(message) as ReflexFunction;
-    stack.push(fn);
-
-    // stack.push(object) //classRegistry[className])
-    // stack.push(message as string)
-    // call(stack, frames);
-    // let fn = object.send stack[stack.length - 1] as ReflexFunction
-    invoke(fn.arity, !!fn.blockParamName, stack, frames, machine.currentProgram, machine)
-    if (doRet) {
-        ret(stack, frames, machine); //?
-    }
-}
+import { hasLocal } from './instruction/hasLocal';
+import { getLocal } from './instruction/getLocal';
+import { mark } from './instruction/mark';
+import { findFrameWithLocal } from './instruction/findFrameWithLocal';
+import { dispatch } from './instruction/dispatch';
 
 export function update(state: State, instruction: Instruction, code: Code): State {
     let [op, value] = instruction;
@@ -203,7 +143,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             let nowTop = stack[stack.length - 1];
             pop(stack);
             let shouldJump = (nowTop as ReflexObject).className === 'Truth';
-            log("JUMP IF -- now top is " + nowTop + " / should jump? " + shouldJump);
+            debug("jump if [true] -- top is " + nowTop + " / should jump? " + shouldJump);
             if (shouldJump) {
                 let theLabel = value as string;
                 log('jump to ' + theLabel);
@@ -214,10 +154,10 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             let msg = value as string;
             let recv = top as ReflexObject;
             pop(stack);
-            log("DISPATCH " + msg + " to " + recv.inspect());
-            log("STACK IS " + dump(stack));
+            debug("dispatch " + msg + " to " + recv.inspect());
+            // log("STACK IS " + dump(stack));
             dispatch(value as string, top as ReflexObject, stack, frames, machine);
-            log("AFTER DISPATCH " + msg + " to " + recv + " -- stack is " + dump(stack));
+            // log("AFTER DISPATCH " + msg + " to " + recv + " -- stack is " + dump(stack));
             break;
         default: assertNever(op);
     }

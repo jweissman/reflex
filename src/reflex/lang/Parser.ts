@@ -5,6 +5,8 @@ import { tree } from "./ast";
 import Tree from './ast/Tree';
 import Reflex from '../Reflex';
 import { log } from '../vm/util/log';
+import { Program } from './ast/Program';
+import { Code } from '../vm/instruction/Instruction';
 
 var contents = fs.readFileSync('./src/reflex/lang/Reflex.ohm');
 var grammar = ohm.grammar(contents.toString());
@@ -13,10 +15,10 @@ semantics.addAttribute("tree", tree)
 
 export default class Parser {
     // trace = Reflex.trace
-    analyze(input: string) {
-        let ast = this.tree(input);
-        let code = ast.code //inspect()
-        log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
+    analyze(input: string): [Tree, Code][] {
+        let ast: Program = this.tree(input) as Program;
+        let code: [Tree, Code][] = ast.lines.map(line => [line, line.code]) //inspect()
+        // log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
         return code
     }
 

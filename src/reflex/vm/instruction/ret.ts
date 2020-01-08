@@ -1,7 +1,7 @@
 import { Frame } from '../Frame';
 import { Stack } from '../Stack';
 import { ReflexNihil } from '../types/ReflexNihil';
-import { makeReflexObject } from '../types/ReflexClass';
+import { makeReflexObject } from "../types/makeReflexObject";
 import Machine from '../Machine';
 
 export function ret(stack: Stack, frames: Frame[], machine: Machine) {

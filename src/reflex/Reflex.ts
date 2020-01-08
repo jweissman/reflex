@@ -2,18 +2,19 @@ import Parser from "./lang/Parser";
 import Machine from "./vm/Machine";
 import { Code } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
+import Tree from "./lang/ast/Tree";
+import { log } from "./vm/util/log";
 
 const preamble = `
 class Class { isDescendantOf(other) { other.isAncestorOf(self) } };
 nil = Nihil.new();
 
-/***
+/*
  * Boolean
  * 
  * The class of truth-values.
  */
 class Boolean {
-    //true() { self };
     false() { self.negate(self.true()) };
     eq(other) { self.isInstanceOf(other.class) };
     neq(other) { self.eq(other).negate() };
@@ -23,7 +24,7 @@ class Falsity < Boolean { true() { false }; negate() { true }; };
 true = Truth.new();
 false = Falsity.new();
 
-/********************************
+/*
  * Number
  * 
  * The class of numeric values
@@ -46,9 +47,14 @@ export default class Reflex {
     }
 
     evaluate(input: string) {
-        let code: Code = this.parser.analyze(input)
+        // input.split("\n")
+        let lines: [Tree, Code][] = this.parser.analyze(input)
+
         // log("RUN CODE", prettyCode(code))
-        this.machine.run(code)
+        lines.forEach(([tree,code]) => {
+            // log("INTERPRET LINE: " + tree.inspect());
+            this.machine.run(code)
+        })
         let result = this.machine.top
         this.machine.stack = [];
         if (result == null) { return 'nothing' }

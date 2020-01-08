@@ -379,3 +379,12 @@ again it just feels like it would be nice to give people some 'optical' construc
 for managing message dispatch in interesting/useful ways.
 
 and we already have a couple cases that seem like they'd be simplified by it!
+
+---
+
+maybe for barrier to javascript we need something more intense than simple mirror -- 
+a Portal that generates appropriate
+mirror-like structures -- maybe better called 'Wormholes' if they are reflecting around JS objects?
+maybe Wormhole is like the channel you use, that the portal can give, into the JS context -- ??
+
+---

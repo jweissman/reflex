@@ -12,7 +12,6 @@ import { trace } from './instruction/trace';
 import { update } from './update';
 import Reflex from '../Reflex';
 import { State } from './State';
-import { ReflexNihil } from './types/ReflexNihil';
 
 export default class Machine {
     stack: Value[] = []
@@ -69,7 +68,7 @@ export default class Machine {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
             // log(`init execution @${label}, ip = ${this.ip}`)
-            log(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
+            // log(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
             this.executeLoop();
         } else {
             fail("Could not find label " + label)

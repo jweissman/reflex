@@ -8,13 +8,14 @@ import { zip } from '../util/zip';
 import { pop } from './pop';
 import Machine from '../Machine';
 import { Value } from './Value';
-import { makeReflexObject } from "../types/ReflexClass";
+import { makeReflexObject } from "../types/makeReflexObject";
 import { ReflexNihil } from "../types/ReflexNihil";
-import { instantiate, getLocal } from "../update";
+import { instantiate } from "./instantiate";
+import { getLocal } from "./getLocal";
 import { log } from "../util/log";
 import { dump } from "../util/dump";
 import { RNumber } from "../Bootstrap";
-import { ReflexNumber } from "../ReflexNumber";
+import { ReflexNumber } from "../types/ReflexNumber";
 // import { log, dump } from "../util";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {

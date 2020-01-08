@@ -1,10 +1,13 @@
-import ReflexClass, { makeReflexObject, defineInstanceMethod, defineClassMethod } from "./types/ReflexClass";
+import ReflexClass from "./types/ReflexClass";
+import { defineClassMethod } from "./types/defineClassMethod";
+import { defineInstanceMethod } from "./types/defineInstanceMethod";
+import { makeReflexObject } from "./types/makeReflexObject";
 import ReflexObject from "./types/ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./types/ReflexFunction";
 import { ReflexNihil } from "./types/ReflexNihil";
 import Machine from "./Machine";
 import { log } from "./util/log";
-import { ReflexNumber } from "./ReflexNumber";
+import { ReflexNumber } from "./types/ReflexNumber";
 
 const Class = ReflexClass.klass;
 Class.set("class", Class);
@@ -14,6 +17,7 @@ const RObject = ReflexClass.make("Object")
 RObject.set("super", RObject);
 Class.set("super", RObject);
 // export const ClassMeta = ReflexClass.make("Meta(Class)", Metaclass, false);
+// meta(class) is just metaclass
 Class.set("meta", Metaclass);
 
 const ObjectMeta = ReflexClass.make("Meta(Object)", Metaclass, false);

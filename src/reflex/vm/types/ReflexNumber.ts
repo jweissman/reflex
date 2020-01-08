@@ -1,4 +1,4 @@
-import ReflexObject from "./types/ReflexObject";
+import ReflexObject from "./ReflexObject";
 export class ReflexNumber extends ReflexObject {
     name = 'Number';
   constructor(public value: number) {

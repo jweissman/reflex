@@ -3,12 +3,12 @@ import Reflex from "../../Reflex";
 
 export function log(message: string) {
     if (Reflex && Reflex.trace) {
-        console.log(chalk.white(message)); //chalk.magentaBright(message));
+        process.stdout.write(chalk.white(message) + "\n"); //chalk.magentaBright(message));
     }
 }
 
 export function debug(message: string) {
     if (Reflex && Reflex.trace) {
-        console.log(chalk.gray(message)); //chalk.magentaBright(message));
+        process.stdout.write(chalk.gray(message) + "\n"); //chalk.magentaBright(message));
     }
 }

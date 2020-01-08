@@ -41,7 +41,7 @@ export type Instruction = [ Op, Value ]
 export const prettyInstruct = (inst: Instruction) => {
   let [op, value] = inst
   if (op === 'label') {
-    return "." + chalk.white(prettyValue(value)) + ":"
+    return chalk.white(prettyValue(value)) + ":"
   } else {
     return [chalk.green(op), chalk.cyan(prettyValue(value))].join(' ')
   }

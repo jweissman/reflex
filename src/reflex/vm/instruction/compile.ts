@@ -5,7 +5,7 @@ import { Defun } from '../../lang/ast/Defun';
 import { FunctionLiteral } from '../../lang/ast/FunctionLiteral';
 import { Stack } from '../Stack';
 import { fail } from '../util/fail';
-import { makeReflexObject } from '../types/ReflexClass';
+import { makeReflexObject } from "../types/makeReflexObject";
 import Machine from '../Machine';
 import { Parameter } from "../../lang/ast/Parameter";
 
