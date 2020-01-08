@@ -1,0 +1,200 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Reflex",
+	"patterns": [
+		{ "include": "#expression" }
+	],
+	"repository": {
+		"expression": {
+			"patterns": [
+				{ "include": "#comments"},
+				{ "include": "#classes" },
+				{ "include": "#defun" },
+				{ "include": "#funcall" },
+				{ "include": "#keywords"},
+				{ "include": "#constants"},
+				{ "include": "#identifiers"},
+				{ "include": "#strings"}
+			]
+		},
+		
+		"keywords": {
+			"name": "keyword.reflex",
+			"patterns": [
+				{ "include": "#flow-control-operators" },
+				{ "include": "#arithmetic-operators" },
+				{ "include": "#message-send-operator" },
+				{ "include": "#semicolon" }
+			]
+		},
+		"constants": {
+			"name": "constant.reflex",
+			"patterns": [
+				{ "include": "#language-constants"},
+				{ "include": "#reserved-words"},
+				{ "include": "#user-defined-constants"}
+			]
+		},
+		"identifiers": {
+			"name": "meta.identifier.reflex",
+			"patterns": [
+				{ "include": "#language-variables" },
+				{ "include": "#variables" }
+			]
+		},
+		"language-constants": {
+			"name": "constant.language.reflex",
+			"match": "\\b(true|false|nil)\\b"
+		},
+		"language-variables": {
+			"name": "variable.language.reflex",
+			"match": "\\b(self|super|meta)\\b"
+		},
+		"user-defined-constants": {
+			"name": "entity.name.class.reflex",
+			"match": "\\b[A-Z][a-zA-Z0-9]+"
+		},
+		"variables": {
+			"name": "variable.reflex",
+			"match": "[a-z][a-zA-Z0-9]+"
+		},
+		"classes": {
+			"name": "meta.class.definition.reflex",
+			"begin": "(class) ([A-Z][a-zA-Z]+)\\s*(< [A-Z][a-zA-Z]+)?\\s*(\\{)",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.class.reflex"
+				},
+				"2": {
+					"name": "entity.name.class.reflex"
+				},
+				"3": {
+					"name": "entity.other.inherited-class.reflex"
+				},
+				"4": {
+					"name": "punctuation.block.begin.reflex"
+				}
+			},
+			"end": "(\\})",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.block.end.reflex"
+				}
+			},
+			"patterns": [
+				{ "include": "#expression" }
+			]
+		},
+
+		"defun": {
+			"name": "meta.function.definition.reflex",
+			"begin": "([a-zA-Z][a-zA-Z0-9]+)\\s*\\([^()]*\\)\\s*(\\{)",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.function.reflex"
+				},
+				"2": {
+					"name": "punctuation.block.begin.reflex"
+				}
+			},
+			"end": "\\}",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.block.end.reflex"
+				}
+			},
+			"patterns": [{ "include": "#expression" }]
+		},
+		"funcall": {
+			"name": "meta.function.call.reflex",
+			"begin": "([a-zA-Z][a-zA-Z0-9]+)\\(",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.function.reflex"
+				}
+			},
+			"end": "\\)",
+			"patterns": [{ "include": "#expression" }]
+		},
+		"flow-control-operators":	{
+			"name": "keyword.control.reflex",
+			"match": "\\b(if|else|yield|while|for|return)\\b"
+		},
+		"reserved-words":	{
+			"name": "keyword.other.reserved.reflex",
+			"match": "\\b(class)\\b"
+		},
+		"arithmetic-operators":	{
+			"name": "keyword.operator.math.reflex",
+			"match": "(\\+|=)"
+		},
+		"message-send-operator":	{
+			"name": "keyword.operator.send.reflex",
+			"match": "\\."
+		},
+		"semicolon":	{
+			"name": "keyword.operator.semicolon.reflex",
+			"match": ";"
+		},
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.line.reflex",
+					"match": "//.*$"
+				},
+				{
+					"name": "comment.line.reflex",
+					"match": "#.*$"
+				},
+				{
+					"name": "comment.block.reflex",
+					"begin": "/\\*",
+					"end": "\\*/"
+				}
+			]
+		},
+		
+		"block": {
+			"name": "meta.structure.block.reflex",
+			"begin": "\\{",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.block.begin.reflex"
+				}
+			},
+			"end": "\\}",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.block.end.reflex"
+				}
+			},
+			"patterns": [
+				{ "include": "#expression" }
+			]
+		},
+		"strings": {
+			"patterns": [{
+				"name": "string.quoted.double.reflex",
+				"begin": "\"",
+				"end": "\"",
+				"patterns": [
+					{
+						"name": "constant.character.escape.reflex",
+						"match": "\\."
+					}
+				]
+			},{
+				"name": "string.quoted.single.reflex",
+				"begin": "'",
+				"end": "'",
+				"patterns": [
+					{
+						"name": "constant.character.escape.reflex",
+						"match": "\\."
+					}
+				]
+			}]
+		}
+	},
+	"scopeName": "source.reflex"
+}

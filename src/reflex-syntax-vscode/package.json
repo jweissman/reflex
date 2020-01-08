@@ -1,0 +1,25 @@
+{
+    "name": "reflex-syntax-vscode",
+    "displayName": "reflex-syntax-vscode",
+    "description": "syntax highlighting for the reflex programming langauge",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.41.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "reflex",
+            "aliases": ["Reflex", "reflex"],
+            "extensions": [".reflex",".rflx"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "reflex",
+            "scopeName": "source.reflex",
+            "path": "./syntaxes/reflex.tmLanguage.json"
+        }]
+    }
+}
