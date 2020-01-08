@@ -3,8 +3,6 @@ import fs from 'fs';
 import ohm, { Semantics, Dict } from 'ohm-js';
 import { tree } from "./ast";
 import Tree from './ast/Tree';
-import Reflex from '../Reflex';
-import { log } from '../vm/util/log';
 import { Program } from './ast/Program';
 import { Code } from '../vm/instruction/Instruction';
 
@@ -18,7 +16,7 @@ export default class Parser {
     analyze(input: string): [Tree, Code][] {
         let ast: Program = this.tree(input) as Program;
         let code: [Tree, Code][] = ast.lines.map(line => [line, line.code]) //inspect()
-        // log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
+        console.log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
         return code
     }
 

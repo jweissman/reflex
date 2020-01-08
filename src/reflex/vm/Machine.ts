@@ -1,10 +1,8 @@
-import chalk from 'chalk';
 import { Instruction, Code, indexForLabel, labelStep, prettyCode } from "./instruction/Instruction";
 import { Value } from "./instruction/Value";
 import ReflexObject from './types/ReflexObject';
 import main, { bootLocals } from './Bootstrap';
 import { ReflexFunction } from './types/ReflexFunction';
-import { log } from './util/log';
 import { Frame } from './Frame';
 import { fail } from './util/fail';
 import { invoke } from './instruction/invoke';
@@ -12,6 +10,7 @@ import { trace } from './instruction/trace';
 import { update } from './update';
 import Reflex from '../Reflex';
 import { State } from './State';
+import fs from 'fs';
 
 export default class Machine {
     stack: Value[] = []
@@ -19,14 +18,35 @@ export default class Machine {
         ip: 0, self: main(this),
         locals: bootLocals
     }];
+    currentProgram: Code = [];
+
+    constructor(private reflex: Reflex) {}
 
     get top() { return this.stack[this.stack.length - 1] }
     get frame() { return this.frames[this.frames.length - 1] }
     get self() { return this.frame.self }
     get ip() { return this.frame.ip }
 
-    currentProgram: Code = [];
     get currentInstruction() { return this.currentProgram[this.ip]; }
+
+    import(given: string) {
+        // add literally to code @ instruction pointer???
+        // as though this line was that code??
+        if (!given.endsWith(".reflex")) { given += ".reflex"; }
+        let paths = [
+            __dirname + "\\..\\lib\\" + given,
+            // given,
+            process.cwd() + "\\" + given,
+        ];
+        let path = paths.find(p => fs.existsSync(p))
+        if (path) {
+            let contents: string = fs.readFileSync(path).toString();
+            console.log("READ CONTENTS", { given, contents })
+            this.reflex.evaluate(contents.toString())
+        } else {
+            throw new Error("Could find find path " + given)
+        }
+    }
 
     sideload(newCode: Code) {
         this.currentProgram = [
@@ -52,14 +72,19 @@ export default class Machine {
             ...oldCode,
             ['label','.main'],
             ...code,
-            ['halt', null]
+            ['halt', null],
+            // ['halt', null]
         ]
     }
 
+
     run(code: Instruction[]) {
-        this.install(code);
-        this.initiateExecution('.main');
+        // if (code.length) {
+            this.install(code);
+            this.initiateExecution('.main');
+        // }
     }
+
 
     initiateExecution(label: string) {
         let code = this.currentProgram
@@ -67,25 +92,30 @@ export default class Machine {
         if (step) {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
-            // log(`init execution @${label}, ip = ${this.ip}`)
-            // log(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
+            console.log(`init execution @${label}, ip = ${this.ip}`)
+            console.log(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
             this.executeLoop();
         } else {
             fail("Could not find label " + label)
         }
     }
 
+    halt() { this.halted = true; }
+    halted = false;
     delaySecs: number = Reflex.config.delay
     executeLoop() {
-        let halted = false;
-        while (!halted) {
+        this.halted = false;
+        while (!this.halted) { //} && this.currentInstruction) {
+            console.log("CURRENT INSTRUCTION: " + this.currentInstruction)
             let [op] = this.currentInstruction
+            
+            // {
+            this.execute(this.currentInstruction)
+            this.frame.ip++;
+            this.syncDelay(this.delaySecs);
+            // }
             if (op === 'halt') {
-                halted = true;
-            } else {
-                this.execute(this.currentInstruction)
-                this.frame.ip++;
-                this.syncDelay(this.delaySecs);
+                this.halted = true;
             }
         }
     }

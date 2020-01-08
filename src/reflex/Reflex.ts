@@ -1,23 +1,30 @@
 import Parser from "./lang/Parser";
 import Machine from "./vm/Machine";
-import { Code } from "./vm/instruction/Instruction";
+import { Code, prettyCode } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
 import Tree from "./lang/ast/Tree";
-import { log } from "./vm/util/log";
+// import { log } from "./vm/util/log";
 
-const preamble = `
-class Class { isDescendantOf(other) { other.isAncestorOf(self) } };
+// import fs from 'fs';
+
+// @ts-ignore
+// import * as Preamble from "./Preamble.reflex"
+const preamble = //Preamble.default
+`
+class Class {
+   isDescendantOf(other) { other.isAncestorOf(self) }
+};
 nil = Nihil.new();
 
 /*
- * Boolean
- * 
- * The class of truth-values.
- */
+* Boolean
+* 
+* The class of truth-values.
+*/
 class Boolean {
-    false() { self.negate(self.true()) };
-    eq(other) { self.isInstanceOf(other.class) };
-    neq(other) { self.eq(other).negate() };
+   false() { self.negate(self.true()) };
+   eq(other) { self.isInstanceOf(other.class) };
+   neq(other) { self.eq(other).negate() };
 };
 class Truth < Boolean { true() { true }; negate() { false }; };
 class Falsity < Boolean { true() { false }; negate() { true }; };
@@ -25,10 +32,10 @@ true = Truth.new();
 false = Falsity.new();
 
 /*
- * Number
- * 
- * The class of numeric values
- */
+* Number
+* 
+* The class of numeric values
+*/
 class Number {}
 
 // wire up main so it can define instance methods on itself...
@@ -39,29 +46,42 @@ export default class Reflex {
     static config: Configuration = new Configuration()
     static get trace(): boolean { return this.config.trace }
     parser: Parser = new Parser();
-    machine: Machine = new Machine()
+    machine: Machine = new Machine(this)
 
     constructor() {
-        // log("EVAL PREAMBLE")
-        this.evaluate(preamble);
+    //     // console.log("EVAL PREAMBLE: " + preamble)
+    //     this.evaluate(preamble);
+        this.evaluate("Kernel.import 'preamble'");
     }
 
+    // how does this work with the web?
+    // maybe we can compile down a tiny bytecode rep after parsing everything...
+    // import() {
+        // let lines: [Tree, Code][] = this.parser.analyze(input)
+        // if (isNode) { }
+        // let contents = fs.readFileSync(filename).toString();
+        // this.evaluate(contents)
+    // }
+
     evaluate(input: string) {
+        console.log("EVAL: " + input)
         // input.split("\n")
         let lines: [Tree, Code][] = this.parser.analyze(input)
 
         // log("RUN CODE", prettyCode(code))
         lines.forEach(([tree,code]) => {
-            // log("INTERPRET LINE: " + tree.inspect());
+            console.log("INTERPRET: " + tree.inspect());
+            console.log("CODE: " + prettyCode(code));
             this.machine.run(code)
         })
+        this.machine.halt(); //ed = true;
         let result = this.machine.top
         this.machine.stack = [];
         if (result == null) { return 'nothing' }
         return result;
     }
 
-    hardReset() { this.machine = new Machine() }
+    hardReset() { this.machine = new Machine(this) }
 
     repl() { const {Repl} = require('./Repl'); (new Repl()).interact(this); }
 }

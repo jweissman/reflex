@@ -107,6 +107,12 @@ classMethods.set("isAncestorOf", new WrappedFunction(
   (machine: Machine, other: ReflexClass) => !!other.ancestors.find(o => o === machine.boundSelf!)
 ));
 
+let Kernel = ReflexClass.make("Kernel")
+Kernel.eigenclass.get("instance_methods").set("import", new WrappedFunction(
+  `Kernel.import`,
+  (machine: Machine, filename: string) => machine.import(filename))
+)
+
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>
   makeReflexObject(machine, Main, [])
@@ -118,6 +124,7 @@ export const bootLocals = {
   Main, 
   Nihil,
   Metaclass,
+  Kernel,
 }
 
 export default constructMain;
