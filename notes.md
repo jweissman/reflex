@@ -365,3 +365,17 @@ self.defineArchetype('class') { |name, superclass, block|
 }
 
 class Bar {...}
+
+-----
+
+okay, both main and super facade have image/hologram-like functionality they need
+to wit --
+main needs to define a defineMethod that's "equivalent" to its metaclasses defineMethod
+(so that methods that main itself defines are accessible as instance methods on main...)
+
+super needs to route messages in a weird way, via the facade, which is already kind of image-esque
+
+again it just feels like it would be nice to give people some 'optical' construction kits
+for managing message dispatch in interesting/useful ways.
+
+and we already have a couple cases that seem like they'd be simplified by it!

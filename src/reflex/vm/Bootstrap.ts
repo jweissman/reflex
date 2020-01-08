@@ -13,14 +13,14 @@ Metaclass.set("super", Class);
 const RObject = ReflexClass.make("Object")
 RObject.set("super", RObject);
 Class.set("super", RObject);
-export const ClassMeta = ReflexClass.make("Meta(Class)", Metaclass, false);
-Class.set("meta", ClassMeta);
+// export const ClassMeta = ReflexClass.make("Meta(Class)", Metaclass, false);
+Class.set("meta", Metaclass);
 
-const ObjectMeta = ReflexClass.make("Meta(Object)", ClassMeta, false);
+const ObjectMeta = ReflexClass.make("Meta(Object)", Metaclass, false);
 
-ClassMeta.set("pre", Class);
+Metaclass.set("pre", Class);
 ObjectMeta.set("pre", RObject);
-Class.set("meta", ClassMeta);
+Class.set("meta", Metaclass);
 RObject.set("meta", ObjectMeta);
 ReflexObject.klass = RObject;
 
@@ -73,7 +73,7 @@ objectMethods.set("isInstanceOf", new WrappedFunction(
         }
     ))
 
-let metaclassMethods = ClassMeta.get("instance_methods")
+let metaclassMethods = Metaclass.get("instance_methods")
 metaclassMethods.set("new", new WrappedFunction(
   `Meta(Class).new`,
   (_machine: Machine, name: string, customSuper?: ReflexClass) =>

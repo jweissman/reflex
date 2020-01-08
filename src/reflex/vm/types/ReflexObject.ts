@@ -34,38 +34,37 @@ export default class ReflexObject {
         return this.id === other.id
     }
 
-    send(message: string): ReflexObject {
-        debug("ReflexObject.send -- " + message + "-- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
+    get messageSources() {
+        let self = this;
         let eigen = this.eigenclass && this.eigenclass.get("instance_methods")
         let shared = this.klass.get("instance_methods")
-        let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
-        if (message === 'self') {
-            // log('msg is self')
-            return this.self;
-        } else if (this.isClass === false && message === 'super') {
-            // log('msg is super') // provide super facade
-            return this.super;
-        } else if (this.get(message)) {
-            // log('msg is raw attribute')
-            return this.get(message)
-        } else if (eigen.get(message) || shared.get(message) || (supershared && supershared.get(message))) { //eigen || shared || supershared) { //} && eigen.get(message)) {
-            let source = eigen.get(message) || shared.get(message) || (supershared && supershared.get(message))
-            if (source.wrapped) {
-                let src = source as WrappedFunction //ReflexObject & { boundSelf: ReflexObject };
-                return src.bind(this as unknown as ReflexClass) //boundSelf = this;
-            }
-            return source
-        } else {
-            if (this.surroundingObject && this.surroundingObject !== this) {
-                // log('trying on surrounding obj')
-                return this.surroundingObject.send(message);
+        let supershared = this.ancestors.map(a => a.get("instance_methods")) //.find(a => a.get(message))
+        return [ self, eigen, shared, ...supershared ]
+    }
+
+    send(message: string): ReflexObject {
+        debug("ReflexObject.send -- " + message + "-- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
+        if (message === 'self') { return this.self }
+        else if (this.isClass === false && message === 'super') { return this.super }
+        else if (this.get(message)) { return this.get(message) }
+        else {
+            let responder = this.messageSources.find(source => source.get(message))
+            if (responder) {
+                let response = responder.get(message)
+                if (response.wrapped) {
+                    let src = response as WrappedFunction
+                    return src.bind(this as unknown as ReflexClass)
+                }
+                return response
             } else {
-                // log('meth missing!')
-                return this.methodMissing(message);
+                if (this.surroundingObject && this.surroundingObject !== this) { // why are we embedded in ourselves?
+                    return this.surroundingObject.send(message);
+                } else {
+                    return this.methodMissing(message);
+                }
             }
         }
     }
-
 
     methodMissing(message: string): ReflexObject {
         throw new MethodMissing(`Method missing: ${message} on ${this.inspect()}`);

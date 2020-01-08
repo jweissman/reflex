@@ -64,26 +64,35 @@ export default class ReflexClass extends ReflexObject {
     protected get instanceMethods(): ReflexObject { return this.get("instance_methods") as ReflexObject }
     get displayName() { return `Class(${this.name})` }
 
-    send(message: string): ReflexObject {
-        if (!this.eigenclass) { this.assembleMeta() }
-        let classMethods = this.eigenclass && this.eigenclass.get("instance_methods")
-        let supermeta = this.metaChain.map(a => a && a.get("instance_methods")).find(a => a && a.get(message))
+    get messageSources(): ReflexObject[] {
+       if (!this.eigenclass) { this.assembleMeta() }
+        let self = this;
+        let eigen = this.eigenclass.get("instance_methods")
         let shared = this.klass.get("instance_methods")
-        let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
-        let sources = [ classMethods, supermeta, shared, supershared ]
-        let source = sources.find(source => source && source.get(message))
-        if (source) {
-            let result = source.get(message)
-            if (result instanceof WrappedFunction) {
-                let res = result as WrappedFunction;
-                return res.bind(this);
-            } else {
-                return result
-            }
-        } else {
-            return super.send(message);
-        }
+        let supershared = this.ancestors.map(a => a.get("instance_methods")) //.find(a => a.get(message))
+        let supermeta = this.metaChain.flatMap(a => a ? [a.get("instance_methods")] : []) //.find(a => a && a.get(message))
+        return [ self, eigen, ...supermeta, shared, ...supershared ]
     }
+    // send(message: string): ReflexObject {
+    //    return super.send(message);
+    // }
+    //    let classMethods = this.eigenclass && this.eigenclass.get("instance_methods")
+    //    let supermeta = this.metaChain.map(a => a && a.get("instance_methods")).find(a => a && a.get(message))
+    //    let shared = this.klass.get("instance_methods")
+    //    let supershared = this.ancestors.map(a => a.get("instance_methods")).find(a => a.get(message))
+    //    let sources = [ classMethods, supermeta, shared, supershared ]
+    //    let source = sources.find(source => source && source.get(message))
+    //    if (source) {
+    //        let result = source.get(message)
+    //        if (result instanceof WrappedFunction) {
+    //            let res = result as WrappedFunction;
+    //            return res.bind(this);
+    //        } else {
+    //            return result
+    //        }
+    //    } else {
+    //    }
+    //}
 }
 
 export const makeReflexObject = (machine: Machine, klass: ReflexClass, args: ReflexObject[]) => {
