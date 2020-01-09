@@ -7,7 +7,7 @@ class Object {
     isA(klass) { self.instanceOf(klass) }
     nil() { false }
     true() { true }
-    false() { self.negate(self.true()) }
+    false() { Boolean.negate(self.true()) }
 }
 
 /*
@@ -27,6 +27,12 @@ class Class {
  */
 class Boolean {
     eq(other) { self.isInstanceOf(other.class) }
+    negate() { Boolean.negate(self) }
+    meta.instanceEval {
+        negate(value) {
+            if (value.true()) { false } else { true }
+        }
+    }
 }
 
 class Truth < Boolean {
@@ -48,28 +54,32 @@ class Number {
     one() { self == 1 }
     divide(other) {
         if (other.zero()) {
-            Infinity.new()
+            Apeiron.new()
         } else {
             self.rawDiv(other)
         }
     }
 }
 
-class Infinity < Number {
-    divide(other) {
-        return Infinity.new()
-    }
+class Apeiron {
+   divide(other) { self }
+   multiply(other) { self }
+   add(other) { self }
+   subtract(other) { self }
+   negate() { self }
 }
 
-class Nil {
+class Nihil {
     nil() { true }
-    false() { true }
+    true() { false }
+    //negate() { true }
 }
 
 # the universal constants
 nil = Nihil.new()
 true = Truth.new()
 false = Falsity.new()
+Infinity = Apeiron.new()
 
 // old ways die hard
 require = Kernel.import;

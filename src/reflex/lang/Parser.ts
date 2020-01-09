@@ -5,6 +5,7 @@ import { tree } from "./ast";
 import Tree from './ast/Tree';
 import { Program } from './ast/Program';
 import { Code } from '../vm/instruction/Instruction';
+import { log } from '../vm/util/log';
 
 var contents = fs.readFileSync('./src/reflex/lang/Reflex.ohm');
 var grammar = ohm.grammar(contents.toString());
@@ -16,7 +17,7 @@ export default class Parser {
     analyze(input: string): [Tree, Code][] {
         let ast: Program = this.tree(input) as Program;
         let code: [Tree, Code][] = ast.lines.map(line => [line, line.code]) //inspect()
-        console.log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
+        log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
         return code
     }
 

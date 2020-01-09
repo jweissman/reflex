@@ -428,3 +428,12 @@ update(msg, model) {
 app = modelViewUpdate model, view, update
 ```
 
+---
+
+thinking of ! and ? as suffixes -- ! could call niladic functions 'forcefully' (maybe gathering yields into a list?? hard collect?)
+? could cast to truthy whatever the result of the function is
+these are just options, it's kind of interesting that they still don't necessarily need to call the function
+(these could be implemented as higher order fns...)
+
+----
+

@@ -27,6 +27,16 @@ describe('Boolean', () => {
                 expect(evaluate("true.neq(false)")).toEqual(true)
             })
         })
+        describe('truthiness', () => {
+            it('all objects except nil and false are .true()', () =>{
+                expect(evaluate("Object.true()")).toEqual(true)
+                expect(evaluate("Object.new().true()")).toEqual(true)
+                expect(evaluate("1.true()")).toEqual(true)
+                expect(evaluate("0.true()")).toEqual(true)
+                expect(evaluate("false.true()")).toEqual(false)
+                expect(evaluate("nil.true()")).toEqual(false)
+            })
+        })
     })
     describe('Falsity', () => {
         it('descends from boolean', () => expect(evaluate('Falsity.isDescendantOf(Boolean)')).toEqual(true))

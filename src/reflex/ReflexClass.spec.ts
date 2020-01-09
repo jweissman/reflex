@@ -421,7 +421,7 @@ describe('Class', () => {
     })
 
     describe(".isAncestorOf/isDescendantOf", () => {
-        fit('describes superclass relationships', () => {
+        it('describes superclass relationships', () => {
             expect(evaluate("Class.isAncestorOf(Object)")).toEqual(false) //false)
             expect(evaluate("Object.isAncestorOf(Class)")).toEqual(true)
             expect(evaluate("Class.isDescendantOf(Object)")).toEqual(true)

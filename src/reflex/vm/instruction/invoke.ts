@@ -85,7 +85,7 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
 export function castReflexToJavascript(object: ReflexObject): any {
     // let result = 
     if (object instanceof ReflexNumber) { return object.value; } // : object
-    else if (object.className === 'Infinity') { return Infinity; }
+    else if (object.className === 'Apeiron') { return Infinity; }
     else if (object.className === 'Truth') { return true; }
     else if (object.className === 'Falsity') { return false; }
     // else if (object.className === 'Nihil') { return null; }

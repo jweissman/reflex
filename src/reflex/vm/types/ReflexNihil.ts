@@ -1,3 +1,6 @@
 import ReflexObject from "./ReflexObject";
 
-export class ReflexNihil extends ReflexObject {}
+export class ReflexNihil extends ReflexObject {
+    /// ...hmmm
+
+}
