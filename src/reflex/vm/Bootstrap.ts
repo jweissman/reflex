@@ -7,37 +7,33 @@ import { ReflexFunction, WrappedFunction } from "./types/ReflexFunction";
 import { ReflexNihil } from "./types/ReflexNihil";
 import Machine from "./Machine";
 import { log } from "./util/log";
-import { ReflexNumber } from "./types/ReflexNumber";
+import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } from "./types/ReflexNumber";
+import { Boots } from "./Boots";
 
-const Class = ReflexClass.klass;
-Class.set("class", Class);
-const Metaclass = ReflexClass.make("Metaclass", ReflexObject.klass, false)
-Metaclass.set("super", Class);
-const RObject = ReflexClass.make("Object")
-RObject.set("super", RObject);
-Class.set("super", RObject);
-// export const ClassMeta = ReflexClass.make("Meta(Class)", Metaclass, false);
-// meta(class) is just metaclass
-Class.set("meta", Metaclass);
+let boots: Boots = new Boots();
+boots.lace();
 
-const ObjectMeta = ReflexClass.make("Meta(Object)", Metaclass, false);
-
-Metaclass.set("pre", Class);
-ObjectMeta.set("pre", RObject);
-Class.set("meta", Metaclass);
-RObject.set("meta", ObjectMeta);
+const Class = boots.classClass;
+const Metaclass = boots.metaclass;
+const RObject = boots.object;
 ReflexObject.klass = RObject;
 
 const RFunction = ReflexClass.make("Function");
 ReflexFunction.klass = RFunction;
 
-const Nihil = ReflexClass.make("Nihil");
+export const Nihil = ReflexClass.make("Nihil");
 ReflexNihil.klass = Nihil;
 
 export const RNumber = ReflexClass.make("Number");
 ReflexNumber.klass = RNumber;
 
-// 
+export const Indeterminate = ReflexClass.make("Indeterminate", RNumber);
+IndeterminateForm.klass = Indeterminate;
+export const PositiveApeiron = ReflexClass.make("PositiveApeiron", RNumber);
+PositiveInfinity.klass = PositiveApeiron;
+export const NegativeApeiron = ReflexClass.make("NegativeApeiron", RNumber);
+NegativeInfinity.klass = NegativeApeiron;
+
 let objectMethods = RObject.get("instance_methods")
 objectMethods.set("eq", new WrappedFunction(`Object.eq`,
  (machine: Machine, other: ReflexObject) => machine.boundSelf!.isEqual(other)
@@ -94,10 +90,18 @@ Kernel.eigenclass.get("instance_methods").set("import", new WrappedFunction(
 
 let arithmetic = {
   eq: (left: number, right: number) => left === right,
-  add: (left: number, right: number) => left + right,
+  add: (left: number, right: number) => {
+    let result = left + right
+    console.log("ADD " + left + " " + right + " YIELDING " + result)
+    return result
+  },
   sub: (left: number, right: number) => left - right,
   mult: (left: number, right: number) => left * right,
-  div: (left: number, right: number) => left / right,
+  div: (left: number, right: number) => {
+    log("DIVIDE " + left + " by " + right)
+    return left / right
+  },
+  mod: (left: number, right: number) => left % right,
   neg: (val: number) => -val,
 }
 
@@ -114,12 +118,18 @@ numberMethods.set("multiply", new WrappedFunction("Number.multiply", (machine: M
 numberMethods.set("rawDiv", new WrappedFunction("Number.rawDiv", (machine: Machine, other: number) => 
     arithmetic.div((machine.boundSelf! as ReflexNumber).value, other)
 ))
+numberMethods.set("modulo", new WrappedFunction("Number.rawDiv", (machine: Machine, other: number) => 
+    arithmetic.mod((machine.boundSelf! as ReflexNumber).value, other)
+))
 numberMethods.set("eq", new WrappedFunction("Number.eq", (machine: Machine, other: number) => 
     arithmetic.eq((machine.boundSelf! as ReflexNumber).value, other)
 ))
 numberMethods.set("negate", new WrappedFunction("Number.negate", (machine: Machine) => 
     arithmetic.neg((machine.boundSelf! as ReflexNumber).value)
 ))
+
+// PositiveApeiron.get("instance_methods").set("value", Infinity)
+// NegativeInfinity.set("value", -Infinity)
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>
@@ -134,6 +144,9 @@ export const bootLocals = {
   Metaclass,
   Kernel,
   Number: RNumber,
+  Indeterminate,
+  PositiveApeiron,
+  NegativeApeiron,
 }
 
 export default constructMain;

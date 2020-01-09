@@ -11,12 +11,9 @@ import { Value } from './Value';
 import { makeReflexObject } from "../types/makeReflexObject";
 import { ReflexNihil } from "../types/ReflexNihil";
 import { getLocal } from "./getLocal";
-import { RNumber } from "../Bootstrap";
-import { ReflexNumber } from "../types/ReflexNumber";
+import { RNumber, Indeterminate, PositiveApeiron, NegativeApeiron } from "../Bootstrap";
+import { ReflexNumber, } from "../types/ReflexNumber";
 import { log } from "../util/log";
-import { dump } from "../util/dump";
-import { dispatch } from "./dispatch";
-// import { log, dump } from "../util";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
     // log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
@@ -84,10 +81,13 @@ function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: 
 
 export function castReflexToJavascript(object: ReflexObject): any {
     // let result = 
-    if (object instanceof ReflexNumber) { return object.value; } // : object
-    else if (object.className === 'Apeiron') { return Infinity; }
-    else if (object.className === 'Truth') { return true; }
+    if (object.className === 'Truth') { return true; }
+    else if (object.className === 'Nihil') { return null; }
     else if (object.className === 'Falsity') { return false; }
+    else if (object.className === 'Indeterminate') { return NaN; }
+    else if (object.className === 'PositiveApeiron') { return Infinity; }
+    else if (object.className === 'NegativeApeiron') { return -Infinity; }
+    else if (object instanceof ReflexNumber) { return object.value; } // : object
     // else if (object.className === 'Nihil') { return null; }
         // dispatch('true', object, machine.stack, machine.frames, machine)
         // let top = stack[stack.length - 1];
@@ -99,19 +99,38 @@ export function castReflexToJavascript(object: ReflexObject): any {
     return object
 }
 export function castJavascriptToReflex(machine: Machine, object: any): ReflexObject {
-    if (typeof object === "number") {
-        return (
-            makeReflexObject(machine, RNumber, [object as unknown as ReflexObject])
-        )
+    if (object instanceof ReflexObject) {
+        return object;
+    } else if (typeof object === "number") {
+        if (isNaN(object)) {
+            log("WOULD CAST NaN to..." + Indeterminate)
+            // throw new Error("Got NAN")
+            return (
+                makeReflexObject(machine, Indeterminate, []) //, [object as unknown as ReflexObject])
+            )
+        }
+        if (object === Infinity) {
+            return (
+                makeReflexObject(machine, PositiveApeiron, []) //, [object as unknown as ReflexObject])
+            )
+        } else if (object === -Infinity) {
+            return (
+                makeReflexObject(machine, NegativeApeiron, []) //, [object as unknown as ReflexObject])
+            )
+        } else {
+            return (
+                makeReflexObject(machine, RNumber, [object as unknown as ReflexObject])
+            )
+        }
     } else if (object === true || object === false) {
         let varName = object ? 'true' : 'false'
         return (getLocal(varName, machine.frames))
     } else {
-        if (object instanceof ReflexObject) {
-            return object;
-        } else {
+        // if (object instanceof ReflexObject) {
+            // return object;
+        // } else {
             throw new Error("won't return uncast JS object")
-        }
+        // }
     }
 }
 

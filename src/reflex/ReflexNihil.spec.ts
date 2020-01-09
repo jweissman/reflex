@@ -13,7 +13,7 @@ describe('Nihil', () => {
 
     describe('"nil" literal', () => {
         it('is a Nihil value', () => {
-            expect(evaluate("nil")).toEqual("Nihil")
+            expect(evaluate("nil")).toEqual(null)
         })
 
         it('is of class Nihil', () => {
@@ -22,14 +22,14 @@ describe('Nihil', () => {
     })
 
     it('is the return value of an empty function', () => {
-        expect(evaluate("f(){};f()")).toEqual("Nihil")
+        expect(evaluate("f(){};f()")).toEqual(null)
     })
 
     it("is the piped value of an exhausted generator", () => {
         evaluate("x=Function")
         evaluate("g=()=>{}")
         evaluate("g { |v| x=v }")
-        expect(evaluate("x")).toEqual("Nihil")
+        expect(evaluate("x")).toEqual(null)
         evaluate("gen=()=>{yield Object}")
         evaluate("gen { |v| x=v }")
         expect(evaluate("x")).toEqual("Class(Object)")

@@ -108,7 +108,8 @@ describe('Number', () => {
                     expect(evaluate("2/2")).toEqual(1)
                     expect(evaluate("4/2")).toEqual(2)
                     expect(evaluate("100/5")).toEqual(20)
-                    expect(evaluate("0/0")).toEqual(Infinity)
+                    expect(evaluate("1/0")).toEqual(Infinity)
+                    expect(evaluate("0/0")).toEqual(NaN)
                 })
             })
 

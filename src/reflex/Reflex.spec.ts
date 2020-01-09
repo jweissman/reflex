@@ -22,14 +22,14 @@ describe('Reflex', () => {
 
                     it('if', ()=> {
                         expect(evaluate("if (true) { Object }")).toEqual("Class(Object)")
-                        expect(evaluate("if (false) { Object }")).toEqual("Nihil")
+                        expect(evaluate("if (false) { Object }")).toEqual(null)
                         expect(evaluate("x=if (true) { Object };x")).toEqual("Class(Object)")
-                        expect(evaluate("x=if (false) { Object };x")).toEqual("Nihil")
+                        expect(evaluate("x=if (false) { Object };x")).toEqual(null)
                     })
 
                     it('if dangles', () => {
                         expect(evaluate("Object if true")).toEqual("Class(Object)")
-                        expect(evaluate("Object if false")).toEqual("Nihil")
+                        expect(evaluate("Object if false")).toEqual(null)
                         expect(evaluate("Object if true else Class")).toEqual("Class(Object)")
                         expect(evaluate("Object if false else Class")).toEqual("Class(Class)")
                     })
@@ -37,21 +37,21 @@ describe('Reflex', () => {
                     it('unless', ()=> {
                         expect(evaluate("unless (true) { Object } else { Class }")).toEqual("Class(Class)")
                         expect(evaluate("unless (false) { Object } else { Class }")).toEqual("Class(Object)")
-                        expect(evaluate("unless (true) { Object }")).toEqual("Nihil")
+                        expect(evaluate("unless (true) { Object }")).toEqual(null)
                         expect(evaluate("unless (false) { Object }")).toEqual("Class(Object)")
 
                         expect(evaluate("unless true==true then { Object } else { Class }")).toEqual("Class(Class)")
                         expect(evaluate("unless true==false then { Object } else { Class }")).toEqual("Class(Object)")
-                        expect(evaluate("unless true==true then { Object }")).toEqual("Nihil")
+                        expect(evaluate("unless true==true then { Object }")).toEqual(null)
                         expect(evaluate("unless true==false then { Object }")).toEqual("Class(Object)")
 
                         expect(evaluate("unless true then Object else Class")).toEqual("Class(Class)")
                         expect(evaluate("unless false then Object else Class")).toEqual("Class(Object)")
-                        expect(evaluate("unless true then Object")).toEqual("Nihil")
+                        expect(evaluate("unless true then Object")).toEqual(null)
                     })
 
                     it('unless dangles', () => {
-                        expect(evaluate("Object unless true")).toEqual("Nihil")
+                        expect(evaluate("Object unless true")).toEqual(null)
                         expect(evaluate("Object unless false")).toEqual("Class(Object)")
                         expect(evaluate("Object unless true else Class")).toEqual("Class(Class)")
                         expect(evaluate("Object unless false else Class")).toEqual("Class(Object)")
@@ -75,7 +75,7 @@ describe('Reflex', () => {
                             evaluate('x=nil')
                             evaluate('assign=->{x=Object.new();true}')
                             expect(evaluate("true || assign()")).toEqual(true)
-                            expect(evaluate("x")).toEqual("Nihil")
+                            expect(evaluate("x")).toEqual(null)
                             expect(evaluate("false || false || assign()")).toEqual(true)
                             expect(evaluate("x")).toEqual("Object")
                         })
@@ -92,7 +92,7 @@ describe('Reflex', () => {
                             evaluate('x=nil')
                             evaluate('assign=()=>{x=Object.new(); true}')
                             expect(evaluate("false && assign()")).toEqual(false)
-                            expect(evaluate("x")).toEqual("Nihil")
+                            expect(evaluate("x")).toEqual(null)
                             expect(evaluate("true && true && true && assign()")).toEqual(true)
                             expect(evaluate("x")).toEqual("Object")
                         })
@@ -150,6 +150,23 @@ describe('Reflex', () => {
                         expect(evaluate("1 != 0")).toEqual(true)
                         expect(evaluate("0 != 0")).toEqual(false)
                         expect(evaluate("2 != -2")).toEqual(true)
+                    })
+                })
+
+                describe("+-/*%", () => {
+                    it('arithmetic', () => {
+                        expect(evaluate('2+2')).toEqual(4)
+                        expect(evaluate('2*3+5')).toEqual(11)
+                        expect(evaluate('2*3+10/2')).toEqual(11)
+                        expect(evaluate('3*(2+10)/2')).toEqual(18)
+                        expect(evaluate('100%10')).toEqual(0)
+                        expect(evaluate('101%10')).toEqual(1)
+                        expect(evaluate('1101%10')).toEqual(1)
+                    })
+                    it('infinite arithmetic', () => {
+                        expect(evaluate('1/0')).toEqual(Infinity)
+                        expect(evaluate('-1/0')).toEqual(-Infinity)
+                        expect(evaluate('(1/0)+1')).toEqual(Infinity)
                     })
                 })
             })
@@ -277,7 +294,7 @@ describe('Reflex', () => {
                     evaluate('x=nil')
                     evaluate('f(val){x=val}')
                     evaluate('g(&b){b(Object)}')
-                    expect(evaluate("x")).toEqual("Nihil")
+                    expect(evaluate("x")).toEqual(null)
                     evaluate('g(&f)')
                     expect(evaluate("x")).toEqual("Class(Object)")
                 })

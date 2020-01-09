@@ -431,9 +431,35 @@ app = modelViewUpdate model, view, update
 ---
 
 thinking of ! and ? as suffixes -- ! could call niladic functions 'forcefully' (maybe gathering yields into a list?? hard collect?)
-? could cast to truthy whatever the result of the function is
+? could cast to truthy whatever the result of the function is -- maybe also short-circuit/safenav (is that too much on one symbol??)
 these are just options, it's kind of interesting that they still don't necessarily need to call the function
 (these could be implemented as higher order fns...)
 
 ----
 
+
+a few quick models for reflex as a general project...
+
+  - "adding reflection to javascript"
+  - 'unitary ruby' (reflection across client/server barrier... drb++)
+  - 'infinite lisp' (binding+bytecode introspection and ast structure manip as xml trees both seem v powerful honestly --)
+
+---
+
+keep having this thought about going metacircular, having a grammar literal that is just an ohm grammar
+(or being able to 'natively' import an ohm grammar) and then using that to parse things, into structures
+you could give with xml literals
+
+and then the language itself could be encoded into itself??
+
+this at least in theory permits some degree of metacircular structure, but it's a bit convoluted
+
+it does seem nice for lang *extensions* to be able to specify simultaneously the grammatical part and the tree details
+
+being able to specify parts of the language 'in refl' seems neat / opening up a powerful set of properties
+
+again this is probably all lang-astronaut stuff but it also seems like the critical path is interesting anyway --
+
+tree objects (syntaxed as xml literals) as parse targets, and grammar literals (ohm heredocs) for parsing little languages
+
+---

@@ -8,7 +8,7 @@ export class NumberLiteral extends Tree {
   get code(): Code {
     return [
       ['push', this.value],
-      ['local_var_get', 'Number'],
+      ['bare', 'Number'],
       ['push', 'new'],
       ['call', null],
       ['invoke', 1],

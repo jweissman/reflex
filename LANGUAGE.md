@@ -1,8 +1,9 @@
-# THE REFLEX PROGRAMMING LANGUAGE SPECIFICATION
+# THE REFLEX PROGRAMMING LANGUAGE REFERENCE
 
 ## About
 
 This document describes the structure of the Reflex programming language. 
+(Note the "official spec" for now is just the reference implementation contained in this repository.)
 
 ## Guiding Principles
 
@@ -42,6 +43,27 @@ With that in mind, here are the principles that will guide us.
    Capture ideas as languages.
    Focus on the expression of problems rather than solution-specification.
    A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.
+
+## Introduction
+
+Reflection is a powerful property, relating inherently to both symmetry and language or "representation".
+
+Reflex tries to answer some of the questions that have been asked (and answered to some degree)
+in languages like Ruby, Eiffel, Smalltalk, Self and Simula. ("Zuse" could be a name for this language.)
+
+We don't necessarily have a lot of new answers, but these are some of the most important ideas we are exploring.
+
+1. Providing structured, fine-grained mechanisms for reflection
+
+In particular the reflecting instruments as we conceive them:
+  - 'mirrors' for creating images (lightweight proxies/decorators/views) and illusions (structured pseudo-objects like super);
+  - 'wands' for mapping between the JS environment and back (wands "cast" between reflex and JS); some of the 'permanent' structures wands can create 'portals' and 'wormholes' for transporting things across the language barrier...
+  - 'crystals' for creating, in conjunction with mirrored objects, 'holograms' or structured systems of images/proxies;
+
+Some of the more mechanical elements...
+  - 'archetypes', a reflective approach to structural types, for creating new kinds in the system (i.e., something like a type but modelled objectively -- classes themselves could be an archetype)
+  - 'aspects' or traits, mixins -- only different from mixing in anonymous module in that they can be reflected on directly
+  
 
 ## Core Types
 ### Object

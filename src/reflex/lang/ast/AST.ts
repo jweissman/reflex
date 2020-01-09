@@ -22,7 +22,7 @@ import { NumberLiteral } from "./NumberLiteral";
 import { Negate } from "./Negate";
 import { Code } from "../../vm/instruction/Instruction";
 // new Binary('+', left.tree, right.tree),
-type BinaryOp = '+' | '-' | '*' | '/'
+type BinaryOp = '+' | '-' | '*' | '/' | '%'
 class Binary extends Tree {
   constructor(public op: BinaryOp, public left: Tree, public right: Tree) {
     super();
@@ -35,6 +35,7 @@ class Binary extends Tree {
       '-': 'subtract',
       '*': 'multiply',
       '/': 'divide',
+      '%': 'modulo',
     }
     return [
       ...this.right.code,
@@ -140,6 +141,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Binary('*', left.tree, right.tree),
   MulExpr_quotient: (left: Node, _sum: Node, right: Node) =>
     new Binary('/', left.tree, right.tree),
+  MulExpr_modulo: (left: Node, _sum: Node, right: Node) =>
+    new Binary('%', left.tree, right.tree),
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),

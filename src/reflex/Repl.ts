@@ -1,7 +1,6 @@
 import { prettyCode } from "./vm/instruction/Instruction";
 import chalk from 'chalk';
 import Reflex from "./Reflex";
-import { castReflexToJavascript } from "./vm/instruction/invoke";
 export class Repl {
     interact(interpreter: Reflex) {
         const clear = require('clear');
@@ -18,7 +17,7 @@ export class Repl {
             eval: (input: string, _ctx: any, _filename: any, cb: any) => {
                 let out = '(nothing)';
                 try {
-                    out = castReflexToJavascript(interpreter.evaluate(input));
+                    out = (interpreter.evaluate(input));
                     if (out === undefined) {
                         out = '(no-result)';
                     }

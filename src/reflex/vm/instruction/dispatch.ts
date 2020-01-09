@@ -1,7 +1,7 @@
 import ReflexObject from '../types/ReflexObject';
 import { invoke } from './invoke';
 import { ret } from './ret';
-import { ReflexFunction, WrappedFunction } from '../types/ReflexFunction';
+import { ReflexFunction } from '../types/ReflexFunction';
 import { Stack } from '../Stack';
 import { Frame } from '../Frame';
 import Machine from '../Machine';
@@ -13,7 +13,6 @@ export function dispatch(message: string, object: ReflexObject, stack: Stack, fr
     let fn = object.send(message) as ReflexFunction;
     stack.push(fn);
     let arity = fn.arity;
-    // if (fn instanceof WrappedFunction) { arity -= 1; }
     log("DISPATCH " + message + " TO " + object.inspect() + " -- INVOKE " + fn.inspect() + " with ARITY " + arity)
     invoke(arity, !!fn.blockParamName, stack, frames, machine.currentProgram, machine);
     if (doRet) {

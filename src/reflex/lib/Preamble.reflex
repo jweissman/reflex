@@ -54,32 +54,47 @@ class Number {
     one() { self == 1 }
     divide(other) {
         if (other.zero()) {
-            Apeiron.new()
+            if (self.zero()) {
+                Indeterminate.new()
+            } else {
+                PositiveApeiron.new()
+            }
         } else {
             self.rawDiv(other)
         }
     }
+
+    // times() {
+    //     counter = self;
+    //     until (counter.zero()) {
+    //         yield();
+    //         counter = counter - 1;
+    //     }
+    // }
 }
 
-class Apeiron {
-   divide(other) { self }
-   multiply(other) { self }
-   add(other) { self }
-   subtract(other) { self }
-   negate() { self }
+class Indeterminate < Number {}
+
+class Apeiron < Number {
+    add(other) { self }
+    subtract(other) { self }
+    multiply(other) { self }
+    divide(other) { self }
 }
+class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
+class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
 class Nihil {
     nil() { true }
     true() { false }
-    //negate() { true }
 }
 
 # the universal constants
 nil = Nihil.new()
 true = Truth.new()
 false = Falsity.new()
-Infinity = Apeiron.new()
+Infinity = PositiveApeiron.new()
+NegativeInfinity = NegativeApeiron.new()
 
 // old ways die hard
 require = Kernel.import;

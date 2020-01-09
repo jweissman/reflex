@@ -37,6 +37,7 @@ Reflex {
     MulExpr
       = MulExpr "*" PriExpr -- product
       | MulExpr "/" PriExpr -- quotient
+      | MulExpr "%" PriExpr -- modulo
       | PriExpr
 
     PriExpr
@@ -44,6 +45,7 @@ Reflex {
 	    | SendMessageEq
       | SendMessage
 	    | CondExpr
+      // | LoopExpr
 	    | Defun
       | FunctionLit
 	    | "(" Expr ")" -- parens
@@ -52,6 +54,8 @@ Reflex {
       | Bareword
       | NumberLit
       | StringLit
+
+    // LoopExpr
       
     CondTernary
       = Expr "?" Expr ":" Expr

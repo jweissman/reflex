@@ -10,7 +10,7 @@ export function call(stack: Stack, frames: Frame[]) {
         stack[stack.length - 2],
         stack[stack.length - 1]
     ];
-    // log("CALL -- top: " + top + " second: " + (second) + "(" + typeof second + ")");
+    log("CALL -- top (method): " + top + " second (recv): " + (second) + "(" + typeof second + ")");
     if (second && second instanceof ReflexObject && top && typeof top === 'string') {
         pop(stack);
         pop(stack);

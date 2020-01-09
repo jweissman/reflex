@@ -1,6 +1,5 @@
 import ReflexObject from "./ReflexObject";
 import { Frame } from "../Frame";
-import { log } from "../util/log";
 import ReflexClass from "./ReflexClass";
 
 export class ReflexFunction extends ReflexObject {

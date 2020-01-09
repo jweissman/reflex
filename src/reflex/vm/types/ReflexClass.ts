@@ -1,12 +1,17 @@
+import util from 'util';
 import ReflexObject from "./ReflexObject";
 import { ReflexFunction } from "./ReflexFunction";
 import Machine from "../Machine";
-import { ReflexNumber } from "./ReflexNumber";
+import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } from "./ReflexNumber";
 import { makeMetaclass } from "./makeMetaclass";
+import { log } from "../util/log";
 
 export const NATIVE_CLASSES: { [key: string]: any } = {
     "Function": ReflexFunction,
     "Number": ReflexNumber,
+    "Indeterminate": IndeterminateForm,
+    "NegativeApeiron": NegativeInfinity,
+    "PositiveApeiron": PositiveInfinity,
 }
 
 export const classRegistry: { [key: string]: ReflexClass } = {}
@@ -14,7 +19,7 @@ export const classRegistry: { [key: string]: ReflexClass } = {}
 export default class ReflexClass extends ReflexObject {
     isClass: boolean = true;
 
-    static make = (name: string, superclass: ReflexClass = ReflexObject.klass, wireMethods: boolean = true) => {
+    static make = (name: string, superclass: ReflexClass = ReflexObject.klass) => {
         // log("MAKE CLASS " + name + " SUBCLASS OF " + superclass)
         let klass = new ReflexClass(name);
         classRegistry[name] = klass;
@@ -25,11 +30,16 @@ export default class ReflexClass extends ReflexObject {
         if (superclass && superclass.get("meta")) {
             meta = makeMetaclass(klass)
             klass.set("meta", meta);
+        } else {
+            // if (name !== 'Object') {
+                // log("WOULD CREATE META FOR " + name);
+                // klass.set("meta", ReflexClass.make("Meta(" + name + ")", Metaclass.klass)
+            // }
         }
         return klass;
     }
 
-    static klass = ReflexClass.make("Class", ReflexClass.klass, false);
+    static klass = ReflexClass.make("Class", ReflexObject.klass);
 
     static instanceEval(self: ReflexObject, machine: Machine, block: ReflexFunction) {
         block.frame.self = self;
@@ -71,6 +81,8 @@ export default class ReflexClass extends ReflexObject {
         let shared = this.klass.get("instance_methods")
         let supershared = this.ancestors.map(a => a.get("instance_methods"))
         let supermeta = this.metaChain.flatMap(a => a ? [a.get("instance_methods")] : [])
-        return [  eigen, ...supermeta, shared, ...supershared ]
+        let sources = [  eigen, ...supermeta, shared, ...supershared ]
+        // log(this.inspect() + " MSG SOURCES: " + util.inspect(sources))
+        return sources;
     }
 }
