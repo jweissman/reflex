@@ -18,20 +18,31 @@ import { Arguments, Argument } from "./Arguments";
 import { Parameter } from "./Parameter";
 import { Compare } from "./Compare";
 import { Conditional } from "./Conditional";
+import { NumberLiteral } from "./NumberLiteral";
+import { Negate } from "./Negate";
 import { Code } from "../../vm/instruction/Instruction";
-
-class NumberLiteral extends Tree {
-  constructor(public value: number) { super(); }
-  inspect(): string {
-    return this.value.toString();
+// new Binary('+', left.tree, right.tree),
+type BinaryOp = '+' | '-' | '*' | '/'
+class Binary extends Tree {
+  constructor(public op: BinaryOp, public left: Tree, public right: Tree) {
+    super();
   }
+  inspect() { return this.left.inspect() + this.op + this.right.inspect() }
+
   get code(): Code {
+    let opMap: { [op in BinaryOp]: string } = {
+      '+': 'add',
+      '-': 'subtract',
+      '*': 'multiply',
+      '/': 'divide',
+    }
     return [
-      [ 'push', this.value ],
-      [ 'local_var_get', 'Number'],
-      [ 'dispatch', 'new' ],
+      ...this.right.code,
+      ...this.left.code,
+      ['push', opMap[this.op]],
+      ['call', null],
+      ['invoke', 1],
     ]
-    // throw new Error("NumberLiteral.code -- Method not implemented.");
   }
 }
 
@@ -96,6 +107,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Bareword: (word: Node) => new Bareword(word.sourceString),
   Barecall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
   PriExpr_parens: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
+  PriExpr_neg: (_neg: Node, expr: Node) => new Negate(expr.tree),
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),
   CmpExpr_neq: (left: Node, _eq: Node, right: Node) => new Compare('!=', left.tree, right.tree),
   CondStmt_ifThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
@@ -120,6 +132,14 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Conditional('if', left.tree, left.tree, right.tree),
   BoolExpr_bool_and: (left: Node, _or: Node, right: Node) =>
     new Conditional('if', left.tree, right.tree, new Bareword('false')),
+  AddExpr_sum: (left: Node, _sum: Node, right: Node) =>
+    new Binary('+', left.tree, right.tree),
+  AddExpr_difference: (left: Node, _sum: Node, right: Node) =>
+    new Binary('-', left.tree, right.tree),
+  MulExpr_product: (left: Node, _sum: Node, right: Node) =>
+    new Binary('*', left.tree, right.tree),
+  MulExpr_quotient: (left: Node, _sum: Node, right: Node) =>
+    new Binary('/', left.tree, right.tree),
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),

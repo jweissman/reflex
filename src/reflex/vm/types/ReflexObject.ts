@@ -44,7 +44,7 @@ export default class ReflexObject {
     }
 
     send(message: string): ReflexObject {
-        // debug("ReflexObject.send -- " + message + "-- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
+        debug("ReflexObject.send -- " + message + "-- to self: " + this.inspect() + " class: " + this.klass + " super: " + this.superclass);
         if (message === 'self') { return this.self }
         else if (this.isClass === false && message === 'super') { return this.super }
         else if (this.has(message)) { return this.get(message) }

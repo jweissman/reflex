@@ -1,6 +1,7 @@
 import ReflexObject from "./ReflexObject";
+
 export class ReflexNumber extends ReflexObject {
-    name = 'Number';
+  // name = 'Number'
   constructor(public value: number) {
     super();
   }

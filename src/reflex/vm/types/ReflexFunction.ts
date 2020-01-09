@@ -33,7 +33,7 @@ export class WrappedFunction extends ReflexObject {
 
     get displayName() { return `Function(${this.name}[wrap])`; }
 
-    get arity() { return this.impl.length; }
+    // get arity() { return this.impl.length-1; }
 
     bind(self: ReflexClass) {
         // log("BIND WRAPPED FN " + this.name + " TO " + self.inspect());

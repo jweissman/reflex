@@ -36,27 +36,6 @@ ReflexNihil.klass = Nihil;
 
 export const RNumber = ReflexClass.make("Number");
 ReflexNumber.klass = RNumber;
-let numberMethods = RNumber.get("instance_methods");
-numberMethods.set("add", new WrappedFunction("Number.add",
-  (machine: Machine, other: ReflexNumber) => {
-    let left =  (machine.boundSelf! as ReflexNumber).value 
-    let right =  other.value
-    let result = left + right;
-    log("Number.add res="+ result + " left="+ left + " right="+ right)
-    return result
-    // return makeReflexObject(machine, RNumber, [result as unknown as ReflexObject]);
-  }
-))
-numberMethods.set("eq", new WrappedFunction("Number.eq",
-  (machine: Machine, other: ReflexNumber) => {
-    let left =  (machine.boundSelf! as ReflexNumber).value 
-    let right =  other.value
-    let result = left === right;
-    log("Number.eq res="+ result + " left="+ left + " right="+ right)
-    return result
-    // return makeReflexObject(machine, RNumber, [result as unknown as ReflexObject]);
-  }
-))
 
 // 
 let objectMethods = RObject.get("instance_methods")
@@ -79,7 +58,7 @@ objectMethods.set("isInstanceOf", new WrappedFunction(
 
 let metaclassMethods = Metaclass.get("instance_methods")
 metaclassMethods.set("new", new WrappedFunction(
-  `Meta(Class).new`,
+  `Metaclass.new`,
   (_machine: Machine, name: string, customSuper?: ReflexClass) =>
     ReflexClass.make(
       name || 'Anonymous',
@@ -113,6 +92,35 @@ Kernel.eigenclass.get("instance_methods").set("import", new WrappedFunction(
   (machine: Machine, filename: string) => machine.import(filename))
 )
 
+let arithmetic = {
+  eq: (left: number, right: number) => left === right,
+  add: (left: number, right: number) => left + right,
+  sub: (left: number, right: number) => left - right,
+  mult: (left: number, right: number) => left * right,
+  div: (left: number, right: number) => left / right,
+  neg: (val: number) => -val,
+}
+
+let numberMethods = RNumber.get("instance_methods");
+numberMethods.set("add", new WrappedFunction("Number.add", (machine: Machine, other: number) => 
+    arithmetic.add((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("subtract", new WrappedFunction("Number.subtract", (machine: Machine, other: number) => 
+    arithmetic.sub((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("multiply", new WrappedFunction("Number.multiply", (machine: Machine, other: number) => 
+    arithmetic.mult((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("rawDiv", new WrappedFunction("Number.rawDiv", (machine: Machine, other: number) => 
+    arithmetic.div((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("eq", new WrappedFunction("Number.eq", (machine: Machine, other: number) => 
+    arithmetic.eq((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("negate", new WrappedFunction("Number.negate", (machine: Machine) => 
+    arithmetic.neg((machine.boundSelf! as ReflexNumber).value)
+))
+
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>
   makeReflexObject(machine, Main, [])
@@ -125,6 +133,7 @@ export const bootLocals = {
   Nihil,
   Metaclass,
   Kernel,
+  Number: RNumber,
 }
 
 export default constructMain;

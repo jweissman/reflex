@@ -1,34 +1,6 @@
 import { evaluate } from "./SpecHelper"
 describe('Reflex', () => {
     describe('structures', () => {
-        describe('Number', () => {
-            it('is the class of numeric values', () => {
-                expect(evaluate("Number")).toEqual("Class(Number)")
-                expect(evaluate("Number.class")).toEqual("Class(Class)")
-            })
-            describe('zero', () => {
-                it('is a number', () => {
-                    expect(evaluate("0")).toEqual("0")
-                    expect(evaluate("0.class")).toEqual("Class(Number)")
-                })
-                it('is an additive identity', () => {
-                    expect(evaluate("0.add(0)")).toEqual("0")
-                    expect(evaluate("1.add(0)")).toEqual("1")
-                    expect(evaluate("2.add(0)")).toEqual("2")
-                    expect(evaluate("2.add(0).add(0).add(0)")).toEqual("2")
-                })
-                it('eq itself', () => {
-                    expect(evaluate("0.eq(0)")).toEqual("Truth")
-                    expect(evaluate("0.eq(1)")).toEqual("Falsity")
-                })
-                it('can tautology', () => {
-                    expect(evaluate("2.add(2).eq(4)")).toEqual("Truth")
-                    expect(evaluate("2.add(2).eq(5)")).toEqual("Falsity")
-                    expect(evaluate("1.add(2).add(3).add(4).eq(10)")).toEqual("Truth")
-                    expect(evaluate("1.add(2).add(3).add(4).eq(11)")).toEqual("Falsity")
-                })
-            })
-        })
         test.todo('Array')
         test.todo('String')
     })
@@ -93,35 +65,35 @@ describe('Reflex', () => {
                     })
                     describe('boolean or', () => {
                         it('has ORs truth table', () => {
-                            expect(evaluate("true || true")).toEqual("Truth")
-                            expect(evaluate("true || false")).toEqual("Truth")
-                            expect(evaluate("false || true")).toEqual("Truth")
-                            expect(evaluate("false || false")).toEqual("Falsity")
-                            expect(evaluate("false || false || true")).toEqual("Truth")
+                            expect(evaluate("true || true")).toEqual(true)
+                            expect(evaluate("true || false")).toEqual(true)
+                            expect(evaluate("false || true")).toEqual(true)
+                            expect(evaluate("false || false")).toEqual(false)
+                            expect(evaluate("false || false || true")).toEqual(true)
                         })
                         it('short-circuits', () => {
                             evaluate('x=nil')
                             evaluate('assign=->{x=Object.new();true}')
-                            expect(evaluate("true || assign()")).toEqual("Truth")
+                            expect(evaluate("true || assign()")).toEqual(true)
                             expect(evaluate("x")).toEqual("Nihil")
-                            expect(evaluate("false || false || assign()")).toEqual("Truth")
+                            expect(evaluate("false || false || assign()")).toEqual(true)
                             expect(evaluate("x")).toEqual("Object")
                         })
                     })
                     describe('boolean and', () => {
                         it('has ANDs truth table', () => {
-                            expect(evaluate("true && true")).toEqual("Truth")
-                            expect(evaluate("true && true && false")).toEqual("Falsity")
-                            expect(evaluate("true && false")).toEqual("Falsity")
-                            expect(evaluate("false && true")).toEqual("Falsity")
-                            expect(evaluate("false && false")).toEqual("Falsity")
+                            expect(evaluate("true && true")).toEqual(true)
+                            expect(evaluate("true && true && false")).toEqual(false)
+                            expect(evaluate("true && false")).toEqual(false)
+                            expect(evaluate("false && true")).toEqual(false)
+                            expect(evaluate("false && false")).toEqual(false)
                         })
                         it('short-circuits', () => {
                             evaluate('x=nil')
                             evaluate('assign=()=>{x=Object.new(); true}')
-                            expect(evaluate("false && assign()")).toEqual("Falsity")
+                            expect(evaluate("false && assign()")).toEqual(false)
                             expect(evaluate("x")).toEqual("Nihil")
-                            expect(evaluate("true && true && true && assign()")).toEqual("Truth")
+                            expect(evaluate("true && true && true && assign()")).toEqual(true)
                             expect(evaluate("x")).toEqual("Object")
                         })
                     })
@@ -130,41 +102,54 @@ describe('Reflex', () => {
             describe('operators', () => {
                 describe('== (eq)', () => {
                     it('compares truth values', () => {
-                        expect(evaluate("true == true")).toEqual('Truth')
-                        expect(evaluate("true == false")).toEqual('Falsity')
-                        expect(evaluate("false == true")).toEqual('Falsity')
-                        expect(evaluate("false == false")).toEqual('Truth')
+                        expect(evaluate("true == true")).toEqual(true)
+                        expect(evaluate("true == false")).toEqual(false)
+                        expect(evaluate("false == true")).toEqual(false)
+                        expect(evaluate("false == false")).toEqual(true)
                     })
                     it('denotes absolute object equality', () => {
                         evaluate("o = Object.new()")
-                        expect(evaluate("o == Object.new()")).toEqual('Falsity')
-                        expect(evaluate("Object.new() == Object.new()")).toEqual('Falsity')
-                        expect(evaluate("o == o")).toEqual('Truth')
+                        expect(evaluate("o == Object.new()")).toEqual(false)
+                        expect(evaluate("Object.new() == Object.new()")).toEqual(false)
+                        expect(evaluate("o == o")).toEqual(true)
                     })
                     it('denotes absolute class equality', () => {
-                        expect(evaluate("Object == Object")).toEqual('Truth')
-                        expect(evaluate("Object == Class")).toEqual('Falsity')
-                        expect(evaluate("Class == Class")).toEqual('Truth')
+                        expect(evaluate("Object == Object")).toEqual(true)
+                        expect(evaluate("Object == Class")).toEqual(false)
+                        expect(evaluate("Class == Class")).toEqual(true)
+                    })
+                    it('denotes absolute numeric equality', () => {
+                        expect(evaluate("0 == 0")).toEqual(true)
+                        expect(evaluate("0 == 1")).toEqual(false)
+                        expect(evaluate("1 == 1")).toEqual(true)
                     })
                 })
 
                 describe("!= (neq)", () => {
                     it('distinguishes truth values', () => {
-                        expect(evaluate("true != true")).toEqual('Falsity')
-                        expect(evaluate("true != false")).toEqual('Truth')
-                        expect(evaluate("false != true")).toEqual('Truth')
-                        expect(evaluate("false != false")).toEqual('Falsity')
+                        expect(evaluate("true != true")).toEqual(false)
+                        expect(evaluate("true != false")).toEqual(true)
+                        expect(evaluate("false != true")).toEqual(true)
+                        expect(evaluate("false != false")).toEqual(false)
                     })
-                    xit('distinguishes objects absolutely', () => {
+                    it('distinguishes objects absolutely', () => {
                         evaluate("o = Object.new()")
-                        expect(evaluate("o != Object.new()")).toEqual('Truth')
-                        expect(evaluate("Object.new() != Object.new()")).toEqual('Truth')
-                        expect(evaluate("o != o")).toEqual('Falsity')
+                        expect(evaluate("o != Object.new()")).toEqual(true)
+                        expect(evaluate("Object.new() != Object.new()")).toEqual(true)
+                        expect(evaluate("o != o")).toEqual(false)
                     })
-                    xit('distinguishes classes absolutely', () => {
-                        expect(evaluate("Object != Object")).toEqual('Truth')
-                        expect(evaluate("Object != Class")).toEqual('Falsity')
-                        expect(evaluate("Class != Class")).toEqual('Truth')
+                    it('distinguishes classes absolutely', () => {
+                        expect(evaluate("Object != Number")).toEqual(true)
+                        expect(evaluate("Object != Function")).toEqual(true)
+                        expect(evaluate("Object != Object")).toEqual(false)
+                        expect(evaluate("Class != Number")).toEqual(true)
+                        expect(evaluate("Class != Boolean")).toEqual(true)
+                        expect(evaluate("Class != Class")).toEqual(false)
+                    })
+                    it('distinguishes numbers absolutely', () => {
+                        expect(evaluate("1 != 0")).toEqual(true)
+                        expect(evaluate("0 != 0")).toEqual(false)
+                        expect(evaluate("2 != -2")).toEqual(true)
                     })
                 })
             })

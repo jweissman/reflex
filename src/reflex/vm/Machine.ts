@@ -11,6 +11,7 @@ import { update } from './update';
 import Reflex from '../Reflex';
 import { State } from './State';
 import fs from 'fs';
+import { debug } from "./util/log";
 
 export default class Machine {
     stack: Value[] = []
@@ -41,7 +42,7 @@ export default class Machine {
         let path = paths.find(p => fs.existsSync(p))
         if (path) {
             let contents: string = fs.readFileSync(path).toString();
-            console.log("READ CONTENTS", { given, contents })
+            // console.log("READ CONTENTS", { given, contents })
             this.reflex.evaluate(contents.toString())
         } else {
             throw new Error("Could find find path " + given)
@@ -92,8 +93,8 @@ export default class Machine {
         if (step) {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
-            console.log(`init execution @${label}, ip = ${this.ip}`)
-            console.log(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
+            // log(`init execution @${label}, ip = ${this.ip}`)
+            debug(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
             this.executeLoop();
         } else {
             fail("Could not find label " + label)
@@ -106,7 +107,7 @@ export default class Machine {
     executeLoop() {
         this.halted = false;
         while (!this.halted) { //} && this.currentInstruction) {
-            console.log("CURRENT INSTRUCTION: " + this.currentInstruction)
+            // console.log("CURRENT INSTRUCTION: " + this.currentInstruction)
             let [op] = this.currentInstruction
             
             // {

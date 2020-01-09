@@ -388,3 +388,43 @@ mirror-like structures -- maybe better called 'Wormholes' if they are reflecting
 maybe Wormhole is like the channel you use, that the portal can give, into the JS context -- ??
 
 ---
+
+realm -- reflex elm dsl
+
+--- this is more like the react dsl?
+
+```
+AppLayout = FC <div><main>{yield}</main></div>
+state AppState { count = 0; inc() { count++ } }
+component App {
+  stateful AppState
+  render(state) {
+    <AppLayout>
+      <div><button onClick=#:Increment>
+    </AppLayout>
+  }
+}
+```
+
+elmish would be like
+
+```
+archetype Message {}
+message Increment {}
+message Decrement {}
+model = 0
+view(model) {
+  <div>
+    <button onClick=#:Increment>+</button>
+    <button onClick=#:Decrement>-</button>
+  </div>
+}
+update(msg, model) {
+  case message as Message {
+    when Increment then model++
+    when Decrement then model--
+  }
+}
+app = modelViewUpdate model, view, update
+```
+

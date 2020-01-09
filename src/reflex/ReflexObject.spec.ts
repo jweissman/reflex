@@ -112,7 +112,7 @@ describe('Object', () => {
     describe("#isInstanceOf", () => {
         it('knows its ancestors', () => {
             evaluate("o=Object.new()")
-            expect(evaluate("o.isInstanceOf(Object)")).toEqual("Truth")
+            expect(evaluate("o.isInstanceOf(Object)")).toEqual(true)
         })
     })
 });

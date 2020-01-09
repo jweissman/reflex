@@ -421,11 +421,11 @@ describe('Class', () => {
     })
 
     describe(".isAncestorOf/isDescendantOf", () => {
-        it('describes superclass relationships', () => {
-            expect(evaluate("Class.isAncestorOf(Object)")).toEqual("Falsity")
-            expect(evaluate("Object.isAncestorOf(Class)")).toEqual("Truth")
-            expect(evaluate("Class.isDescendantOf(Object)")).toEqual("Truth")
-            expect(evaluate("Object.isDescendantOf(Class)")).toEqual("Falsity")
+        fit('describes superclass relationships', () => {
+            expect(evaluate("Class.isAncestorOf(Object)")).toEqual(false) //false)
+            expect(evaluate("Object.isAncestorOf(Class)")).toEqual(true)
+            expect(evaluate("Class.isDescendantOf(Object)")).toEqual(true)
+            expect(evaluate("Object.isDescendantOf(Class)")).toEqual(false)
         })
     })
 });

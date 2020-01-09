@@ -155,9 +155,9 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             let recv = top as ReflexObject;
             pop(stack);
             debug("dispatch " + msg + " to " + recv.inspect());
-            // log("STACK IS " + dump(stack));
+            log("STACK IS " + dump(stack));
             dispatch(value as string, top as ReflexObject, stack, frames, machine);
-            // log("AFTER DISPATCH " + msg + " to " + recv + " -- stack is " + dump(stack));
+            log("AFTER DISPATCH " + msg + " to " + recv + " -- stack is " + dump(stack));
             break;
         default: assertNever(op);
     }

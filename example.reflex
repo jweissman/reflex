@@ -1,0 +1,17 @@
+// a simple hello class
+class Hello {
+    init() {
+        self.greeting = 'Hello, '
+    }
+
+    greet(subject) {
+        self.greeting + subject if subject
+    }
+}
+
+/* yup */
+/*
+nope
+*/
+greeter = Hello.new()
+greeter.greet("world")

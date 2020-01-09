@@ -20,13 +20,23 @@ Reflex {
       | BoolExpr
 
     BoolExpr
-      = BoolExpr "||" BoolExpr -- bool_or
-      | BoolExpr "&&" BoolExpr -- bool_and
+      = BoolExpr "||" CmpExpr -- bool_or
+      | BoolExpr "&&" CmpExpr -- bool_and
       | CmpExpr
 
     CmpExpr
-      = CmpExpr "==" CmpExpr -- eq
-      | CmpExpr "!=" CmpExpr -- neq
+      = CmpExpr "==" AddExpr -- eq
+      | CmpExpr "!=" AddExpr -- neq
+      | AddExpr
+
+    AddExpr
+      = AddExpr "+" MulExpr -- sum
+      | AddExpr "-" MulExpr -- difference
+      | MulExpr
+    
+    MulExpr
+      = MulExpr "*" PriExpr -- product
+      | MulExpr "/" PriExpr -- quotient
       | PriExpr
 
     PriExpr
@@ -37,6 +47,7 @@ Reflex {
 	    | Defun
       | FunctionLit
 	    | "(" Expr ")" -- parens
+      | "-" Expr -- neg
       | Barecall
       | Bareword
       | NumberLit

@@ -1,7 +1,24 @@
+/*
+ * class Object
+ * The class of everything!
+ */
+class Object {
+    neq(other) { self.eq(other).negate() }
+    isA(klass) { self.instanceOf(klass) }
+    nil() { false }
+    true() { true }
+    false() { self.negate(self.true()) }
+}
+
+/*
+ * Class
+ *
+ * The class of classes.
+ */
 class Class {
     isDescendantOf(other) { other.isAncestorOf(self) }
-};
-nil = Nihil.new();
+    isKindOf(other) { other == self || other.isAncestorOf(self) }
+}
 
 /*
  * Boolean
@@ -9,21 +26,53 @@ nil = Nihil.new();
  * The class of truth-values.
  */
 class Boolean {
-    false() { self.negate(self.true()) };
-    eq(other) { self.isInstanceOf(other.class) };
-    neq(other) { self.eq(other).negate() };
-};
-class Truth < Boolean { true() { true }; negate() { false }; };
-class Falsity < Boolean { true() { false }; negate() { true }; };
-true = Truth.new();
-false = Falsity.new();
+    eq(other) { self.isInstanceOf(other.class) }
+}
+
+class Truth < Boolean {
+    negate() { false }
+}
+
+class Falsity < Boolean {
+    true() { false }
+    negate() { true }
+}
 
 /*
  * Number
  * 
  * The class of numeric values
  */
-class Number {}
+class Number {
+    zero() { self == 0 }
+    one() { self == 1 }
+    divide(other) {
+        if (other.zero()) {
+            Infinity.new()
+        } else {
+            self.rawDiv(other)
+        }
+    }
+}
+
+class Infinity < Number {
+    divide(other) {
+        return Infinity.new()
+    }
+}
+
+class Nil {
+    nil() { true }
+    false() { true }
+}
+
+# the universal constants
+nil = Nihil.new()
+true = Truth.new()
+false = Falsity.new()
+
+// old ways die hard
+require = Kernel.import;
 
 // wire up main so it can define instance methods on itself...
-self.defineMethod = meta.defineMethod
+self.defineMethod = meta.defineMethod;

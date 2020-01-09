@@ -3,6 +3,8 @@ import Machine from "./vm/Machine";
 import { Code, prettyCode } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
 import Tree from "./lang/ast/Tree";
+import ReflexObject from "./vm/types/ReflexObject";
+import { castReflexToJavascript } from "./vm/instruction/invoke";
 // import { log } from "./vm/util/log";
 
 // import fs from 'fs';
@@ -64,21 +66,30 @@ export default class Reflex {
     // }
 
     evaluate(input: string) {
-        console.log("EVAL: " + input)
+        // console.log("EVAL: " + input)
         // input.split("\n")
         let lines: [Tree, Code][] = this.parser.analyze(input)
 
         // log("RUN CODE", prettyCode(code))
         lines.forEach(([tree,code]) => {
-            console.log("INTERPRET: " + tree.inspect());
-            console.log("CODE: " + prettyCode(code));
+            // console.log("INTERPRET: " + tree.inspect());
+            // console.log("CODE: " + prettyCode(code));
             this.machine.run(code)
         })
         this.machine.halt(); //ed = true;
         let result = this.machine.top
         this.machine.stack = [];
         if (result == null) { return 'nothing' }
-        return result;
+        else if (result instanceof ReflexObject) {
+            let cast = castReflexToJavascript(result);
+            if (cast instanceof ReflexObject) {
+                return cast.inspect()
+            } else {
+                return cast;
+            }
+        }
+        else { return result; }
+
     }
 
     hardReset() { this.machine = new Machine(this) }
