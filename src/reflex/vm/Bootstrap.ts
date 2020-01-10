@@ -92,13 +92,13 @@ let arithmetic = {
   eq: (left: number, right: number) => left === right,
   add: (left: number, right: number) => {
     let result = left + right
-    console.log("ADD " + left + " " + right + " YIELDING " + result)
+    // console.log("ADD " + left + " " + right + " YIELDING " + result)
     return result
   },
   sub: (left: number, right: number) => left - right,
   mult: (left: number, right: number) => left * right,
   div: (left: number, right: number) => {
-    log("DIVIDE " + left + " by " + right)
+    // log("DIVIDE " + left + " by " + right)
     return left / right
   },
   mod: (left: number, right: number) => left % right,

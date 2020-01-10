@@ -64,13 +64,13 @@ class Number {
         }
     }
 
-    // times() {
-    //     counter = self;
-    //     until (counter.zero()) {
-    //         yield();
-    //         counter = counter - 1;
-    //     }
-    // }
+    times(&b) {
+        counter = Number.new(self);
+        until(counter.zero()) {
+            b();
+            counter = counter + (-1);
+        }
+    }
 }
 
 class Indeterminate < Number {}

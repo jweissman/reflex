@@ -7,6 +7,7 @@ describe('Reflex', () => {
 
     describe("syntax", () => {
         describe('core', () => {
+            
             describe('conditionals', () => {
                 describe('gates execution', () => {
                     it('if-else', ()=> {
@@ -99,6 +100,32 @@ describe('Reflex', () => {
                     })
                 })
             })
+
+            describe('loops', () => {
+                it('until', () => {
+                    evaluate('x=8');
+                    evaluate('y=1');
+                    evaluate('until(x.zero()) { y = y * 2; x = x + (-1) }')
+                    expect(evaluate('y')).toEqual(256);
+                    expect(evaluate('x')).toEqual(0);
+                })
+                it('while', () => {
+                    evaluate('x=8');
+                    evaluate('y=1');
+                    evaluate('while(x != 0) { y = y * 2; x = x + (-1) }')
+                    expect(evaluate('y')).toEqual(256);
+                    expect(evaluate('x')).toEqual(0);
+                })
+
+                it('times', () => {
+                    evaluate("x=0")
+                    evaluate("2.times { x = x + 1 }")
+                    expect(evaluate("x")).toEqual(2)
+                    evaluate("3.times { x = x * 2 }")
+                    expect(evaluate("x")).toEqual(16)
+                })
+            })
+
             describe('operators', () => {
                 describe('== (eq)', () => {
                     it('compares truth values', () => {

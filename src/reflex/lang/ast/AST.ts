@@ -20,29 +20,35 @@ import { Compare } from "./Compare";
 import { Conditional } from "./Conditional";
 import { NumberLiteral } from "./NumberLiteral";
 import { Negate } from "./Negate";
+import { Binary } from "./Binary";
 import { Code } from "../../vm/instruction/Instruction";
-// new Binary('+', left.tree, right.tree),
-type BinaryOp = '+' | '-' | '*' | '/' | '%'
-class Binary extends Tree {
-  constructor(public op: BinaryOp, public left: Tree, public right: Tree) {
+
+type LoopKeyword = 'while' | 'until'
+class Loop extends Tree {
+  static count: number = 0;
+  constructor(public keyword: LoopKeyword, public test: Tree, public block: Tree) {
     super();
   }
-  inspect() { return this.left.inspect() + this.op + this.right.inspect() }
-
+  inspect(): string {
+    return this.keyword + "(" + this.test.inspect() + ") {" + this.block.inspect() + "}";
+  }
   get code(): Code {
-    let opMap: { [op in BinaryOp]: string } = {
-      '+': 'add',
-      '-': 'subtract',
-      '*': 'multiply',
-      '/': 'divide',
-      '%': 'modulo',
-    }
+    // throw new Error("Loop.code -- Method not implemented.");
+    let name = `loop-${Loop.count++}`;
+    let prefix = (msg: string) => `${name}-${msg}`;
+    let labelBegin = prefix('begin');
+    let labelEnd = prefix('end');
+    let flipTest: Code = this.keyword === 'while' ? [['dispatch', 'negate']] : [];
     return [
-      ...this.right.code,
-      ...this.left.code,
-      ['push', opMap[this.op]],
-      ['call', null],
-      ['invoke', 1],
+      ['label', labelBegin],
+      ...this.test.code,
+      ...flipTest,
+      ['jump_if', labelEnd],
+      // ['pop', null],
+      ...this.block.code,
+      ['jump', labelBegin],
+      ['label', labelEnd],
+      // ['pop', null],
     ]
   }
 }
@@ -129,6 +135,10 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Conditional('unless', cond.tree, left.tree, right.tree),
   CondStmt_unlessThen: (_unless: Node, cond: Node, _then: Node, left: Node) =>
     new Conditional('unless', cond.tree, left.tree, new Bareword('nil')),
+  LoopExpr_until: (_until: Node, test: Node, block: Node) =>
+    new Loop('until', test.tree, block.tree),
+  LoopExpr_while: (_until: Node, test: Node, block: Node) =>
+    new Loop('while', test.tree, block.tree),
   BoolExpr_bool_or: (left: Node, _or: Node, right: Node) =>
     new Conditional('if', left.tree, left.tree, right.tree),
   BoolExpr_bool_and: (left: Node, _or: Node, right: Node) =>
@@ -143,6 +153,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Binary('/', left.tree, right.tree),
   MulExpr_modulo: (left: Node, _sum: Node, right: Node) =>
     new Binary('%', left.tree, right.tree),
+  
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),

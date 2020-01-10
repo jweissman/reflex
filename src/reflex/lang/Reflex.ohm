@@ -45,7 +45,7 @@ Reflex {
 	    | SendMessageEq
       | SendMessage
 	    | CondExpr
-      // | LoopExpr
+      | LoopExpr
 	    | Defun
       | FunctionLit
 	    | "(" Expr ")" -- parens
@@ -55,7 +55,12 @@ Reflex {
       | NumberLit
       | StringLit
 
-    // LoopExpr
+    LoopExpr
+      = While Condition Block -- while 
+      | Until Condition Block -- until 
+    
+    While = "while"
+    Until = "until"
       
     CondTernary
       = Expr "?" Expr ":" Expr
@@ -90,6 +95,7 @@ Reflex {
     Else
       = "else"
       | "otherwise"
+
     Condition 
       = Expr
 
