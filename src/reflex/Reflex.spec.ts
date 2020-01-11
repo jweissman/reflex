@@ -57,6 +57,13 @@ describe('Reflex', () => {
                         expect(evaluate("Object unless true else Class")).toEqual("Class(Class)")
                         expect(evaluate("Object unless false else Class")).toEqual("Class(Object)")
                     })
+
+                    it('evaluates condition truthiness', () => {
+                        expect(evaluate("Object unless 1")).toEqual(null)
+                        expect(evaluate("Object if 1")).toEqual("Class(Object)")
+                        expect(evaluate("Object unless 0")).toEqual("Class(Object)")
+                        expect(evaluate("Object if 0")).toEqual(null)
+                    })
                 })
 
                 describe('shorthand', () => {
@@ -383,7 +390,18 @@ describe('Reflex', () => {
         it('upto', () => {
             evaluate('x=0')
             evaluate('1.upto(10) { |n| x = x + n }')
-            expect(evaluate('x')).toEqual(90)
+            expect(evaluate('x')).toEqual(55)
         })
+    })
+
+    xit('self-spec', () => {
+        expect(() => evaluate("Kernel.import 'spec'")).not.toThrow()
+        expect(()=>evaluate(`
+        describe('reflex') {
+            it('is great') {
+                true.should be true
+                false.should be false
+            }
+        }`)).not.toThrow()
     })
 })

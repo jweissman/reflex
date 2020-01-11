@@ -138,7 +138,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             machine.jump(indexForLabel(code, theLabel));
             break;
         case 'jump_if': // jump if true...
-            dispatch('true', top as ReflexObject, stack, frames, machine, true);
+            // dispatch('true', top as ReflexObject, stack, frames, machine, true);
             // ret(stack, frames, machine); //?
             // now top should be Truth
             let nowTop = stack[stack.length - 1];

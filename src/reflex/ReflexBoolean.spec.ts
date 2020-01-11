@@ -28,11 +28,11 @@ describe('Boolean', () => {
             })
         })
         describe('truthiness', () => {
-            it('all objects except nil and false are .true()', () =>{
+            it('nil, false and zero are not .true()', () =>{
                 expect(evaluate("Object.true()")).toEqual(true)
                 expect(evaluate("Object.new().true()")).toEqual(true)
                 expect(evaluate("1.true()")).toEqual(true)
-                expect(evaluate("0.true()")).toEqual(true)
+                expect(evaluate("0.true()")).toEqual(false)
                 expect(evaluate("false.true()")).toEqual(false)
                 expect(evaluate("nil.true()")).toEqual(false)
             })

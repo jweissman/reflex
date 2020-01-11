@@ -52,6 +52,7 @@ class Falsity < Boolean {
 class Number {
     zero() { self == 0 }
     one() { self == 1 }
+    true() { self.zero().negate() }
     divide(other) {
         if (other.zero()) {
             if (self.zero()) {
@@ -68,15 +69,18 @@ class Number {
 
     times(&b) {
         counter = Number.new(self);
-        until(counter.zero()) {
+        until (counter.zero()) {
             b();
             counter = counter - 1;
         }
     }
 
-    upto(other, &b) {
+    upto(stop, &b) {
         val = Number.new(self)
-        until(val == other) { b(val); val = val+1 }
+        until (val == stop+1) {
+            b(val);
+            val = val+1
+        }
     }
 }
 
