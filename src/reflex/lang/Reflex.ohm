@@ -1,24 +1,22 @@
 Reflex {
     Program
-      = ListOf<Stmt, delim*> delim*
+      = ListOf<Stmt, delim*> delim?
     
     Stmt
       =
       | Expr
       
     Expr =
-	    | SendMessageEq
-	    | Defclass
-      | CondTernary
 	    | AlgExpr
 
-      
     AlgExpr =
+      | Message "=" Expr -- local_assign
       | BoolExpr
 
     BoolExpr
       = BoolExpr "||" CmpExpr -- bool_or
       | BoolExpr "&&" CmpExpr -- bool_and
+      | BoolExpr "?" Expr ":" Expr -- tern
       | CmpExpr
 
     CmpExpr
@@ -38,21 +36,21 @@ Reflex {
       | DotExpr
 
     DotExpr
-      = DotExpr "." Message Arguments -- call
+      = DotExpr "." Message "=" Expr -- sendEq
+      | DotExpr "." Message Arguments -- call
       | DotExpr "." Message -- ivar_get
       | PriExpr
 
     PriExpr
       = 
-	    //| SendMessageEq
-      | "-" Expr -- neg
-	    | "(" Expr ")" -- parens
+	    | "-" Expr -- neg
 	    | CondExpr
       | LoopExpr
-	    | Defun
+      | Defclass
+      | Defun
       | FunctionLit
-      | SendMessage
-      | Barecall
+	    | "(" Expr ")" -- parens
+      | Message Arguments -- casualCall
       | Bareword
       | NumberLit
       | StringLit
@@ -125,32 +123,6 @@ Reflex {
 
     FunctionName
       = ident
- 
-    //SendMessageEq
-    //  = (Bareword | Funcall | SendMessage) "." Message "=" Expr -- other
-    //  | Message "=" Expr -- local
-
-    //SendMessage
-    //  = Receiver "." Message Arguments -- call
-    //  | Receiver "." Message -- attr
-
-    //Funcall
-    //  = Barecall
-    
-    //Barecall
-    //  = Message Arguments
-    
-    //Receiver
-    //  =
-    //  | Funcall
-    //  | SendMessage
-    //  | Bareword
-    //  | StringLit
-    //  | FunctionLit
-	   // //| "(" Expr ")" -- parens
-    //  | Barecall
-    //  | Bareword
-    //  | NumberLit
 
     Message
       = ~Keyword ident

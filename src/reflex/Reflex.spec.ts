@@ -373,7 +373,7 @@ describe('Reflex', () => {
             expect(() => evaluate("self.o")).toThrow()
         })
 
-        xit('successor and predecessor', () => {
+        it('successor and predecessor', () => {
             evaluate("x = 0")
             expect(evaluate("x = x + 1")).toEqual(1)
             expect(evaluate("x = x - 1")).toEqual(0)

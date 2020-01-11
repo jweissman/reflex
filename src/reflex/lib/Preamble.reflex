@@ -70,7 +70,7 @@ class Number {
         counter = Number.new(self);
         until(counter.zero()) {
             b();
-            counter = counter + (-1);
+            counter = counter - 1;
         }
     }
 }

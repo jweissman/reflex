@@ -58,8 +58,8 @@ const self = new Bareword('self')
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Program: (list: Node, _delim: Node) =>
     new Program(list.tree),
-  Funcall: (call: Node) =>
-    new SendMethodCall(self, call.key.tree, call.args.tree),
+  // Funcall: (call: Node) =>
+    // new SendMethodCall(self, call.key.tree, call.args.tree),
   Defclass_plain: (_class: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree),
   Defclass_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
@@ -89,9 +89,19 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Arg_ref: (_amp: Node, expr: Node) => new Argument(expr.tree, true),
   Arg: (expr: Node) => expr.tree instanceof Argument ? expr.tree : new Argument(expr.tree, false),
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
-  SendMessage_call: (receiver: Node, _dot: Node, message: Node, args: Node) => {
+
+  DotExpr_ivar_get: (receiver: Node, _dot: Node, message: Node) => {
+    // console.log("DOT EXPR ivar get: " + receiver.tree + "." + message.tree)
+
+    return new SendMessage(receiver.tree, message.tree)
+  },
+
+  DotExpr_call: (receiver: Node, _dot: Node, message: Node, args: Node) => {
     let theArgs = args.tree;
     return new SendMethodCall(receiver.tree, message.tree, theArgs);
+  },
+  DotExpr_sendEq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) => {
+    return new SendMessageEq(receiver.tree, message.tree, expr.tree);
   },
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
   Param: (parameter: Node) => {
@@ -104,20 +114,20 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     }
   },
   Param_ref: (_amp: Node, word: Node) => new Parameter((word.tree as Bareword).word, true),
-  SendMessage_attr: (receiver: Node, _dot: Node, message: Node) =>
-    new SendMessage(receiver.tree, message.tree),
-  SendMessageEq_other: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) =>
-    new SendMessageEq(receiver.tree, message.tree, expr.tree),
-  SendMessageEq_local: (message: Node, _eq: Node, expr: Node) =>
-    new LocalVarSet(message.tree, expr.tree),
+  AlgExpr_local_assign: (message: Node, _eq: Node, expr: Node) => {
+    // console.log("LOCAL VAR SET", message.tree)
+      return new LocalVarSet(message.tree, expr.tree)
+  },
   Message: (contents: Node) => new Message(contents.sourceString),
   Bareword: (word: Node) => new Bareword(word.sourceString),
-  Barecall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
+  PriExpr_casualCall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
   PriExpr_parens: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
   PriExpr_neg: (_neg: Node, expr: Node) => new Negate(expr.tree),
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),
   CmpExpr_neq: (left: Node, _eq: Node, right: Node) => new Compare('!=', left.tree, right.tree),
   CondStmt_ifThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
+    new Conditional('if', cond.tree, left.tree, right.tree),
+  BoolExpr_tern: (cond: Node, _q: Node, left: Node, _colon: Node, right: Node) =>
     new Conditional('if', cond.tree, left.tree, right.tree),
   CondTernary: (cond: Node, _q: Node, left: Node, _colon: Node, right: Node) =>
     new Conditional('if', cond.tree, left.tree, right.tree),

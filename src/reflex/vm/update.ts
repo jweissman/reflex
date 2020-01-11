@@ -56,7 +56,8 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
             if (hasLocal(value as string, frames)) {
                 stack.push(getLocal(value as string, frames))
             } else {
-                throw new Error("no such local variable '" + value as string)
+                console.log("LOCAL VAR GET", value)
+                throw new Error("no such local variable '" + value as string + "'")
             }
             break;
         case 'local_var_set':

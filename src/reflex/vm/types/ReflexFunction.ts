@@ -34,9 +34,9 @@ export class WrappedFunction extends ReflexObject {
 
     // get arity() { return this.impl.length-1; }
 
-    bind(self: ReflexClass) {
+    bind(self: ReflexObject) {
         // log("BIND WRAPPED FN " + this.name + " TO " + self.inspect());
-        let mu = new WrappedFunction(self.name + "." + this.name.split('.')[1], this.impl);
+        let mu = new WrappedFunction(self.displayName + "." + this.name.split('.')[1], this.impl);
         mu.bound = true;
         mu.boundSelf = self;
         return mu;

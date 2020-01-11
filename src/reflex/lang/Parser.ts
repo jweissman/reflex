@@ -17,7 +17,7 @@ export default class Parser {
     analyze(input: string): [Tree, Code][] {
         let ast: Program = this.tree(input) as Program;
         let code: [Tree, Code][] = ast.lines.map(line => [line, line.code]) //inspect()
-        log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
+        // console.log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
         return code
     }
 

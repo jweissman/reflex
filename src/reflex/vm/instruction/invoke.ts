@@ -196,6 +196,8 @@ export function invoke(
             let call = top.send('call');
             log("WOULD CALL " + call)
             args.reverse().forEach(arg => stack.push(arg))
+            if (call instanceof WrappedFunction) { call.bind(top) }
+            if (call instanceof ReflexFunction) { call.frame.self=top}
             stack.push(call);
             invoke(arity, hasBlock, stack, frames, code, machine, ensureReturns)
             // dispatch('call', top, args, stack, frames, code)

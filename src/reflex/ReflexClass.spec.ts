@@ -13,7 +13,7 @@ describe('Class', () => {
 
     describe(".new", () => {
         it('is a Function', () => {
-            expect(evaluate("Class.new")).toEqual("Function(Class.new[wrap])")
+            expect(evaluate("Class.new")).toEqual("Function(Class(Class).new[wrap])")
         })
         it('is a class factory', () => {
             expect(evaluate("Class.new()")).toEqual("Class(Anonymous)")
