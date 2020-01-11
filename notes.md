@@ -476,3 +476,162 @@ that it received a message, even though it does nothing with it
    and then add spy instrumentation around methodMissing
 
 ---
+
+
+it just kidn of struck me --
+reflex DOEs imply some kind of structured pattern matching
+could we do some kind of substructural typing with archetypes
+(not just exhaustion checking on cases but pattern matching tuples or something??)
+let people have a little type algebra, as a treat
+what does it mean, though, and how do those kind of forms interact with other things?
+
+at some level maybe it's just destructuring, which i can see how to do with lists and hashes
+(and maybe sets etc)
+
+trees are more obscure
+
+in particular strings are interesting since we could 'destructure' over a grammar, yielding
+a tree whose elements can be matched against structurally
+
+pattern-action is the reflex mechanism, and it is not known in nature for 'discrimination'
+something happening beneath the level of consciousness -- beneath the abstract language/system your
+living body gives you to manipulate it with, the internal system of icons and metaphors linked to feelings
+and actions and operations -- almost all of animal awareness is 'reflex oriented' in a certain way
+
+patterns -- actions
+
+how to manipulate structures in order to extract these?
+
+i keep thinking of path primitives, and 'micro-lenses' of some kind that can be composed into new
+amalgam objects -- crystalline structures bridging the (abstraction, language, higher-order kinds?) 
+
+----------------------------------------------------------------
+
+how to destructure an object is kind of an interesting question, maybe THE question
+we can ask an object in a case/match kind of structure whether it matches a given structure
+then it's up to objects to answer them -- maybe archetypes (and unions/sums/algebraic results of composing
+and decomposing archetypes) can construct pretty complex matching systems without too much elbow grease/boilerplate
+
+---
+
+we sure are leaning hard on archetypes, let's just recall the most basic thing we can do with them.
+
+it might be time to see if our language can start handling it.
+
+the simplest function of the archetype is to provide a subclassing mechanism that has a tiny bit
+more sugar: instead of say `class Zebra < Animal {}`, given we know we have a lot of `Animal`s in the system suppose, we can create a foo archetype... and then we can say `animal Zebra {}`
+
+this is the simplest possible sugar we can imagine, and it really boils down to defining a wrapper
+with the name around Class new...
+
+jeez, can we do this just with what we have now??
+
+i'm imagining something like `animal = Animal.archetype`
+
+which raises the question of what that `archetype` function is/does but i think we might be
+able to work it out
+
+at least it would be interesting to know what's MISSING from that, since there's no sugar (grammar)
+involved
+
+okay, so when we are asked to create an archetype for an `Animal` -- `Class(Animal)`, we want to
+yield a function that creates new instances of class animal... and accepts a block that it runs
+as setup
+
+```
+class Class {
+  meta.instanceEval {
+    archetype() {
+      (^name,&b) => Class.new(name)
+    }
+  }
+}
+```
+
+okay, that's where it comes down to needing lang support or macro system or something
+
+let's think through the lang support side then, we'd need to test for
+an 'archetypal' definition as being distinct from a normal function call
+
+we could have archetypes on by default, but that could possibly get confusing??
+i kind of like the idea though
+
+
+
+
+------------
+
+alright, so i think the model is something like conceptually 
+
+objects are always 'partial objects' on a continuum between pure 'values' and formal types
+
+the entire idea (oo) is to build structure/function up gradually, using abstraction layers to simplify
+implementaiton, allow reuse, and more importantly, permit a cognitively-tractable degree of structural granularity (a small number of fine details that govern most important structures/patterns)
+
+so there's a pure ('purity') continuum of objects
+
+    <----------------------------------------------------------->
+    more abstract                                    more concrete       
+    Object     Animal         Canine         Shepherd         Fido
+
+                                                      'final' (inextensible classes)
+                              archetypes
+
+so archetypes are one way to capture 'this object class is moderately concrete' (if not 'final'),
+and further indicate that 'these objects collectively are a set' which can be enumerated, 
+verified exhaustively for matching etc
+
+the idea is not necessarily that archetypes are inextensible, or don't have ramifications/subtypes etc
+
+sugar for the layer that is going to be bloated in most
+ontologies -- (a dog application might just want to say `dog Shepherd {}`...)
+[not as a point of blame, note this inefficiency arises precisely in order to 'make room' for human cognitive order models/categories/logic flows (i.e., the constraint that 'orderly' systems in general need to operate within a small number of finite concepts, expose cheaply-connected logic centers,
+exhibit a unitary domain model, etc)]
+
+---
+
+
+major differences from ruby so far are mainly within the dispatch/calling model -- we do not
+dispatch barewords as method calls unless they have args or empty parens or something -- we will hand
+back references to functions instead of blind calling things -- this has some implications but not 
+so many -- ruby's object model is still a good approximation of what is going on in reflex
+
+---
+
+okay, so pattern action stuff -- i can imagine path literal 'lens' style structures being used to decompose
+a matched object in a structure, i can also imagine some degree of archetype / class / tuple algebra
+things should match against classes and superclasses ofc and regexes ...
+
+
+--
+
+i really do like arch as generalization of class keyword -- i do worry about weird implications but
+most straightforward expressions shouldn't be impacted ?? we'll have to watch it -- but it's interesting
+that it won't necessarily increase the size of the grammar
+
+-------------------------------
+
+concepts: a 'central mirror' app structure, where you build an explicit 'Domain' object
+maybe you can wire with a for mlike `Reflex.domain(self)` or something?? and this
+lets you ask for archetypes -- it makes it the parent space of the archetypes
+
+maybe i'm just talking about modules at some point
+
+it would be interesting to distinguish a Domain from a Module from a Package
+
+there would be a handful of common domains that share a model
+
+domain.package.module.function
+
+i guess the idea would be that 'public' domains are common, code for them is shared?
+(we're all building on same/similar data structures/abstractions?)
+
+regardless it's just a language abstraction (if we want to share domains great, if they are easily shareable and have verification/contract properties, that's awesome)
+
+the idea is really just that archetypes have a namespace, where we can reflect on those
+archetypes
+
+-----------
+
+i almost think we could try to lift some of object's internals into reflex
+let's wait until we have lists and strings though~!

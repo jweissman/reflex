@@ -118,7 +118,7 @@
 		},
 		"flow-control-operators":	{
 			"name": "keyword.control.reflex",
-			"match": "\\b(if|else|yield|while|for|return)\\b"
+			"match": "\\b(if|unless|else|then|while|until)\\b"
 		},
 		"reserved-words":	{
 			"name": "keyword.other.reserved.reflex",

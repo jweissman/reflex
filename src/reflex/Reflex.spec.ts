@@ -389,9 +389,42 @@ describe('Reflex', () => {
 
         it('upto', () => {
             evaluate('x=0')
-            evaluate('1.upto(10) { |n| x = x + n }')
+            evaluate('1.upto 10 { |n| x = x + n }')
             expect(evaluate('x')).toEqual(55)
         })
+    })
+
+    xit('can escape a newline', () => {
+        expect(evaluate(`
+        x=0
+        zero=x.zero
+        zero()
+        `)).toEqual(true)
+        expect(evaluate(`
+        x=1
+        zero=(x+\\
+        1).zero
+        zero()
+        `)).toEqual(false)
+        expect(evaluate(`
+        x=10
+        y=x.times
+        (y) { x = x + 1 }
+        x
+        `)).toEqual(110)
+    })
+
+    it('archetype', () => {
+        evaluate('class Model {}')
+        expect(evaluate('Model')).toEqual('Class(Model)')
+        evaluate('model Car {}')
+        expect(evaluate('Car.new()')).toEqual('Car')
+        // expect(evaluate('Car.archetype')).toEqual('Class(Model)')
+        expect(evaluate('Car.super')).toEqual('Class(Model)')
+        evaluate('model Taxi < Car {}')
+        expect(evaluate('Taxi.new()')).toEqual('Taxi')
+        // expect(evaluate('Taxi.archetype')).toEqual('Class(Model)')
+        expect(evaluate('Taxi.super')).toEqual('Class(Car)')
     })
 
     xit('self-spec', () => {

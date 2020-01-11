@@ -21,48 +21,22 @@ import { Conditional } from "./Conditional";
 import { NumberLiteral } from "./NumberLiteral";
 import { Negate } from "./Negate";
 import { Binary } from "./Binary";
-import { Code } from "../../vm/instruction/Instruction";
+import { Loop } from "./Loop";
 
-type LoopKeyword = 'while' | 'until'
-class Loop extends Tree {
-  static count: number = 0;
-  constructor(public keyword: LoopKeyword, public test: Tree, public block: Tree) {
-    super();
-  }
-  inspect(): string {
-    return this.keyword + "(" + this.test.inspect() + ") {" + this.block.inspect() + "}";
-  }
-  get code(): Code {
-    // throw new Error("Loop.code -- Method not implemented.");
-    let name = `loop-${Loop.count++}`;
-    let prefix = (msg: string) => `${name}-${msg}`;
-    let labelBegin = prefix('begin');
-    let labelEnd = prefix('end');
-    let flipTest: Code = this.keyword === 'while' ? [['dispatch', 'negate']] : [];
-    return [
-      ['label', labelBegin],
-      ...this.test.code,
-      ...flipTest,
-      ['jump_if', labelEnd],
-      // ['pop', null],
-      ...this.block.code,
-      ['jump', labelBegin],
-      ['label', labelEnd],
-      // ['pop', null],
-    ]
-  }
-}
+// const self = new Bareword('self')
 
-const self = new Bareword('self')
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
-  Program: (list: Node, _delim: Node) =>
+  Program: (_pre: Node, list: Node, _post: Node) =>
     new Program(list.tree),
-  // Funcall: (call: Node) =>
-    // new SendMethodCall(self, call.key.tree, call.args.tree),
   Defclass_plain: (_class: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree),
   Defclass_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
+    new Defclass(name.tree, block.tree, superclass.tree),
+  Defclass_arch_plain: (arch: Node, name: Node, block: Node) =>
+    new Defclass(name.tree, block.tree, new Bareword(capitalize(arch.sourceString))),
+  Defclass_arch_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
     new Defclass(name.tree, block.tree, superclass.tree),
   ClassName: (id: Node) => new Message(id.sourceString),
   ExtendsClass: (_extends: Node, name: Node) => name.tree,
@@ -89,20 +63,12 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Arg_ref: (_amp: Node, expr: Node) => new Argument(expr.tree, true),
   Arg: (expr: Node) => expr.tree instanceof Argument ? expr.tree : new Argument(expr.tree, false),
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
-
-  DotExpr_ivar_get: (receiver: Node, _dot: Node, message: Node) => {
-    // console.log("DOT EXPR ivar get: " + receiver.tree + "." + message.tree)
-
-    return new SendMessage(receiver.tree, message.tree)
-  },
-
-  DotExpr_call: (receiver: Node, _dot: Node, message: Node, args: Node) => {
-    let theArgs = args.tree;
-    return new SendMethodCall(receiver.tree, message.tree, theArgs);
-  },
-  DotExpr_sendEq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) => {
-    return new SendMessageEq(receiver.tree, message.tree, expr.tree);
-  },
+  DotExpr_ivar_get: (receiver: Node, _dot: Node, message: Node) =>
+    new SendMessage(receiver.tree, message.tree),
+  DotExpr_call: (receiver: Node, _dot: Node, message: Node, args: Node) =>
+    new SendMethodCall(receiver.tree, message.tree, args.tree),
+  DotExpr_sendEq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) =>
+    new SendMessageEq(receiver.tree, message.tree, expr.tree),
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
   Param: (parameter: Node) => {
     if (parameter.tree instanceof Bareword) {
@@ -114,14 +80,12 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     }
   },
   Param_ref: (_amp: Node, word: Node) => new Parameter((word.tree as Bareword).word, true),
-  AlgExpr_local_assign: (message: Node, _eq: Node, expr: Node) => {
-    // console.log("LOCAL VAR SET", message.tree)
-      return new LocalVarSet(message.tree, expr.tree)
-  },
+  AlgExpr_local_assign: (message: Node, _eq: Node, expr: Node) =>
+      new LocalVarSet(message.tree, expr.tree),
   Message: (contents: Node) => new Message(contents.sourceString),
   Bareword: (word: Node) => new Bareword(word.sourceString),
-  PriExpr_casualCall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
-  PriExpr_parens: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
+  CasualCall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
+  ParenExpr: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
   PriExpr_neg: (_neg: Node, expr: Node) => new Negate(expr.tree),
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),
   CmpExpr_neq: (left: Node, _eq: Node, right: Node) => new Compare('!=', left.tree, right.tree),
@@ -163,7 +127,6 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Binary('/', left.tree, right.tree),
   MulExpr_modulo: (left: Node, _sum: Node, right: Node) =>
     new Binary('%', left.tree, right.tree),
-  
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),

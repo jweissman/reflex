@@ -68,21 +68,25 @@ class Number {
     call(other) { other.add(self) }
 
     times(&b) {
-        counter = Number.new(self);
+        counter = self //Number.new(self);
         until (counter.zero()) {
-            b();
             counter = counter - 1;
+            b();
         }
     }
 
     upto(stop, &b) {
-        val = Number.new(self)
-        until (val == stop+1) {
+        val = self
+        end = stop + 1
+        until (val == end) {
             b(val);
-            val = val+1
+            val = val + 1
         }
     }
 }
+
+class Integer < Number {}
+class Float < Number {}
 
 class Indeterminate < Number {}
 
@@ -108,7 +112,7 @@ Infinity = PositiveApeiron.new()
 NegativeInfinity = NegativeApeiron.new()
 
 // old ways die hard
-require = Kernel.import;
+require = Kernel.import
 
 // wire up main so it can define instance methods on itself...
-self.defineMethod = meta.defineMethod;
+self.defineMethod = meta.defineMethod

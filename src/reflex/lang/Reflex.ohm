@@ -1,13 +1,13 @@
 Reflex {
     Program
-      = ListOf<Stmt, delim*> delim?
+      = delim* ListOf<Expr, delim*> delim*
     
-    Stmt
-      =
-      | Expr
+    Noop
+      = lineTerminator?
       
     Expr =
 	    | AlgExpr
+        //| Noop
 
     AlgExpr =
       | Message "=" Expr -- local_assign
@@ -16,7 +16,7 @@ Reflex {
     BoolExpr
       = BoolExpr "||" CmpExpr -- bool_or
       | BoolExpr "&&" CmpExpr -- bool_and
-      | BoolExpr "?" Expr ":" Expr -- tern
+      | CmpExpr "?" BoolExpr ":" BoolExpr -- tern
       | CmpExpr
 
     CmpExpr
@@ -37,23 +37,29 @@ Reflex {
 
     DotExpr
       = DotExpr "." Message "=" Expr -- sendEq
-      | DotExpr "." Message Arguments -- call
+      | DotExpr "." Message ~lineTerminator Arguments -- call
       | DotExpr "." Message -- ivar_get
       | PriExpr
 
     PriExpr
-      = 
+      =
 	    | "-" Expr -- neg
 	    | CondExpr
       | LoopExpr
       | Defclass
       | Defun
       | FunctionLit
-	    | "(" Expr ")" -- parens
-      | Message Arguments -- casualCall
-      | Bareword
+	    | CasualCall
+      | ParenExpr -- parens
+	    | Bareword
       | NumberLit
       | StringLit
+      
+    CasualCall
+      = (Bareword | ParenExpr) ~lineTerminator Arguments
+    
+    ParenExpr
+      = "(" Expr ")"
 
     LoopExpr
       = While Condition Block -- while 
@@ -82,7 +88,7 @@ Reflex {
 
     CondBlock
       = Block
-      | Expr
+      | CmpExpr
 
     Conj
       = If
@@ -100,11 +106,14 @@ Reflex {
       | "otherwise"
 
     Condition 
-      = Expr
+      = ParenExpr
+      | CmpExpr
 
     Defclass
       = Class ClassName ExtendsClass Block -- extends
+      | ident ClassName ExtendsClass Block -- arch_extends
       | Class ClassName Block -- plain
+      | ident ClassName Block -- arch_plain
     
     Class
       = "class"
@@ -127,7 +136,7 @@ Reflex {
     Message
       = ~Keyword ident
       
-    Keyword = If | Else | Unless | Then
+    Keyword = If | Else | Unless | Then | While | Until
 
     Bareword
       = Message
@@ -138,13 +147,13 @@ Reflex {
    
     Args
       = FormalArguments
-      | BareArguments
+      | ~lineTerminator BareArguments
     
     FormalArguments
       = "(" ListOf<Arg, ","> ")"
 
     BareArguments
-      = ~"(" NonemptyListOf<Arg, ",">
+      = ~lineTerminator ~"(" NonemptyListOf<Arg, ",">
      
     Arg
       = "&" Expr -- ref
@@ -166,7 +175,6 @@ Reflex {
 
     Block 
       = "{" Program "}"
-    
       
     PipedBlock = "{" PipeVars? Program "}"
     PipeVars = "|" ListOf<Param,","> "|"
@@ -184,7 +192,8 @@ Reflex {
       | Params "=>" Expr
     
     NumberLit
-      = digit+
+      = digit+ -- int
+      | digit+ "." digit+ -- float
     
     StringLit
       = "'" #singleStringCharacter* "'"
@@ -209,35 +218,45 @@ Reflex {
     ident
       = letter idChar*
     
-    idChar = alnum | "_"
+    idChar
+      = alnum
+      | "_"
     
     delim
       = delimiter
+      | lineTerminator
       
-    delimiter = ";"
+    delimiter
+      = ";"
     
     lineTerminator
       = "\n"
       | "\r"
   
     whitespace = #" " | " " | "\t"
-      
-      
     
-    comment = shortComment | formalComment
+    comment
+      = shortComment
+      | formalComment
     
-    formalComment = formalCommentStart (~formalCommentEnd any)* formalCommentEnd
+    formalComment
+      = formalCommentStart (~formalCommentEnd any)* formalCommentEnd
     formalCommentStart = "/*"
     formalCommentEnd = "*/"
-    
+   
     shortComment
       = commentMark #(~lineTerminator any)* lineTerminator?
     
 	  commentMark
       = octothorpe
       | doubleSlash
-    octothorpe = #"#"
-    doubleSlash = #"/" #"/"
-	  space := comment | whitespace | lineTerminator
+    octothorpe
+      = #"#"
+    doubleSlash
+      = #"/" #"/"
+	  space
+      := comment
+      | whitespace
+      | "\\" lineTerminator -- escapeNewline
 
 }

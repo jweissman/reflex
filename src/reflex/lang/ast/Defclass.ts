@@ -11,7 +11,7 @@ import { Arguments, Argument } from "./Arguments";
 import { FunctionLiteral } from "./FunctionLiteral";
 
 export class Defclass extends Tree {
-  constructor(public name: Message, public body: Tree, public superclass?: Message) {
+  constructor(public name: Message, public body: Tree, public superclass?: Tree, public arch: boolean = false) {
     super();
   }
 
@@ -30,20 +30,6 @@ export class Defclass extends Tree {
       this.name,
       new SendMethodCall(new Bareword("Class"), new Message("new"), new Arguments(new Sequence<Argument>(newClassArgs)))
     );
-    // let newBody = ((this.body as Program).lines as Sequence<Defun>).map((maybeMethod) => {
-    //   if (maybeMethod instanceof Defun) {
-    //     let defun = maybeMethod as Defun;
-    //     defun.compileOnly = true;
-    //     return new SendMethodCall(
-    //       new Bareword('self'), new Message("defineMethod"),
-    //       new Arguments(new Sequence([new Argument(defun.name), new Argument(
-    //         new FunctionLiteral(defun.params, defun.block)
-    //       )]))
-    //     );
-    //   } else {
-    //     return maybeMethod;
-    //   }
-    // })
     return new Program(new Sequence([
       defClass,
       // new LocalVarGet(this.name),
