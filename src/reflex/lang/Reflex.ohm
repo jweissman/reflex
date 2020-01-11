@@ -48,11 +48,11 @@ Reflex {
       | LoopExpr
       | Defclass
       | Defun
-	    | CasualCall
       | CoreExpr
 
     CoreExpr
       = FunctionLit
+	    | CasualCall
       | ParenExpr -- parens
 	    | Bareword
       | NumberLit
@@ -84,10 +84,10 @@ Reflex {
       | Unless Condition Then? CondBlock -- unlessThen
 
     CondParticle
-     = PriExpr If Condition Else Expr  -- ifElse
-     | PriExpr Unless Condition Else Expr -- unlessElse
-     | PriExpr If Condition -- if
-     | PriExpr Unless Condition -- unless
+     = CoreExpr If Condition Else Expr  -- ifElse
+     | CoreExpr Unless Condition Else Expr -- unlessElse
+     | CoreExpr If Condition -- if
+     | CoreExpr Unless Condition -- unless
 
     CondBlock
       = Block

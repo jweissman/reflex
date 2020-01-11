@@ -68,7 +68,7 @@ class Number {
     call(other) { other.add(self) }
 
     times(&b) {
-        counter = self //Number.new(self);
+        counter = self
         until (counter.zero()) {
             counter = counter - 1;
             b();

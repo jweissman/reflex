@@ -1,17 +1,35 @@
-// a simple hello class
-class Hello {
-    init() {
-        self.greeting = 'Hello, '
-    }
-
-    greet(subject) {
-        self.greeting + subject if subject
+class Algorithm {
+    meta.instanceEval {
+        get(n) { self.compute(n) }
     }
 }
 
-/* yup */
-/*
-nope
-*/
-greeter = Hello.new()
-greeter.greet("world")
+algorithm Fibonacci {
+    meta.instanceEval {
+      compute(n) {
+          fib = self.compute
+          base = n.zero() || n.one()
+          if (base) { 1 } else { fib(n-1) + fib(n-2) }
+      }
+    }
+}
+
+//Fibonacci.get(10)
+
+// todo a simple hello class (strings)
+// class Hello {
+//     init() {
+//         self.greeting = 'Hello, '
+//     }
+// 
+//     greet(subject) {
+//         self.greeting + subject if subject
+//     }
+// }
+// 
+// /* yup */
+// /*
+// nope
+// */
+// greeter = Hello.new()
+// greeter.greet("world")
