@@ -379,5 +379,11 @@ describe('Reflex', () => {
             expect(evaluate("x = x - 1")).toEqual(0)
             expect(evaluate("x = x - 1")).toEqual(-1)
         })
+
+        it('upto', () => {
+            evaluate('x=0')
+            evaluate('1.upto(10) { |n| x = x + n }')
+            expect(evaluate('x')).toEqual(90)
+        })
     })
 })

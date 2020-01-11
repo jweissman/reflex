@@ -73,6 +73,11 @@ class Number {
             counter = counter - 1;
         }
     }
+
+    upto(other, &b) {
+        val = Number.new(self)
+        until(val == other) { b(val); val = val+1 }
+    }
 }
 
 class Indeterminate < Number {}
