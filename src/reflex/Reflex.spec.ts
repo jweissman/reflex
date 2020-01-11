@@ -372,5 +372,12 @@ describe('Reflex', () => {
             // (so inherited into child scopes but not living on the object as such...)
             expect(() => evaluate("self.o")).toThrow()
         })
+
+        xit('successor and predecessor', () => {
+            evaluate("x = 0")
+            expect(evaluate("x = x + 1")).toEqual(1)
+            expect(evaluate("x = x - 1")).toEqual(0)
+            expect(evaluate("x = x - 1")).toEqual(-1)
+        })
     })
 })

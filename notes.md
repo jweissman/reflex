@@ -463,3 +463,16 @@ again this is probably all lang-astronaut stuff but it also seems like the criti
 tree objects (syntaxed as xml literals) as parse targets, and grammar literals (ohm heredocs) for parsing little languages
 
 ---
+
+
+shadow -- an image that returns nil for everything?? (could be basis for pure mocks)
+void -- an image that throws for everything?
+
+
+trying to think about the semantics for mocking
+we want the mirror to be able to create a spy, something that can report
+that it received a message, even though it does nothing with it
+-- it could start with a shadow (or void if you want to be 'strict'??)
+   and then add spy instrumentation around methodMissing
+
+---

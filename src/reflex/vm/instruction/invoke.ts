@@ -14,6 +14,8 @@ import { getLocal } from "./getLocal";
 import { RNumber, Indeterminate, PositiveApeiron, NegativeApeiron } from "../Bootstrap";
 import { ReflexNumber, } from "../types/ReflexNumber";
 import { log } from "../util/log";
+import { dispatch } from "./dispatch";
+import { dump } from "../util/dump";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
     // log('INVOKE reflex fn ' + top.name + ' with arity ' + top.arity)
@@ -144,7 +146,7 @@ export function invoke(
     ensureReturns?: ReflexObject
 ) {
     let top = stack[stack.length - 1];
-    // log("INVOKE " + arity + " -- stack: " + dump(stack))
+    log("INVOKE " + top + " (arity: " + arity + ") -- stack: " + dump(stack))
     // if (top instanceof WrappedFunction) { arity -= 1 } // hm
     pop(stack);
 
@@ -190,6 +192,15 @@ export function invoke(
         invokeReflex(top, args, stack, frames, code, machine, hasBlock, ensureReturns);
     }
     else {
-        fail("invoke -- expected top to be a function!");
+        if (top instanceof ReflexObject) {
+            let call = top.send('call');
+            log("WOULD CALL " + call)
+            args.reverse().forEach(arg => stack.push(arg))
+            stack.push(call);
+            invoke(arity, hasBlock, stack, frames, code, machine, ensureReturns)
+            // dispatch('call', top, args, stack, frames, code)
+        }
+
+        // fail("invoke -- expected top to be a function!");
     }
 }

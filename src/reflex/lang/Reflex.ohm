@@ -12,9 +12,6 @@ Reflex {
       | CondTernary
 	    | AlgExpr
 
-	  CondExpr =
-      | CondParticle
-	    | CondStmt
       
     AlgExpr =
       | BoolExpr
@@ -35,21 +32,26 @@ Reflex {
       | MulExpr
     
     MulExpr
-      = MulExpr "*" PriExpr -- product
-      | MulExpr "/" PriExpr -- quotient
-      | MulExpr "%" PriExpr -- modulo
+      = MulExpr "*" DotExpr -- product
+      | MulExpr "/" DotExpr -- quotient
+      | MulExpr "%" DotExpr -- modulo
+      | DotExpr
+
+    DotExpr
+      = DotExpr "." Message Arguments -- call
+      | DotExpr "." Message -- ivar_get
       | PriExpr
 
     PriExpr
       = 
-	    | SendMessageEq
-      | SendMessage
+	    //| SendMessageEq
+      | "-" Expr -- neg
+	    | "(" Expr ")" -- parens
 	    | CondExpr
       | LoopExpr
 	    | Defun
       | FunctionLit
-	    | "(" Expr ")" -- parens
-      | "-" Expr -- neg
+      | SendMessage
       | Barecall
       | Bareword
       | NumberLit
@@ -62,6 +64,9 @@ Reflex {
     While = "while"
     Until = "until"
       
+	  CondExpr =
+      | CondParticle
+	    | CondStmt
     CondTernary
       = Expr "?" Expr ":" Expr
       
@@ -121,31 +126,31 @@ Reflex {
     FunctionName
       = ident
  
-    SendMessageEq
-      = (Bareword | Funcall | SendMessage) "." Message "=" Expr -- other
-      | Message "=" Expr -- local
+    //SendMessageEq
+    //  = (Bareword | Funcall | SendMessage) "." Message "=" Expr -- other
+    //  | Message "=" Expr -- local
 
-    SendMessage
-      = Receiver "." Message Arguments -- call
-      | Receiver "." Message -- attr
+    //SendMessage
+    //  = Receiver "." Message Arguments -- call
+    //  | Receiver "." Message -- attr
 
-    Funcall
-      = Barecall
+    //Funcall
+    //  = Barecall
     
-    Barecall
-      = Message Arguments
+    //Barecall
+    //  = Message Arguments
     
-    Receiver
-      =
-      | Funcall
-      | SendMessage
-      | Bareword
-      | StringLit
-      | FunctionLit
-	    //| "(" Expr ")" -- parens
-      | Barecall
-      | Bareword
-      | NumberLit
+    //Receiver
+    //  =
+    //  | Funcall
+    //  | SendMessage
+    //  | Bareword
+    //  | StringLit
+    //  | FunctionLit
+	   // //| "(" Expr ")" -- parens
+    //  | Barecall
+    //  | Bareword
+    //  | NumberLit
 
     Message
       = ~Keyword ident
