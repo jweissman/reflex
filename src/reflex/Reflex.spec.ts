@@ -389,29 +389,43 @@ describe('Reflex', () => {
 
         it('upto', () => {
             evaluate('x=0')
-            evaluate('1.upto 10 { |n| x = x + n }')
+            evaluate('1.upto(10) { |n| x = x + n }')
             expect(evaluate('x')).toEqual(55)
         })
     })
 
-    xit('can escape a newline', () => {
-        expect(evaluate(`
-        x=0
-        zero=x.zero
-        zero()
-        `)).toEqual(true)
+    it('can escape a newline', () => {
         expect(evaluate(`
         x=1
-        zero=(x+\\
+        z=(x+\\
         1).zero
-        zero()
+        z()
         `)).toEqual(false)
+    })
+    it('delimits statements reasonably', () => {
+        expect(evaluate(`
+        x=0
+        z=x.zero
+        z()
+        `)).toEqual(true)
+    })
+        
+    it('delimits statements reasonably (ii)', () => {
         expect(evaluate(`
         x=10
-        y=x.times
+        y=3.times
+        y { x = x + 1 }
+        x
+        `)).toEqual(13)
+    })
+
+    it('funcalls from parens', () => {
+        expect(evaluate(`
+        x=10
+        y=3.times
         (y) { x = x + 1 }
         x
-        `)).toEqual(110)
+        `)).toEqual(13)
     })
 
     it('archetype', () => {

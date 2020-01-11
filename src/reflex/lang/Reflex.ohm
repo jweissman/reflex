@@ -48,15 +48,18 @@ Reflex {
       | LoopExpr
       | Defclass
       | Defun
-      | FunctionLit
 	    | CasualCall
+      | CoreExpr
+
+    CoreExpr
+      = FunctionLit
       | ParenExpr -- parens
 	    | Bareword
       | NumberLit
       | StringLit
       
     CasualCall
-      = (Bareword | ParenExpr) ~lineTerminator Arguments
+      = CoreExpr ~lineTerminator Arguments
     
     ParenExpr
       = "(" Expr ")"

@@ -83,8 +83,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   AlgExpr_local_assign: (message: Node, _eq: Node, expr: Node) =>
       new LocalVarSet(message.tree, expr.tree),
   Message: (contents: Node) => new Message(contents.sourceString),
-  Bareword: (word: Node) => new Bareword(word.sourceString),
-  CasualCall: (word: Node, args: Node) => new Barecall(word.sourceString, args.tree),
+  Bareword: (word: Node) => new Bareword((word.tree as Message).key),
+  CasualCall: (word: Node, args: Node) => new Barecall(word.tree, args.tree),
   ParenExpr: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
   PriExpr_neg: (_neg: Node, expr: Node) => new Negate(expr.tree),
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),

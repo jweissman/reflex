@@ -635,3 +635,7 @@ archetypes
 
 i almost think we could try to lift some of object's internals into reflex
 let's wait until we have lists and strings though~!
+
+------------------------
+
+higher-order types with the archetypes ...
