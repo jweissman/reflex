@@ -68,7 +68,7 @@ class Number {
     call(other) { other.add(self) }
 
     times(&b) {
-        counter = self
+        counter = self;
         until (counter.zero()) {
             counter = counter - 1;
             b();
@@ -76,8 +76,8 @@ class Number {
     }
 
     upto(stop, &b) {
-        val = self
-        end = stop + 1
+        val = self;
+        end = stop + 1;
         until (val == end) {
             b(val);
             val = val + 1

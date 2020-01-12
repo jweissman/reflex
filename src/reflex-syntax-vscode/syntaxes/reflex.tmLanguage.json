@@ -8,13 +8,14 @@
 		"expression": {
 			"patterns": [
 				{ "include": "#comments"},
-				{ "include": "#classes" },
-				{ "include": "#defun" },
 				{ "include": "#funcall" },
+				{ "include": "#classes" },
 				{ "include": "#keywords"},
+				{ "include": "#defun" },
 				{ "include": "#constants"},
 				{ "include": "#identifiers"},
-				{ "include": "#strings"}
+				{ "include": "#strings"},
+				{ "include": "#numbers"}
 			]
 		},
 		
@@ -28,7 +29,7 @@
 			]
 		},
 		"constants": {
-			"name": "constant.reflex",
+			"name": "meta.constant.reflex",
 			"patterns": [
 				{ "include": "#language-constants"},
 				{ "include": "#reserved-words"},
@@ -43,11 +44,11 @@
 			]
 		},
 		"language-constants": {
-			"name": "constant.language.reflex",
-			"match": "\\b(true|false|nil)\\b"
+			"name": "constant.language.core.reflex",
+			"match": "\\b(true|false|nil|Infinity)\\b"
 		},
 		"language-variables": {
-			"name": "variable.language.reflex",
+			"name": "constant.language.meta.reflex",
 			"match": "\\b(self|super|meta)\\b"
 		},
 		"user-defined-constants": {
@@ -58,9 +59,13 @@
 			"name": "variable.reflex",
 			"match": "[a-z][a-zA-Z0-9]+"
 		},
+		"parameter": {
+			"name": "variable.parameter.reflex",
+			"match": "[a-z][a-zA-Z0-9]+"
+		},
 		"classes": {
 			"name": "meta.class.definition.reflex",
-			"begin": "(class) ([A-Z][a-zA-Z]+)\\s*(< [A-Z][a-zA-Z]+)?\\s*(\\{)",
+			"begin": "(class) ([A-Z][a-zA-Z]+)\\s*<\\s*([A-Z][a-zA-Z]+)?\\s*(\\{)",
 			"beginCaptures": {
 				"1": {
 					"name": "keyword.class.reflex"
@@ -88,12 +93,15 @@
 
 		"defun": {
 			"name": "meta.function.definition.reflex",
-			"begin": "([a-zA-Z][a-zA-Z0-9]+)\\s*\\([^()]*\\)\\s*(\\{)",
+			"begin": "([a-zA-Z][a-zA-Z0-9]+)\\s*\\(([^()]*)\\)\\s*(\\{)",
 			"beginCaptures": {
 				"1": {
 					"name": "entity.name.function.reflex"
 				},
 				"2": {
+					"name": "variable.parameter.reflex"
+				},
+				"3": {
 					"name": "punctuation.block.begin.reflex"
 				}
 			},
@@ -114,7 +122,10 @@
 				}
 			},
 			"end": "\\)",
-			"patterns": [{ "include": "#expression" }]
+			"patterns": [
+				{ "include": "#parameter" },
+				{ "include": "#expression" }
+			]
 		},
 		"flow-control-operators":	{
 			"name": "keyword.control.reflex",
@@ -126,7 +137,7 @@
 		},
 		"arithmetic-operators":	{
 			"name": "keyword.operator.math.reflex",
-			"match": "(\\+|=)"
+			"match": "(\\+|-|\\*|\\/|\\|\\||=)"
 		},
 		"message-send-operator":	{
 			"name": "keyword.operator.send.reflex",
@@ -147,7 +158,7 @@
 					"match": "#.*$"
 				},
 				{
-					"name": "comment.block.reflex",
+					"name": "comment.block.documentation.reflex",
 					"begin": "/\\*",
 					"end": "\\*/"
 				}
@@ -171,6 +182,12 @@
 			"patterns": [
 				{ "include": "#expression" }
 			]
+		},
+		"numbers": {
+			"patterns": [{
+				"name": "constant.numeric.integer.reflex",
+				"match": "\\b([0-9])+"
+			}]
 		},
 		"strings": {
 			"patterns": [{
