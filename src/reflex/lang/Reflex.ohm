@@ -47,22 +47,19 @@ Reflex {
     PriExpr
       =
 	    | "-" Expr -- neg
-      | LoopExpr
-      | Defclass
-      | Defun
-      | CoreExpr
-
-    CoreExpr
-      = 
       | FunctionLit
       | ParenExpr -- parens
-	    | Bareword
       | NumberLit
       | StringLit
-      
+	    | Bareword
+
     CasualCall
-      = CoreExpr ~lineTerminator Arguments
-    
+      = CasuallyCallableExpr ~lineTerminator Arguments
+
+    CasuallyCallableExpr
+      = Expr
+      //| CasualCall
+        
     ParenExpr
       = "(" Expr ")"
 
@@ -86,14 +83,14 @@ Reflex {
       | Unless Condition Then? CondBlock -- unlessThen
 
     CondParticle
-     = CoreExpr If Condition Else Expr  -- ifElse
-     | CoreExpr Unless Condition Else Expr -- unlessElse
-     | CoreExpr If Condition -- if
-     | CoreExpr Unless Condition -- unless
+     = Expr If Condition Else Expr  -- ifElse
+     | Expr Unless Condition Else Expr -- unlessElse
+     | Expr If Condition -- if
+     | Expr Unless Condition -- unless
 
     CondBlock
       = Block
-      | CmpExpr
+      | Expr
 
     Conj
       = If
@@ -116,9 +113,12 @@ Reflex {
 
     Defclass
       = Class ClassName ExtendsClass Block -- extends
-      | ident ClassName ExtendsClass Block -- arch_extends
+      | Arch ClassName ExtendsClass Block -- arch_extends
       | Class ClassName Block -- plain
-      | ident ClassName Block -- arch_plain
+      | Arch ClassName Block -- arch_plain
+    
+    Arch
+      = ~("A".."Z") ident
     
     Class
       = "class"
@@ -145,10 +145,6 @@ Reflex {
 
     Bareword
       = Message
-
-    SpecifiedArguments
-      = FormalArguments PipedBlock -- block
-      | FormalArguments -- no_block
  
     Arguments
       = Args? PipedBlock -- block
@@ -176,7 +172,7 @@ Reflex {
       = "(" ListOf<Param, ","> ")"
     
     BareParams
-      = ~"(" ListOf<Param, ",">
+      = ~"(" NonemptyListOf<Param, ",">
 
     Param
       = "&" Bareword -- ref
@@ -185,8 +181,11 @@ Reflex {
     Block 
       = "{" Program "}"
       
-    PipedBlock = "{" PipeVars? Program "}"
-    PipeVars = "|" ListOf<Param,","> "|"
+    PipedBlock
+      = "{" PipeVars? Program "}"
+
+    PipeVars
+      = "|" ListOf<Param,","> "|"
 
     FunctionLit
       = FormalFunctionLiteral 

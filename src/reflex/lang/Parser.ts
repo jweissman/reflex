@@ -18,7 +18,7 @@ export default class Parser {
         let ast: Program = this.tree(input) as Program;
         if (ast) {
             let code: [Tree, Code][] = ast.lines.map(line => [line, line.code]) //inspect()
-            // console.log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
+            console.log("PARSE: "+input+"=>"+chalk.blue(ast.inspect()))
             return code
         } else {
             log("warn: undefined parse '" + input + "'" + ast)

@@ -109,8 +109,6 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
-class 
-
 # the universal constants
 nil = Nihil.new()
 true = Truth.new()
