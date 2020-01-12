@@ -71,7 +71,7 @@ class Number {
         counter = self;
         until (counter.zero()) {
             counter = counter - 1;
-            b();
+            b()
         }
     }
 

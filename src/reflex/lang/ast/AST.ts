@@ -30,6 +30,7 @@ const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Program: (_pre: Node, list: Node, _post: Node) =>
     new Program(list.tree),
+  Stmt: (_pre: Node, expr: Node) => expr.tree,
   Defclass_plain: (_class: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree),
   Defclass_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
@@ -48,6 +49,18 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     return new PipedBlock(pipe, block.tree)
   },
   PipeVars: (_lp: Node, pipeVars: Node, _rp: Node) => pipeVars.tree,
+  // SpecifiedArguments_block: (args: Node, block: Node) => {
+  //   let argTree = args.tree[0] || new Sequence([]);
+  //   return new Arguments(argTree, block.tree);
+  // },
+  // SpecifiedArguments_no_block: (args: Node) => {
+  //   if (args.tree instanceof Sequence) {
+  //     return new Arguments(args.tree)
+  //   } else {
+  //     throw new Error("args tree was not sequence: " + args.tree)
+  //   }
+  // },
+
   Arguments_block: (args: Node, block: Node) => {
     let argTree = args.tree[0] || new Sequence([]);
     return new Arguments(argTree, block.tree);
@@ -69,6 +82,9 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new SendMethodCall(receiver.tree, message.tree, args.tree),
   DotExpr_sendEq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) =>
     new SendMessageEq(receiver.tree, message.tree, expr.tree),
+  // CoreExpr_funcall: (fn: Node, args: Node) =>
+    // new SendMethodCall(new Bareword('self'), fn.tree, args.tree),
+    // new Barecall(fn.tree, args.tree),
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
   Param: (parameter: Node) => {
     if (parameter.tree instanceof Bareword) {

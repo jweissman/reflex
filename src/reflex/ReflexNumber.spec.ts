@@ -113,8 +113,9 @@ describe('Number', () => {
                 })
             })
 
-            xit('precedence', () => {
-                expect(evaluate("2+2*3")).toEqual(7)
+            it('precedence', () => {
+                expect(evaluate("2+2*3")).toEqual(8)
+                expect(evaluate("2+2*3-1")).toEqual(7)
             })
         })
     })

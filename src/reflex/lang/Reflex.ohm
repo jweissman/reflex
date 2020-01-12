@@ -1,21 +1,24 @@
 Reflex {
     Program
-      = delim* ListOf<Expr, delim*> delim*
-    
-    Noop
-      = lineTerminator?
+      = delim* ListOf<Stmt, delim*> delim*
+
+    Stmt = delim* Expr
       
     Expr =
+      | CondExpr
+	    | Defclass
+      | Defun
+      | LoopExpr
+	    | CasualCall
 	    | AlgExpr
-        //| Noop
 
     AlgExpr =
       | Message "=" Expr -- local_assign
       | BoolExpr
 
     BoolExpr
-      = BoolExpr "||" CmpExpr -- bool_or
-      | BoolExpr "&&" CmpExpr -- bool_and
+      = BoolExpr "||" Expr -- bool_or
+      | BoolExpr "&&" Expr -- bool_and
       | CmpExpr "?" BoolExpr ":" BoolExpr -- tern
       | CmpExpr
 
@@ -44,15 +47,14 @@ Reflex {
     PriExpr
       =
 	    | "-" Expr -- neg
-	    | CondExpr
       | LoopExpr
       | Defclass
       | Defun
       | CoreExpr
 
     CoreExpr
-      = FunctionLit
-	    | CasualCall
+      = 
+      | FunctionLit
       | ParenExpr -- parens
 	    | Bareword
       | NumberLit
@@ -143,7 +145,11 @@ Reflex {
 
     Bareword
       = Message
-      
+
+    SpecifiedArguments
+      = FormalArguments PipedBlock -- block
+      | FormalArguments -- no_block
+ 
     Arguments
       = Args? PipedBlock -- block
       | Args -- no_block
