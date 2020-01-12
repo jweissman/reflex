@@ -4,7 +4,7 @@ import { Code } from "./vm/instruction/Instruction";
 import { Configuration } from "./Configuration";
 import Tree from "./lang/ast/Tree";
 import ReflexObject from "./vm/types/ReflexObject";
-import { castReflexToJavascript } from "./vm/instruction/invoke";
+import { Converter } from "./vm/Converter";
 
 export default class Reflex {
     static config: Configuration = new Configuration()
@@ -22,13 +22,13 @@ export default class Reflex {
         lines.forEach(([_tree,code]) => {
             this.machine.run(code)
             result = this.machine.top
-            this.machine.reset(); //stack = [];
+            this.machine.reset();
         })
         this.machine.halt();
         this.machine.reset(); // = [];
         if (result == null) { return 'nothing' }
         else if (result && result instanceof ReflexObject) {
-            let cast = castReflexToJavascript(result);
+            let cast = Converter.castReflexToJavascript(result);
             if (cast instanceof ReflexObject) {
                 return cast.inspect()
             } else {

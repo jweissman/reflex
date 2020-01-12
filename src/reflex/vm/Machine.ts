@@ -5,17 +5,34 @@ import main, { bootLocals } from './Bootstrap';
 import { ReflexFunction } from './types/ReflexFunction';
 import { Frame } from './Frame';
 import { fail } from './util/fail';
-import { invoke } from './instruction/invoke';
 import { trace } from './instruction/trace';
-import { update } from './update';
 import Reflex from '../Reflex';
 import { State } from './State';
 import fs from 'fs';
 import { debug } from "./util/log";
 import Controller from "./Controller";
 
+class Loader {
+    static PATH_TO_REFLEX_LIBRARY =__dirname + "\\..\\lib\\"
+    getContents(given: string): string {
+        if (!given.endsWith(".reflex")) { given += ".reflex"; }
+        let paths = [
+            Loader.PATH_TO_REFLEX_LIBRARY + given,
+            process.cwd() + "\\" + given,
+        ];
+        let path = paths.find(p => fs.existsSync(p))
+        if (path) {
+            let contents: string = fs.readFileSync(path).toString();
+            return contents;
+        } else {
+            throw new Error("Could find find path " + given)
+        }
+    }
+}
+
 export default class Machine {
     controller: Controller = new Controller(this);
+    loader: Loader = new Loader();
     private stack: Value[] = []
     private frames: Frame[] = [{
         ip: 0, self: main(this),
@@ -39,22 +56,9 @@ export default class Machine {
     reset() { this.stack = [] }
 
     import(given: string) {
-        // add literally to code @ instruction pointer???
-        // as though this line was that code??
-        if (!given.endsWith(".reflex")) { given += ".reflex"; }
-        let paths = [
-            __dirname + "\\..\\lib\\" + given,
-            // given,
-            process.cwd() + "\\" + given,
-        ];
-        let path = paths.find(p => fs.existsSync(p))
-        if (path) {
-            let contents: string = fs.readFileSync(path).toString();
-            // console.log("READ CONTENTS", { given, contents })
-            this.reflex.evaluate(contents.toString())
-        } else {
-            throw new Error("Could find find path " + given)
-        }
+        this.reflex.evaluate(
+            this.loader.getContents(given)
+        )
     }
 
     sideload(newCode: Code) {
@@ -149,7 +153,7 @@ export default class Machine {
     doInvoke(ret: ReflexObject | undefined, fn: ReflexFunction, ...args: ReflexObject[]) {
         args.forEach(arg => this.stack.push(arg))
         this.stack.push(fn)
-        invoke(fn.arity, false, this.stack, this.frames, this.currentProgram, this, ret);
+        this.controller.invoke(fn.arity, false, ret);
     }
 
     jump(newIp: number) {
