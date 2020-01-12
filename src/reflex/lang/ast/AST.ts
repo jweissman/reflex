@@ -27,6 +27,9 @@ import { Loop } from "./Loop";
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
+// const processArgs = (args: Node): Arguments => {
+// }
+
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Program: (_pre: Node, list: Node, _post: Node) =>
     new Program(list.tree),
@@ -49,18 +52,6 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     return new PipedBlock(pipe, block.tree)
   },
   PipeVars: (_lp: Node, pipeVars: Node, _rp: Node) => pipeVars.tree,
-  // SpecifiedArguments_block: (args: Node, block: Node) => {
-  //   let argTree = args.tree[0] || new Sequence([]);
-  //   return new Arguments(argTree, block.tree);
-  // },
-  // SpecifiedArguments_no_block: (args: Node) => {
-  //   if (args.tree instanceof Sequence) {
-  //     return new Arguments(args.tree)
-  //   } else {
-  //     throw new Error("args tree was not sequence: " + args.tree)
-  //   }
-  // },
-
   Arguments_block: (args: Node, block: Node) => {
     let argTree = args.tree[0] || new Sequence([]);
     return new Arguments(argTree, block.tree);
@@ -100,7 +91,9 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
       new LocalVarSet(message.tree, expr.tree),
   Message: (contents: Node) => new Message(contents.sourceString),
   Bareword: (word: Node) => new Bareword((word.tree as Message).key),
-  CasualCall: (word: Node, args: Node) => new Barecall(word.tree, args.tree),
+  Call: (word: Node, args: Node) => new Barecall(word.tree, args.tree),
+  // CarefulCall_noBlock: (callable: Node, args: Node) =>
+    // new Barecall(callable.tree, new Arguments(args.tree)),
   ParenExpr: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
   PriExpr_neg: (_neg: Node, expr: Node) => new Negate(expr.tree),
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),

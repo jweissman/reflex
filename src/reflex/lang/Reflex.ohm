@@ -1,6 +1,6 @@
 Reflex {
     Program
-      = delim* ListOf<Stmt, delim*> delim*
+      = delim* ListOf<Stmt, delim> delim*
 
     Stmt = delim* Expr
       
@@ -9,7 +9,7 @@ Reflex {
 	    | Defclass
       | Defun
       | LoopExpr
-	    | CasualCall
+      | Call
 	    | AlgExpr
 
     AlgExpr =
@@ -52,13 +52,13 @@ Reflex {
       | NumberLit
       | StringLit
 	    | Bareword
+        
+    Call
+      = CallableExpr ~lineTerminator Arguments
 
-    CasualCall
-      = CasuallyCallableExpr ~lineTerminator Arguments
-
-    CasuallyCallableExpr
-      = Expr
-      //| CasualCall
+    CallableExpr
+      = Call
+      | Bareword
         
     ParenExpr
       = "(" Expr ")"
@@ -200,7 +200,7 @@ Reflex {
       | Params "=>" Expr
     
     NumberLit
-      = digit+ -- int
+      = #(~whitespace digit)+ -- int
       | digit+ "." digit+ -- float
     
     StringLit

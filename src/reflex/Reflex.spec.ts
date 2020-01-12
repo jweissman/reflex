@@ -447,6 +447,15 @@ describe('Reflex', () => {
         expect(evaluate('g()()')).toEqual(3)
     })
 
+    it('does not casually call numeric literals', () => {
+        expect(()=>evaluate('1 2 3')).toThrow()
+    })
+
+    it('orders operations with variables', () => {
+        evaluate('x=0')
+        expect(evaluate('2*x-3')).toEqual(-3)
+    })
+
     xit('self-spec', () => {
         expect(() => evaluate("Kernel.import 'spec'")).not.toThrow()
         expect(()=>evaluate(`
