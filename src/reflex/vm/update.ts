@@ -20,6 +20,18 @@ import { getLocal } from './instruction/getLocal';
 import { mark } from './instruction/mark';
 import { findFrameWithLocal } from './instruction/findFrameWithLocal';
 import { dispatch } from './instruction/dispatch';
+import { Value } from './instruction/Value';
+import { Stack } from './Stack';
+
+export function push(object: Value, stack: Stack) {
+    if (object === undefined) {
+        throw new Error("Won't push undefined onto stack")
+    } else if (object === null) {
+        throw new Error("Won't push raw null onto stack")
+    } else {
+        stack.push(object)
+    }
+}
 
 export function update(state: State, instruction: Instruction, code: Code): State {
     let [op, value] = instruction;
@@ -28,7 +40,8 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
     let top = stack[stack.length - 1];
     switch (op) {
         case 'push':
-            stack.push(value);
+            push(value, stack);
+            //stack.push(value);
             break;
         case 'pop':
             pop(stack);
@@ -99,7 +112,7 @@ export function update(state: State, instruction: Instruction, code: Code): Stat
                         // log("yield to block " + fn)
                         args.forEach(arg => stack.push(arg))
                         stack.push(fn);
-                        invoke(fn.arity, !!fn.blockParamName, stack, frames, machine.currentProgram, machine)
+                        invoke(fn.arity, !!fn.blockParamName, stack, frames, machine.activeProgram, machine)
                     });
                     stack.push(yieldFn)
                 } else {

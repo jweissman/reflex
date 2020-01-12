@@ -14,7 +14,7 @@ export function dispatch(message: string, object: ReflexObject, stack: Stack, fr
     stack.push(fn);
     let arity = fn.arity;
     log("DISPATCH " + message + " TO " + object.inspect() + " -- INVOKE " + fn.inspect() + " with ARITY " + arity)
-    invoke(arity, !!fn.blockParamName, stack, frames, machine.currentProgram, machine);
+    invoke(arity, !!fn.blockParamName, stack, frames, machine.activeProgram, machine);
     if (doRet) {
         ret(stack, frames, machine);
     }

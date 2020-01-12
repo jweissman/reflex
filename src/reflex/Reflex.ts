@@ -22,10 +22,10 @@ export default class Reflex {
         lines.forEach(([_tree,code]) => {
             this.machine.run(code)
             result = this.machine.top
-            this.machine.stack = [];
+            this.machine.reset(); //stack = [];
         })
         this.machine.halt();
-        this.machine.stack = [];
+        this.machine.reset(); // = [];
         if (result == null) { return 'nothing' }
         else if (result && result instanceof ReflexObject) {
             let cast = castReflexToJavascript(result);

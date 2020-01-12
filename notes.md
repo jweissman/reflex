@@ -639,3 +639,38 @@ let's wait until we have lists and strings though~!
 ------------------------
 
 higher-order types with the archetypes ...
+
+--------------------------------
+
+okay, major refactors both of grammar and vm architecture -- everything now goes through a controller monolith kind of class
+
+we can factor out narrower concerns from there, but the parameter madness should be reduced a little bit 
+
+----
+
+came here to say some things about mirrors, wands, holograms etc
+
+i think the semantics for mirrors should be that they implicitly grab a binding when they're created 
+
+(maybe if you give an object, it takes the binding 'of' that objects' self --- kind of strange but...)
+
+okay, so if i create a mirror and 'stabilize' an image on it, I 'freeze' the binding
+if i get passed a bound mirror, i can reflect on both bindings at once (current context + bound)
+
+the big idea with mirrors is that they're not the object, but pass-along/mediate signals -- transduction
+
+a mirror can reflect the entire environment also -- they're gateway into reification as well as reflective instrument
+
+okay, so a mirror 'is' a binding or captures one; it can also 'freeze' that binding into place and get passed around
+(and 'carry' that binding with it...)
+
+a wand has to have a binding to create objects ---
+
+the idea with a wand is that it can give you a 'portalized' JS object, a facade with wrappers around JS methods and
+accessors/converters/lenses for JS attributes
+
+so i could get a wand 'pointing' to the window object and start manipulating the dom, or a wand to fs and start doing filesystem ops
+
+i think this is really still pending some more data structures for reflection (lists, strings, dicts) ----
+
+---

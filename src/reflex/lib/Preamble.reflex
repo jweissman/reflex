@@ -20,6 +20,16 @@ class Class {
     isKindOf(other) { other == self || other.isAncestorOf(self) }
 }
 
+/* 
+ * Nihil
+ *
+ * The class of uninhabited types.
+ */
+class Nihil {
+    nil() { true }
+    true() { false }
+}
+
 /*
  * Boolean
  * 
@@ -99,10 +109,7 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
-class Nihil {
-    nil() { true }
-    true() { false }
-}
+class 
 
 # the universal constants
 nil = Nihil.new()

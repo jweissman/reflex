@@ -3,7 +3,6 @@ import ReflexObject from '../types/ReflexObject';
 import { ReflexFunction, WrappedFunction } from '../types/ReflexFunction';
 import { Frame } from '../Frame';
 import { Stack } from '../Stack';
-import { fail } from '../util/fail';
 import { zip } from '../util/zip';
 import { pop } from './pop';
 import Machine from '../Machine';
@@ -14,7 +13,6 @@ import { getLocal } from "./getLocal";
 import { RNumber, Indeterminate, PositiveApeiron, NegativeApeiron } from "../Bootstrap";
 import { ReflexNumber, } from "../types/ReflexNumber";
 import { log } from "../util/log";
-import { dispatch } from "./dispatch";
 import { dump } from "../util/dump";
 
 function invokeReflex(top: ReflexFunction, args: Value[], stack: Stack, frames: Frame[], code: Code, machine: Machine, hasBlock: boolean, ensureReturns?: ReflexObject) {
@@ -126,7 +124,7 @@ export function castJavascriptToReflex(machine: Machine, object: any): ReflexObj
         }
     } else if (object === true || object === false) {
         let varName = object ? 'true' : 'false'
-        return (getLocal(varName, machine.frames))
+        return (getLocal(varName, machine.activeFrames))
     } else {
         // if (object instanceof ReflexObject) {
             // return object;

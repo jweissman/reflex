@@ -12,14 +12,16 @@ import Reflex from '../Reflex';
 import { State } from './State';
 import fs from 'fs';
 import { debug } from "./util/log";
+import Controller from "./Controller";
 
 export default class Machine {
-    stack: Value[] = []
-    frames: Frame[] = [{
+    controller: Controller = new Controller(this);
+    private stack: Value[] = []
+    private frames: Frame[] = [{
         ip: 0, self: main(this),
         locals: bootLocals
     }];
-    currentProgram: Code = [];
+    private currentProgram: Code = [];
 
     constructor(private reflex: Reflex) {}
 
@@ -29,6 +31,12 @@ export default class Machine {
     get ip() { return this.frame.ip }
 
     get currentInstruction() { return this.currentProgram[this.ip]; }
+
+    get activeStack() { return this.stack }
+    get activeFrames() { return this.frames }
+    get activeProgram() { return this.currentProgram }
+
+    reset() { this.stack = [] }
 
     import(given: string) {
         // add literally to code @ instruction pointer???
@@ -132,10 +140,10 @@ export default class Machine {
 
     execute(instruction: Instruction) {
         let { stack, frames } = this.state
-        // log('frames: ' + frames.flatMap(frame => frame.self.inspect()).join(","))
         let frame = frames[frames.length - 1]
         trace(`exec @${this.ip}`, instruction, frame, stack)
-        update(this.state, instruction, this.currentProgram)
+        this.controller.execute(instruction)
+        // update(this.state, instruction, this.currentProgram)
     }
 
     doInvoke(ret: ReflexObject | undefined, fn: ReflexFunction, ...args: ReflexObject[]) {
@@ -146,7 +154,6 @@ export default class Machine {
 
     jump(newIp: number) {
         this.frame.ip = newIp;
-        // throw new Error("Machine.jump -- Method not implemented.");
     }
 
     get state(): State { return { stack: this.stack, frames: this.frames, machine: this } }

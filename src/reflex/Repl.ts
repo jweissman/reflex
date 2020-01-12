@@ -36,7 +36,7 @@ export class Repl {
         });
         server.defineCommand('code', {
             help: 'Echo current program instructions',
-            action: () => { console.log(prettyCode(interpreter.machine.currentProgram)); }
+            action: () => { console.log(prettyCode(interpreter.machine.activeProgram)); }
         });
         // server.defineCommand('stack', {
         //     help: 'Dump current stack elements',

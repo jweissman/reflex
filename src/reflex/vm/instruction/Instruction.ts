@@ -33,8 +33,8 @@ export const prettyValue = (v: Value) => {
   else if (v instanceof ReflexObject) { return v.inspect(); }
   else if (v instanceof Tree) { return v.inspect(); }
   else {
-    return 'undefined!!'
-    // throw new Error("Called pretty value on unknown: " + v)
+    // return 'undefined!!'
+    throw new Error("Called pretty value on unknown: " + v)
     // return v.toString();
   }
 }
