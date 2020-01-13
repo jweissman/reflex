@@ -62,4 +62,8 @@ describe('Boolean', () => {
             })
         })
     })
+
+    describe('algebra', () => {
+      test.todo("operations -- and (&&), or (||), not (!)")
+    })
 })

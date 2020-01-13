@@ -1,16 +1,14 @@
 class Algorithm {
-    meta.instanceEval {
-        get(n) { self.compute(n) }
+    call(n) {
+        self.compute(n)
     }
 }
 
 algorithm Fibonacci {
-    meta.instanceEval {
-      compute(n) {
-          fib = self.compute
-          base = n.zero() || n.one()
-          if (base) { 1 } else { fib(n-1) + fib(n-2) }
-      }
+    compute(n) {
+        // breaks?? base = n.zero() || n.one()
+        if (n.zero() || n.one()) { 1 }
+        else { self.compute(n-1) + self.compute(n-2) }
     }
 }
 

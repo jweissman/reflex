@@ -442,9 +442,9 @@ describe('Reflex', () => {
         expect(evaluate('Taxi.super')).toEqual('Class(Car)')
     })
 
-    it('call higher-order funs', () => {
+    it('will not carefully call higher-order funs', () => {
         evaluate('g=->->3')
-        expect(evaluate('g()()')).toEqual(3)
+        expect(()=>evaluate('g()()')).toThrow()
     })
 
     it('does not casually call numeric literals', () => {
@@ -457,13 +457,24 @@ describe('Reflex', () => {
     })
 
     it('fib', () => {
+        evaluate('fib=n=>(n.zero()||n.one())?1:fib(n-1)+fib(n-2)')
+        expect(evaluate('fib 0')).toEqual(1)
+        expect(evaluate('fib 1')).toEqual(1)
+        expect(evaluate('fib 2')).toEqual(2)
+        expect(evaluate('fib 3')).toEqual(3)
+        expect(evaluate('fib 4')).toEqual(5)
+        expect(evaluate('fib 5')).toEqual(8)
+    })
+
+    fit('fib example', () => {
         evaluate('require "example"')
-        expect(evaluate('Fibonacci.get(0)')).toEqual(1)
-        expect(evaluate('Fibonacci.get(1)')).toEqual(1)
-        expect(evaluate('Fibonacci.get(2)')).toEqual(2)
-        expect(evaluate('Fibonacci.get(3)')).toEqual(3)
-        expect(evaluate('Fibonacci.get(4)')).toEqual(5)
-        expect(evaluate('Fibonacci.get(5)')).toEqual(8)
+        evaluate('fibonacci=Fibonacci.new()')
+        expect(evaluate('fibonacci 0')).toEqual(1)
+        expect(evaluate('fibonacci 1')).toEqual(1)
+        expect(evaluate('fibonacci 2')).toEqual(2)
+        expect(evaluate('fibonacci 3')).toEqual(3)
+        expect(evaluate('fibonacci 4')).toEqual(5)
+        expect(evaluate('fibonacci 5')).toEqual(8)
     })
 
     xit('self-spec', () => {

@@ -675,3 +675,80 @@ i think this is really still pending some more data structures for reflection (l
 
 
 ---
+
+okay, so what if `archetype` keyword is formal type constructor
+
+(i know, but)
+
+no type judgments on everything (though i reserve the right to add `x: Type` judgments...)
+
+the idea would just be to permit simple structured tuples/sums/unions
+
+and to destructure these in matching/messages
+
+```
+archetype Point = [ Number, Number ]
+archetype Line = { a: Point, b: Point }
+
+archetype List<T> = T[]
+
+archetype Model = Number
+archetype Message<T> = Inc | Dec | Store<T> | Load<T>
+
+// okay, so far archetypes are just cosmetic
+// how could we destructure them
+update(model: Model, msg: Message<T>) {
+  case(msg) {
+    Inc -> model + 1
+    Dec -> model - 1
+    Store<T> -> ...
+  }
+}
+```
+
+this becomes a fully typed lang as soon as we do this
+it'll infect everything
+
+if we think about 'contracts' rather than formal types this might
+not feel so scary? that is, runtime checks
+
+although the presence of type judgments does make me wonder
+i've heard the types for dynamic languages can be pretty wild
+
+---
+
+contracts in two senses then: between objects and the caller,
+another layer of sanity checks (automated units, maybe you could say)
+
+and then in case statements, exhaustion and 'destructuring' (to some degree)
+of (arche)type expressions
+
+the idea is that they're not full types, they're really objects
+(and in most cases maybe you can substitute a class name for an archetype)
+
+they just look like types
+
+i feel like i'm trying to convince myself that it won't make the language huge
+
+(and maybe undercut dynamism at some point? a deeper worry)
+
+(imagining types like `RespondsTo<:blah>` and just wanting not that)
+
+(i do love the idea of a bunch of optional test-ish kind of things)
+(more type-decorations/annotations than judgments/inferences)
+(maybe the question there is a better syntax/analog for annotations then??)
+i was about to argue that `throw unless x.isA(Class)` isn't that bad but it's clearly awful compared to the `x: Class` sort of judgment in a parameter
+
+i'll say that the parameter thing does seem weirdly cheap, at least as a runtime check
+
+i like the idea of the type fragment of the language basically only ever
+being accessible in a 'non-typing' context in case statements
+
+----------------------------------------------------------------
+
+---------
+
+i think i do like `using` as a require-like
+
+
+

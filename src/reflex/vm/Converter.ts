@@ -1,3 +1,4 @@
+import util from 'util'
 import { log } from './util/log';
 import ReflexObject from './types/ReflexObject';
 import { getLocal } from './instruction/getLocal';
@@ -55,7 +56,7 @@ export class Converter {
             return (getLocal(varName, this.ctrl.frames));
         }
         else {
-            throw new Error("won't return uncast JS object");
+            throw new Error("won't return uncast JS object: " + util.inspect(object));
         }
     }
 }
