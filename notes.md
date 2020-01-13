@@ -752,3 +752,48 @@ i think i do like `using` as a require-like
 
 
 
+----------------------------------------------------------------
+
+okay, so thinking more about archetypes -- if we do allow sums/unions, do we allow code to be created for those instances?
+(what if they don't share anything at all??? i guess you have to know that in advance??)
+
+how does it even work logically?
+
+okay, so i'm now thinking of archetypes as something like 'virtual types' that the runtime can verify for you
+
+```
+archetype Push<T> = T
+archetype Zero;
+archetype Inc;
+archetype Dec;
+archetype Model = Number
+archetype Message<A> = Inc | Dec | Push<A> | Zero
+
+class Model {
+  inc(): Model { self + 1 }
+  dec(): Model { self - 1 }
+  zero(): Model { 0 }
+}
+
+handle(model: Model, message: Message<Model>): State {
+  case(message) {
+    when Push<T> then message as Model
+    else model.send(&message) // types could be converted to messages based on name??
+  }
+}
+
+model = Model.new()
+newModel = handle(model, Inc) # model is 1
+newModel = handle(model, 2)   # model is 2
+newModel = handle(model, Dec) # model is 1
+```
+
+why couldn't we just do static typechecks at this point (we could definitely validate a case stmt exhausts the type...)
+
+---------------------
+
+okay, if archetypes are ultimately about 'defining messages' (kind of interesting link between the paradigms)
+...or at least if that's our "archetypal" use case...
+
+what do we do about abstract types, generics etc? do we permit higher-order types
+

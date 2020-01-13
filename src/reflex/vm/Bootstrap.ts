@@ -89,22 +89,24 @@ Kernel.eigenclass.get("instance_methods").set("import", new WrappedFunction(
 )
 
 let arithmetic = {
-  eq: (left: number, right: number) => left === right,
-  add: (left: number, right: number) => {
-    let result = left + right
-    // console.log("ADD " + left + " " + right + " YIELDING " + result)
-    return result
-  },
+  add: (left: number, right: number) => left + right,
   sub: (left: number, right: number) => left - right,
   mult: (left: number, right: number) => left * right,
-  div: (left: number, right: number) => {
-    // log("DIVIDE " + left + " by " + right)
-    return left / right
-  },
+  div: (left: number, right: number) => left / right,
   mod: (left: number, right: number) => left % right,
   neg: (val: number) => -val,
+  eq: (left: number, right: number) => left === right,
+  gt: (left: number, right: number) => left > right,
+  gte: (left: number, right: number) => left >= right,
+  lt: (left: number, right: number) => left < right,
+  lte: (left: number, right: number) => left <= right,
 }
 
+// const defineArithmetic = (methodName: string) => {
+//   numberMethods.set(methodName, new WrappedFunction("Number." + methodName, (machine: Machine, other: number) =>
+//     (arithmetic[methodName] as Function)((machine.boundSelf! as ReflexNumber).value, other)
+//   ))
+// }
 let numberMethods = RNumber.get("instance_methods");
 numberMethods.set("add", new WrappedFunction("Number.add", (machine: Machine, other: number) => 
     arithmetic.add((machine.boundSelf! as ReflexNumber).value, other)
@@ -126,6 +128,18 @@ numberMethods.set("eq", new WrappedFunction("Number.eq", (machine: Machine, othe
 ))
 numberMethods.set("negate", new WrappedFunction("Number.negate", (machine: Machine) => 
     arithmetic.neg((machine.boundSelf! as ReflexNumber).value)
+))
+numberMethods.set("gt", new WrappedFunction("Number.gt", (machine: Machine, other: number) => 
+    arithmetic.gt((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("lt", new WrappedFunction("Number.lt", (machine: Machine, other: number) => 
+    arithmetic.lt((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("gte", new WrappedFunction("Number.gte", (machine: Machine, other: number) => 
+    arithmetic.gte((machine.boundSelf! as ReflexNumber).value, other)
+))
+numberMethods.set("lte", new WrappedFunction("Number.lte", (machine: Machine, other: number) => 
+    arithmetic.lte((machine.boundSelf! as ReflexNumber).value, other)
 ))
 
 // PositiveApeiron.get("instance_methods").set("value", Infinity)

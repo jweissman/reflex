@@ -23,13 +23,25 @@ import { NumberLiteral } from "./NumberLiteral";
 import { Negate } from "./Negate";
 import { Binary } from "./Binary";
 import { Loop } from "./Loop";
+import { Code } from '../../vm/instruction/Instruction';
 
-// const self = new Bareword('self')
+function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
 
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
-
-// const processArgs = (args: Node): Arguments => {
-// }
+export class LogicalNot extends Tree {
+  constructor(public expr: Tree) {
+    super();
+  }
+  inspect(): string {
+    return `!${this.expr.inspect()}`;
+  }
+  get code(): Code {
+    return [
+      ...this.expr.code,
+      ['dispatch', 'negate'],
+    ]
+  }
+}
+ 
 
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Program: (_pre: Node, list: Node, _post: Node) =>
@@ -53,67 +65,23 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     return new PipedBlock(pipe, block.tree)
   },
   PipeVars: (_lp: Node, pipeVars: Node, _rp: Node) => pipeVars.tree,
+  CasualArguments: (args: Node) => Arguments.from(args.tree),
   CasualArguments_block: (args: Node, block: Node) => {
-    // console.log("CASUAL ARGS + BLOCK -- ARGS: " + args.sourceString)
-    // console.log("CASUAL ARGS + BLOCK -- BLOCK: " + args.sourceString)
     let argTree = args.tree[0] || new Sequence([]);
     return new Arguments(argTree, block.tree);
   },
-  CasualArguments: (args: Node) => {
-    // console.log("CASUAL ARGS: " + args.sourceString)
-    let tree = args.tree
-    if (tree instanceof Sequence) {
-      // console.log("CASUAL ARGS -- SEQUENCE: " + tree.inspect())
-      return new Arguments(tree)
-    } else {
-      // if (args instanceof Arguments) { return args; }
-      // else if (args instanceof PipedBlock) {
-      //   let argTree = new Sequence([]);
-      //   return new Arguments(argTree, args.tree);
-      // }
-      // console.log(util.inspect(args))
-      if (tree instanceof Arguments) { return tree; }
-      else if (tree instanceof PipedBlock) {
-        // return 
-        throw new Error("!!! piped block -- args tree was not sequence: " + tree.inspect())
-      } 
-
-      throw new Error("casual args tree was not sequence: " + tree)
-    }
-  },
+  CarefulArguments: (args: Node) => Arguments.from(args.tree),
   CarefulArguments_block: (args: Node, block: Node) => {
     let argTree = args.tree[0] || new Sequence([]);
     return new Arguments(argTree, block.tree);
-  },
-  CarefulArguments: (args: Node) => {
-    let { tree } = args;
-    if (tree instanceof Sequence) {
-      return new Arguments(tree)
-    } else {
-      if (tree instanceof Arguments) { return tree; }
-      // else if (tree instanceof PipedBlock) {
-      //   // return 
-      //   throw new Error("!!! piped block -- args tree was not sequence: " + tree.inspect())
-      // } 
-      throw new Error("args tree was not sequence: " + tree.inspect())
-    }
   },
   FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
   Arg_ref: (_amp: Node, expr: Node) => new Argument(expr.tree, true),
   Arg: (expr: Node) => expr.tree instanceof Argument ? expr.tree : new Argument(expr.tree, false),
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
-  ObjectDot_dot: (receiver: Node, _dot: Node, message: Node, _andDot: Node) =>
-   new SendMessage(receiver.tree, message.tree),
-  //DotExpr_call: (receiver: Node, _dot: Node, message: Node, args: Node) =>
-  //  new SendMethodCall(receiver.tree, message.tree, args.tree),
-  EqExpr_send_eq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) =>
-   new SendMessageEq(receiver.tree, message.tree, expr.tree),
-
-      //  | ObjectDot "." Message "=" Expr -- send_eq
-  CoreExpr_funcall: (fn: Node, args: Node) => {
-    // return new SendMethodCall(new Bareword('self'), fn.tree, args.tree)
-    return new Barecall(new Bareword(fn.tree.key), args.tree)
-  },
+  ObjectDot_dot: (receiver: Node, _dot: Node, message: Node, _andDot: Node) => new SendMessage(receiver.tree, message.tree),
+  EqExpr_send_eq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) => new SendMessageEq(receiver.tree, message.tree, expr.tree),
+  CoreExpr_funcall: (fn: Node, args: Node) => new Barecall(new Bareword(fn.tree.key), args.tree),
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
   Param: (parameter: Node) => {
     if (parameter.tree instanceof Bareword) {
@@ -125,40 +93,22 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     }
   },
   Param_ref: (_amp: Node, word: Node) => new Parameter((word.tree as Bareword).word, true),
-
-       //| Message "=" Expr -- local_eq
-  EqExpr_local_eq: (message: Node, _eq: Node, expr: Node) =>
-      new LocalVarSet(message.tree, expr.tree),
+  EqExpr_local_eq: (message: Node, _eq: Node, expr: Node) => new LocalVarSet(message.tree, expr.tree),
   Message: (contents: Node) => new Message(contents.sourceString),
   Bareword: (word: Node) => new Bareword((word.tree as Message).key),
-  // = ObjectDot "." Message CasualArguments -- obj
-  CasualCall_obj: (objDot: Node, _dot: Node, msg: Node, args: Node) => {
-    // console.log("CASUAL CALL OBJ: " + objDot.sourceString)
-    // console.log("CASUAL CALL MESSAGE: " + msg.sourceString)
-    // console.log("CASUAL CALL ARGS: " + args.sourceString)
-    if (args.tree instanceof PipedBlock) {
-      // console.log("!!! ARGS WAS PIPED BLOCK: " + args.tree.inspect())
-    }
-    return new SendMethodCall(objDot.tree, msg.tree, args.tree)
-  },
+  CasualCall_obj: (objDot: Node, _dot: Node, msg: Node, args: Node) => new SendMethodCall(objDot.tree, msg.tree, args.tree),
   CasualCall_msg: (message: Node, args: Node) => new Barecall(message.tree, args.tree),
-
-      //  ObjectExpr = ObjectDot "." Message CarefulArguments -- call
-// objdot call = ObjectDot "." Message CarefulArguments &"." -- call 
-  ObjectDot_call: (objDot: Node, _dot: Node, msg: Node, args: Node, _nextDot: Node) => //new Barecall(message.tree, args.tree),
-    new SendMethodCall(objDot.tree, msg.tree, args.tree),
-  ObjectExpr_dot: (objDot: Node, _dot: Node, msg: Node) => //new Barecall(message.tree, args.tree),
-    new SendMessage(objDot.tree, msg.tree),
-  ObjectExpr_call: (objDot: Node, _dot: Node, msg: Node, args: Node) => //new Barecall(message.tree, args.tree),
-    new SendMethodCall(objDot.tree, msg.tree, args.tree),
-  // CarefulCall_block: (callable: Node, args: Node, block: Node) => new CarefulCall
-    // new Barecall(callable.tree, new Arguments(args.tree)),
-  // CarefulCall_noBlock: (callable: Node, args: Node) =>
-    // new Barecall(callable.tree, new Arguments(args.tree)),
+  ObjectDot_call: (objDot: Node, _dot: Node, msg: Node, args: Node, _nextDot: Node) => new SendMethodCall(objDot.tree, msg.tree, args.tree),
+  ObjectExpr_dot: (objDot: Node, _dot: Node, msg: Node) => new SendMessage(objDot.tree, msg.tree),
+  ObjectExpr_call: (objDot: Node, _dot: Node, msg: Node, args: Node) => new SendMethodCall(objDot.tree, msg.tree, args.tree),
   ParenExpr: (_lp: Node, expr: Node, _rp: Node) => expr.tree,
   PriExpr_neg: (_neg: Node, expr: Node) => new Negate(expr.tree),
   CmpExpr_eq: (left: Node, _eq: Node, right: Node) => new Compare('==', left.tree, right.tree),
   CmpExpr_neq: (left: Node, _eq: Node, right: Node) => new Compare('!=', left.tree, right.tree),
+  CmpExpr_lt: (left: Node, _eq: Node, right: Node) => new Compare('<', left.tree, right.tree),
+  CmpExpr_gt: (left: Node, _eq: Node, right: Node) => new Compare('>', left.tree, right.tree),
+  CmpExpr_lte: (left: Node, _eq: Node, right: Node) => new Compare('<=', left.tree, right.tree),
+  CmpExpr_gte: (left: Node, _eq: Node, right: Node) => new Compare('>=', left.tree, right.tree),
   CondStmt_ifThenElse: (_if: Node, cond: Node, _then: Node, left: Node, _else: Node, right: Node) =>
     new Conditional('if', cond.tree, left.tree, right.tree),
   BoolExpr_tern: (cond: Node, _q: Node, left: Node, _colon: Node, right: Node) =>
@@ -187,6 +137,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Conditional('if', left.tree, left.tree, right.tree),
   BoolExpr_bool_and: (left: Node, _or: Node, right: Node) =>
     new Conditional('if', left.tree, right.tree, new Bareword('false')),
+  PriExpr_not: (_not: Node, expr: Node) =>
+    new LogicalNot(expr.tree),
   AddExpr_sum: (left: Node, _sum: Node, right: Node) =>
     new Binary('+', left.tree, right.tree),
   AddExpr_difference: (left: Node, _sum: Node, right: Node) =>

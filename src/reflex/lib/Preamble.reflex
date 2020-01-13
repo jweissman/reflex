@@ -62,13 +62,18 @@ class Falsity < Boolean {
 class Number {
     zero() { self == 0 }
     one() { self == 1 }
+    positive() { self.gt(0) }
     true() { self.zero().negate() }
     divide(other) {
         if (other.zero()) {
             if (self.zero()) {
                 Indeterminate.new()
             } else {
-                PositiveApeiron.new()
+                if (self.positive()) {
+                    PositiveApeiron.new()
+                } else {
+                    NegativeApeiron.new()
+                }
             }
         } else {
             self.rawDiv(other)

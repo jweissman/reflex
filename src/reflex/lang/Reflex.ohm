@@ -26,14 +26,20 @@ Reflex {
       | BoolExpr
 
     BoolExpr
-      = BoolExpr "||" CmpExpr -- bool_or
+      = 
+      | BoolExpr "||" CmpExpr -- bool_or
       | BoolExpr "&&" CmpExpr -- bool_and
       | BoolExpr "?" CmpExpr ":" CmpExpr -- tern
+      //| "!" CmpExpr -- bool_not
       | CmpExpr
 
     CmpExpr
       = CmpExpr "==" AddExpr -- eq
       | CmpExpr "!=" AddExpr -- neq
+      | CmpExpr "<" AddExpr -- lt
+      | CmpExpr ">" AddExpr -- gt
+      | CmpExpr "<=" AddExpr -- lte
+      | CmpExpr ">=" AddExpr -- gte
       | AddExpr
 
     AddExpr
@@ -49,7 +55,8 @@ Reflex {
 
     PriExpr
       =
-	    | "-" Expr -- neg
+	    | "!" PriExpr -- not
+	    | "-" PriExpr -- neg
         | FunctionLit
         | ObjectExpr
       

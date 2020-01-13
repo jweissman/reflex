@@ -45,6 +45,24 @@ describe('Number', () => {
             expect(evaluate("1.eq(1)")).toEqual(true)
             expect(evaluate("1.eq(0)")).toEqual(false)
         })
+        it('gt', () => {
+            expect(evaluate("1.gt(0)")).toEqual(true)
+            expect(evaluate("0.gt(1)")).toEqual(false)
+        })
+        it('lt', () => {
+            expect(evaluate("0.lt(1)")).toEqual(true)
+            expect(evaluate("1.lt(0)")).toEqual(false)
+        })
+        it('gte', () => {
+            expect(evaluate("1.gte(0)")).toEqual(true)
+            expect(evaluate("1.gte(1)")).toEqual(true)
+            expect(evaluate("0.gte(1)")).toEqual(false)
+        })
+        it('lte', () => {
+            expect(evaluate("0.lte(1)")).toEqual(true)
+            expect(evaluate("1.lte(1)")).toEqual(true)
+            expect(evaluate("1.lte(0)")).toEqual(false)
+        })
     })
 
     describe('integer arithmetic', () => {

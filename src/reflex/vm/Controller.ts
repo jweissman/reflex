@@ -147,8 +147,8 @@ export class Controller {
         ensureReturns?: ReflexObject
     ) {
         let top = this.stack[this.stack.length - 1];
-        log("INVOKE " + top + " (arity: " + arity + ") -- stack: " + dump(this.stack))
-        log("HAS BLOCK? " + hasBlock)
+        // log("INVOKE " + top + " (arity: " + arity + ") -- stack: " + dump(this.stack))
+        // log("HAS BLOCK? " + hasBlock)
         this.pop()
         let args = [];
         for (let i = 0; i < arity; i++) {
@@ -158,7 +158,7 @@ export class Controller {
         }
         // log("...okay, invoke: " + util.inspect(top))
         if (top instanceof WrappedFunction) {
-            log("invoke wrapped")
+            // log("invoke wrapped")
             if (hasBlock) {
                 args.push(this.stack[this.stack.length - 1]);
                 this.pop();
@@ -180,14 +180,14 @@ export class Controller {
                 this.machine.unbindSelf()
             }
         } else if (top instanceof ReflexFunction) {
-            log("invoke reflex...")
+            // log("invoke reflex...")
             this.invokeReflex(top, args, hasBlock, ensureReturns);
         }
         else {
             if (top instanceof ReflexObject) {
-                log("call obj")
+                // log("call obj")
                 let call = top.send('call');
-                log("WOULD CALL " + call)
+                // log("WOULD CALL " + call)
                 args.reverse().forEach(arg => this.push(arg))
                 if (call instanceof WrappedFunction) { call.bind(top) }
                 if (call instanceof ReflexFunction) { call.frame.self = top }

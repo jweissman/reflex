@@ -25,6 +25,16 @@ export class Arguments extends Tree {
     }
   }
 
+  static from(tree: Tree) {
+    // let { tree } = args;
+    if (tree instanceof Sequence) {
+      return new Arguments(tree)
+    } else {
+      if (tree instanceof Arguments) { return tree; }
+      throw new Error("args tree was not sequence: " + tree.inspect())
+    }
+  }
+
   get length() { return this.args.length}
 
   inspect(): string {

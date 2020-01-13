@@ -9,10 +9,17 @@ export class Compare extends Tree {
   get code(): Code {
     let ops: {
       [key in Comparator]: string;
-    } = { '==': 'eq', '!=': 'neq' };
+    } = {
+      '==': 'eq',
+      '!=': 'neq',
+      '>': 'gt',
+      '>=': 'gte',
+      '<': 'lt',
+      '<=': 'lte',
+     };
     return [
-      ...this.left.code,
       ...this.right.code,
+      ...this.left.code,
       ['push', ops[this.op]],
       ['call', null],
       ['invoke', 1],

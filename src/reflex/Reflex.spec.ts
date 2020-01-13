@@ -105,6 +105,18 @@ describe('Reflex', () => {
                             expect(evaluate("x")).toEqual("Object")
                         })
                     })
+                    describe('boolean not', () => {
+                        it('has NOTs truth table', () => {
+                            expect(evaluate("!true")).toEqual(false)
+                            expect(evaluate("!false")).toEqual(true)
+                        })
+
+                        it('composes with boolean operators', () => {
+                            expect(evaluate("!true || !false")).toEqual(true)
+                            expect(evaluate("!false && !false")).toEqual(true)
+                            expect(evaluate("!!true || !!false")).toEqual(true)
+                        })
+                    })
                 })
             })
 
@@ -201,6 +213,40 @@ describe('Reflex', () => {
                         expect(evaluate('1/0')).toEqual(Infinity)
                         expect(evaluate('-1/0')).toEqual(-Infinity)
                         expect(evaluate('(1/0)+1')).toEqual(Infinity)
+                    })
+                })
+
+                describe("!", () => {
+                    it('logical not', () => {
+                        expect(evaluate("!true")).toEqual(false)
+                        expect(evaluate("!false")).toEqual(true)
+                    })
+                    it('convolutes', () => {
+                        expect(evaluate("!!true")).toEqual(true)
+                        expect(evaluate("!!false")).toEqual(false)
+                    })
+                })
+
+                describe('comparators', () => {
+                    it('lt', () => {
+                        expect(evaluate('1 < 0')).toEqual(false)
+                        expect(evaluate('1 < 1')).toEqual(false)
+                        expect(evaluate('1 < 2')).toEqual(true)
+                    })
+                    it('lte', ()=>{
+                        expect(evaluate('1 <= 0')).toEqual(false)
+                        expect(evaluate('1 <= 1')).toEqual(true)
+                        expect(evaluate('1 <= 2')).toEqual(true)
+                    })
+                    it('gt', () => {
+                        expect(evaluate('1 > 0')).toEqual(true)
+                        expect(evaluate('1 > 1')).toEqual(false)
+                        expect(evaluate('1 > 2')).toEqual(false)
+                    })
+                    it('gte', ()=>{
+                        expect(evaluate('1 >= 0')).toEqual(true)
+                        expect(evaluate('1 >= 1')).toEqual(true)
+                        expect(evaluate('1 >= 2')).toEqual(false)
                     })
                 })
             })
@@ -429,7 +475,7 @@ describe('Reflex', () => {
         `)).toEqual(13)
     })
 
-    it('archetype', () => {
+    it('archetype with simple class name', () => {
         evaluate('class Model {}')
         expect(evaluate('Model')).toEqual('Class(Model)')
         evaluate('model Car {}')
@@ -441,6 +487,9 @@ describe('Reflex', () => {
         // expect(evaluate('Taxi.archetype')).toEqual('Class(Model)')
         expect(evaluate('Taxi.super')).toEqual('Class(Car)')
     })
+
+    test.todo("archetype with ComplexClassName")
+    test.todo("sum/union archetype")
 
     it('will not carefully call higher-order funs', () => {
         evaluate('g=->->3')
@@ -466,7 +515,7 @@ describe('Reflex', () => {
         expect(evaluate('fib 5')).toEqual(8)
     })
 
-    fit('fib example', () => {
+    it('fib example', () => {
         evaluate('require "example"')
         evaluate('fibonacci=Fibonacci.new()')
         expect(evaluate('fibonacci 0')).toEqual(1)
