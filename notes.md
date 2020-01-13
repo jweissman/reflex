@@ -673,4 +673,5 @@ so i could get a wand 'pointing' to the window object and start manipulating the
 
 i think this is really still pending some more data structures for reflection (lists, strings, dicts) ----
 
+
 ---

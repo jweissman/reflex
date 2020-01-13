@@ -456,6 +456,16 @@ describe('Reflex', () => {
         expect(evaluate('2*x-3')).toEqual(-3)
     })
 
+    it('fib', () => {
+        evaluate('require "example"')
+        expect(evaluate('Fibonacci.get(0)')).toEqual(1)
+        expect(evaluate('Fibonacci.get(1)')).toEqual(1)
+        expect(evaluate('Fibonacci.get(2)')).toEqual(2)
+        expect(evaluate('Fibonacci.get(3)')).toEqual(3)
+        expect(evaluate('Fibonacci.get(4)')).toEqual(5)
+        expect(evaluate('Fibonacci.get(5)')).toEqual(8)
+    })
+
     xit('self-spec', () => {
         expect(() => evaluate("Kernel.import 'spec'")).not.toThrow()
         expect(()=>evaluate(`

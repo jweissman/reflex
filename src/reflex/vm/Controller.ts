@@ -1,3 +1,4 @@
+import util from 'util';
 import { Value } from './instruction/Value';
 import Machine from './Machine';
 import { Instruction, indexForLabel, Code, nextOperativeCommand } from './instruction/Instruction';
@@ -147,6 +148,7 @@ export class Controller {
     ) {
         let top = this.stack[this.stack.length - 1];
         log("INVOKE " + top + " (arity: " + arity + ") -- stack: " + dump(this.stack))
+        log("HAS BLOCK? " + hasBlock)
         this.pop()
         let args = [];
         for (let i = 0; i < arity; i++) {
@@ -154,7 +156,9 @@ export class Controller {
             args.push(newTop);
             this.pop();
         }
+        // log("...okay, invoke: " + util.inspect(top))
         if (top instanceof WrappedFunction) {
+            log("invoke wrapped")
             if (hasBlock) {
                 args.push(this.stack[this.stack.length - 1]);
                 this.pop();
@@ -176,10 +180,12 @@ export class Controller {
                 this.machine.unbindSelf()
             }
         } else if (top instanceof ReflexFunction) {
+            log("invoke reflex...")
             this.invokeReflex(top, args, hasBlock, ensureReturns);
         }
         else {
             if (top instanceof ReflexObject) {
+                log("call obj")
                 let call = top.send('call');
                 log("WOULD CALL " + call)
                 args.reverse().forEach(arg => this.push(arg))
@@ -187,6 +193,8 @@ export class Controller {
                 if (call instanceof ReflexFunction) { call.frame.self = top }
                 this.push(call);
                 this.invoke(arity, hasBlock, ensureReturns)
+            } else {
+                throw new Error("Top was not reflex function or object at invoke")
             }
         }
     }
@@ -254,7 +262,9 @@ export class Controller {
         if (frame.retValue) {
             this.push(frame.retValue);
         } else {
+            log("RET")
             if (this.stackIsEmpty()) {
+                log("RET -- stack was empty! providing Nihil...")
                 this.push(this.makeNil());
             }
         }
@@ -303,6 +313,7 @@ export class Controller {
     }
 
     private invokeReflex(top: ReflexFunction, args: Value[], hasBlock: boolean, ensureReturns?: ReflexObject) {
+        log("INVOKE REFLEX " + top.inspect())
         let ip = indexForLabel(this.code, top.label);
         let frame = this.frames[this.frames.length - 1];
         let self = frame.self as ReflexObject;

@@ -4,7 +4,7 @@
  */
 class Object {
     neq(other) { self.eq(other).negate() }
-    isA(klass) { self.instanceOf(klass) }
+    isA(klass) { self.isInstanceOf(klass) }
     nil() { false }
     true() { true }
     false() { Boolean.negate(self.true()) }
