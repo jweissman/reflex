@@ -136,7 +136,9 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),
-  NumberLit: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
+  NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
+  NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(
+    Number(`${whole.sourceString}.${fraction.sourceString}`), true),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),
   EmptyListOf: () => new Sequence([]),
 }

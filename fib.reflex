@@ -6,8 +6,11 @@ class Algorithm {
 
 algorithm Fibonacci {
     compute(n) {
-        // a=0;b=1;
-        // test = n < 2;
-        if (n<2) { 1 } else { self(n-1) + self(n-2) }
+        test = n <= 1;
+        if (test) {
+            1
+        } else {
+            self(n-1) + self(n-2) 
+        }
     }
 }

@@ -6,10 +6,20 @@ describe('Number', () => {
         expect(evaluate("Number.class")).toEqual("Class(Class)")
     })
 
+    it('integers', () => {
+        expect(evaluate("1")).toEqual(1)
+        expect(evaluate("1.class")).toEqual("Class(Integer)")
+    })
+
+    it('floats', () => {
+        expect(evaluate("1.5")).toEqual(1.5)
+        expect(evaluate("1.5.class")).toEqual("Class(Float)")
+    })
+
     describe('zero', () => {
-        it('is a number', () => {
+        it('is an integer', () => {
             expect(evaluate("0")).toEqual(0)
-            expect(evaluate("0.class")).toEqual("Class(Number)")
+            expect(evaluate("0.class")).toEqual("Class(Integer)")
         })
         it('is an identity for addition', () => {
             expect(evaluate("0.add(0)")).toEqual(0)
@@ -30,7 +40,7 @@ describe('Number', () => {
     describe('one', () => {
         it('is a number', () => {
             expect(evaluate("1")).toEqual(1)
-            expect(evaluate("1.class")).toEqual("Class(Number)")
+            expect(evaluate("1.class")).toEqual("Class(Integer)")
         })
         it('is an additive successor', () => {
             expect(evaluate("1.add(1)")).toEqual(2)

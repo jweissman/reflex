@@ -9,14 +9,14 @@ export class ReflexNumber extends ReflexObject {
   toString() { return this.value.toString(); }
 }
 
-// our mapping for nan
+// export class ReflexFloat extends ReflexNumber { name='Float' }
+// export class ReflexInteger extends ReflexNumber { name='Integer' }
+
 export class IndeterminateForm extends ReflexNumber {
   name = 'Indeterminate';
   toString() { return this.displayName; }
-  // inspect() { return 'Indeterminate'; }
 }
 
-// export class Infinity extends ReflexObject {}
 export class PositiveInfinity extends ReflexNumber {
   name = 'PositiveApeiron';
   value = Infinity;

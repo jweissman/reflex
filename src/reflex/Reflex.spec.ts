@@ -533,6 +533,8 @@ describe('Reflex', () => {
         expect(evaluate('fibonacci 3')).toEqual(3)
         expect(evaluate('fibonacci 4')).toEqual(5)
         expect(evaluate('fibonacci 5')).toEqual(8)
+        expect(evaluate('fibonacci 6')).toEqual(13)
+        expect(evaluate('fibonacci 7')).toEqual(21)
     })
 
     xit('self-spec', () => {

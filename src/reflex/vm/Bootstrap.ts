@@ -6,7 +6,6 @@ import ReflexObject from "./types/ReflexObject";
 import { ReflexFunction, WrappedFunction } from "./types/ReflexFunction";
 import { ReflexNihil } from "./types/ReflexNihil";
 import Machine from "./Machine";
-import { log } from "./util/log";
 import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } from "./types/ReflexNumber";
 import { Boots } from "./Boots";
 
@@ -26,6 +25,11 @@ ReflexNihil.klass = Nihil;
 
 export const RNumber = ReflexClass.make("Number");
 ReflexNumber.klass = RNumber;
+
+// export const RInt = ReflexClass.make("Integer", RNumber);
+// ReflexInteger.klass = RInt;
+// export const RFloat = ReflexClass.make("Float", RNumber);
+// ReflexFloat.klass = RInt;
 
 export const Indeterminate = ReflexClass.make("Indeterminate", RNumber);
 IndeterminateForm.klass = Indeterminate;
@@ -158,6 +162,8 @@ export const bootLocals = {
   Metaclass,
   Kernel,
   Number: RNumber,
+  // Float: RFloat,
+  // Integer: RInt,
   Indeterminate,
   PositiveApeiron,
   NegativeApeiron,

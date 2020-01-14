@@ -220,8 +220,8 @@ Reflex {
       | Params "=>" Expr
     
     NumberLit
-      = #(~whitespace digit)+ -- int
-      | digit+ "." digit+ -- float
+      = digit+ "." digit+ -- float
+      | #(~whitespace digit)+ -- int
     
     StringLit
       = "'" #singleStringCharacter* "'"

@@ -13,6 +13,7 @@ export default class ReflexObject {
     protected members: Store = {}
     wrapped: boolean = false;
     id: number = ReflexObject.count++;
+    // name: string;
 
     has(k: string) { return Object.keys(this.members).includes(k) }
     set(k: string,v: ReflexObject) { this.members[k] = v }

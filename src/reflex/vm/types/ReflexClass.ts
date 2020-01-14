@@ -9,6 +9,8 @@ import { log } from "../util/log";
 export const NATIVE_CLASSES: { [key: string]: any } = {
     "Function": ReflexFunction,
     "Number": ReflexNumber,
+    // "Integer": ReflexInteger,
+    // "Float": ReflexFloat,
     "Indeterminate": IndeterminateForm,
     "NegativeApeiron": NegativeInfinity,
     "PositiveApeiron": PositiveInfinity,
@@ -74,6 +76,14 @@ export default class ReflexClass extends ReflexObject {
     }
     protected get instanceMethods(): ReflexObject { return this.get("instance_methods") as ReflexObject }
     get displayName() { return `Class(${this.name})` }
+    get derived() { return this.superclass.name !== ReflexObject.klass.name }
+    get base() {
+        if (!this.derived) {
+            throw new Error("only derived classes have base classes")
+        } else {
+            return this.ancestors[this.ancestors.length - 3]
+        }
+    }
 
     get messageSources(): ReflexObject[] {
        if (!this.eigenclass) { this.assembleMeta() }
