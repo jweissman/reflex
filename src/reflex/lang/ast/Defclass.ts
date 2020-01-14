@@ -22,8 +22,13 @@ export class Defclass extends Tree {
     return `class ${this.name.inspect()} {${this.body.inspect()}}`;
   }
 
-  // okay, maybe formal defuns just define instance methods??
-  get structure() {
+  get code(): Code {
+    return [
+      ...this.structure.code,
+    ];
+  }
+
+  private get structure() {
     let newClassArgs: Argument[] = [new Argument(this.name)];
     if (this.superclass) { newClassArgs.push(new Argument(this.superclass)) }
     let defClass = new LocalVarOrEq(
@@ -32,15 +37,12 @@ export class Defclass extends Tree {
     );
     return new Program(new Sequence([
       defClass,
-      // new LocalVarGet(this.name),
       new SendMethodCall(
         new Bareword(this.name.key), new Message("defineClassMethod"),
         new Arguments(new Sequence([
-          // new Argument(new Bareword('_setup')),
-          // new Argument(new Message('_setup')),
           new Argument(new Message('_setup')),
           new Argument(
-            new FunctionLiteral(new Sequence([]), this.body) //new Program(new Sequence(this.body.lines)))
+            new FunctionLiteral(new Sequence([]), this.body)
           )
         ]))
       ),
@@ -49,11 +51,5 @@ export class Defclass extends Tree {
         new Arguments(new Sequence([])),
       ),
     ]));
-  }
-  get code(): Code {
-    return [
-      ...this.structure.code,
-      // ['local_var_get', this.name.key],
-    ];
   }
 }

@@ -18,17 +18,17 @@ describe('Function', () => {
         expect(evaluate("foo()")).toEqual("Class(Object)")
     })
     it('creates lambdas', () => {
-        expect(evaluate("()=>{Object}")).toEqual("Function(->Object)")
+        expect(evaluate("()=>{Object}")).toEqual("->Object")
     });
     it('invokes lambdas', () => {
-        expect(evaluate("f=()=>{Object}")).toEqual("Function(->Object)")
+        expect(evaluate("f=()=>{Object}")).toEqual("->Object")
         expect(evaluate("f()")).toEqual("Class(Object)")
     });
 
     describe('class methods', () => {
         describe('.new', () => {
             it('returns its arg', () => {
-                expect(evaluate("fn=Function.new(()=>{Class})")).toMatch("Function")
+                expect(evaluate("fn=Function.new(()=>{Class})")).toMatch("->Class")
                 expect(evaluate("fn.class")).toMatch("Class(Function)")
                 expect(evaluate("fn()")).toMatch("Class(Class)")
             })
@@ -47,11 +47,11 @@ describe('Function', () => {
     it('binds locals', () => {
         expect(evaluate("class A{bar(){b=self;()=>{b}}}; A")).toEqual("Class(A)")
         expect(evaluate("baz=A.new()")).toEqual("A")
-        expect(evaluate("fn=baz.bar()")).toMatch("Function")
+        expect(evaluate("fn=baz.bar()")).toMatch("->b")
         expect(evaluate("fn()")).toMatch("A")
 
         expect(evaluate("class A{quux(){()=>{self}}}; A")).toEqual("Class(A)")
-        expect(evaluate("fn=baz.quux()")).toMatch("Function")
+        expect(evaluate("fn=baz.quux()")).toMatch("->self")
         expect(evaluate("fn()")).toMatch("A")
     })
     it('higher-order', () => {

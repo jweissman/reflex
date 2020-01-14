@@ -13,7 +13,7 @@ describe('Class', () => {
 
     describe(".new", () => {
         it('is a Function', () => {
-            expect(evaluate("Class.new")).toEqual("Function(Class(Class).new[wrap])")
+            expect(evaluate("Class.new")).toEqual("Function(Class(Class).new)")
         })
         it('is a class factory', () => {
             expect(evaluate("Class.new()")).toEqual("Class(Anonymous)")
@@ -140,7 +140,7 @@ describe('Class', () => {
         it("extends Object", () => {
             expect(evaluate("class Object { foo() { self.class } }; Object")).toEqual("Class(Object)")
             expect(evaluate("Object.new().foo()")).toEqual("Class(Object)")
-            expect(evaluate("Function.new(()=>{}).foo()")).toEqual("Class(Function)")
+            expect(evaluate("(()=>{}).foo()")).toEqual("Class(Function)")
             expect(evaluate("Class.new().foo()")).toEqual("Class(Class)")
         })
 

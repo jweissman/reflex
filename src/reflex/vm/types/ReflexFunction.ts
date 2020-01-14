@@ -14,7 +14,7 @@ export class ReflexFunction extends ReflexObject {
     inspect() { return this.displayName; }
     get displayName() {
         if (this.name && this.name.match(/lambda/) && this.source) {
-            return `Function(${this.source})`
+            return this.source
         } else {
             return `Function(${this.name})`
         }
@@ -26,31 +26,16 @@ export class WrappedFunction extends ReflexObject {
     wrapped = true;
     bound = false;
     boundSelf?: ReflexObject;
-    constructor(public name: string, public impl: Function) {
+    constructor(public name: string, public impl: Function, public convertArgs: boolean = true) {
         super();
     }
 
-    get displayName() { return `Function(${this.name}[wrap])`; }
-
-    // get arity() { return this.impl.length-1; }
+    get displayName() { return `Function(${this.name})`; }
 
     bind(self: ReflexObject) {
-        // log("BIND WRAPPED FN " + this.name + " TO " + self.inspect());
-        let mu = new WrappedFunction(self.displayName + "." + this.name.split('.')[1], this.impl);
+        let mu = new WrappedFunction(self.displayName + "." + this.name.split('.')[1], this.impl, this.convertArgs);
         mu.bound = true;
         mu.boundSelf = self;
         return mu;
     }
 }
-
-// export class BoundFunction extends WrappedFunction {
-//     bound = true;
-//     // wrapped = true;
-//     private boundSelf?: any;
-//     constructor(public fn: WrappedFunction, public self: ReflexObject) {
-//         super();
-//     }
-
-//     get displayName() { return `Function(${this.name}[wrap])`; }
-//     get arity() { return this.impl.length; }
-// }

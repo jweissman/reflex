@@ -8,6 +8,7 @@ import { ReflexNihil } from "./types/ReflexNihil";
 import Machine from "./Machine";
 import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } from "./types/ReflexNumber";
 import { Boots } from "./Boots";
+import { ReflexArray } from "./types/ReflexArray";
 
 let boots: Boots = new Boots();
 boots.lace();
@@ -26,17 +27,15 @@ ReflexNihil.klass = Nihil;
 export const RNumber = ReflexClass.make("Number");
 ReflexNumber.klass = RNumber;
 
-// export const RInt = ReflexClass.make("Integer", RNumber);
-// ReflexInteger.klass = RInt;
-// export const RFloat = ReflexClass.make("Float", RNumber);
-// ReflexFloat.klass = RInt;
-
 export const Indeterminate = ReflexClass.make("Indeterminate", RNumber);
 IndeterminateForm.klass = Indeterminate;
 export const PositiveApeiron = ReflexClass.make("PositiveApeiron", RNumber);
 PositiveInfinity.klass = PositiveApeiron;
 export const NegativeApeiron = ReflexClass.make("NegativeApeiron", RNumber);
 NegativeInfinity.klass = NegativeApeiron;
+
+export const RArray = ReflexClass.make("Array")
+ReflexArray.klass = RArray;
 
 let objectMethods = RObject.get("instance_methods")
 objectMethods.set("eq", new WrappedFunction(`Object.eq`,
@@ -67,10 +66,13 @@ metaclassMethods.set("new", new WrappedFunction(
 ))
 
 let classMethods = Class.get("instance_methods")
-classMethods.set("new", new WrappedFunction(
+let newObjectFunction = new WrappedFunction(
   `Class.new`,
-  (machine: Machine, ...args: ReflexObject[]) => makeReflexObject(machine, machine.boundSelf! as ReflexClass, args))
+  (machine: Machine, ...args: ReflexObject[]) => makeReflexObject(machine, machine.boundSelf! as ReflexClass, args),
+  false
 )
+// console.log("NEW OBJ FN", newObjectFunction.inspect())
+classMethods.set("new", newObjectFunction)
 classMethods.set("defineMethod", new WrappedFunction(`Class.defineMethod`,
   (machine: Machine, name: string, fn: ReflexFunction) => {
     defineInstanceMethod(machine.boundSelf! as ReflexClass, fn, name)
@@ -92,11 +94,12 @@ Kernel.eigenclass.get("instance_methods").set("import", new WrappedFunction(
   (machine: Machine, filename: string) => machine.import(filename))
 )
 
-let arithmetic = {
+type ArithOp = 'add' | 'subtract' | 'multiply' | 'divide' | 'mod' | 'neg' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte'
+let arithmetic: { [key in ArithOp]: Function} = {
   add: (left: number, right: number) => left + right,
-  sub: (left: number, right: number) => left - right,
-  mult: (left: number, right: number) => left * right,
-  div: (left: number, right: number) => left / right,
+  subtract: (left: number, right: number) => left - right,
+  multiply: (left: number, right: number) => left * right,
+  divide: (left: number, right: number) => left / right,
   mod: (left: number, right: number) => left % right,
   neg: (val: number) => -val,
   eq: (left: number, right: number) => left === right,
@@ -105,49 +108,33 @@ let arithmetic = {
   lt: (left: number, right: number) => left < right,
   lte: (left: number, right: number) => left <= right,
 }
-
-// const defineArithmetic = (methodName: string) => {
-//   numberMethods.set(methodName, new WrappedFunction("Number." + methodName, (machine: Machine, other: number) =>
-//     (arithmetic[methodName] as Function)((machine.boundSelf! as ReflexNumber).value, other)
-//   ))
-// }
 let numberMethods = RNumber.get("instance_methods");
-numberMethods.set("add", new WrappedFunction("Number.add", (machine: Machine, other: number) => 
-    arithmetic.add((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("subtract", new WrappedFunction("Number.subtract", (machine: Machine, other: number) => 
-    arithmetic.sub((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("multiply", new WrappedFunction("Number.multiply", (machine: Machine, other: number) => 
-    arithmetic.mult((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("rawDiv", new WrappedFunction("Number.rawDiv", (machine: Machine, other: number) => 
-    arithmetic.div((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("modulo", new WrappedFunction("Number.rawDiv", (machine: Machine, other: number) => 
-    arithmetic.mod((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("eq", new WrappedFunction("Number.eq", (machine: Machine, other: number) => 
-    arithmetic.eq((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("negate", new WrappedFunction("Number.negate", (machine: Machine) => 
-    arithmetic.neg((machine.boundSelf! as ReflexNumber).value)
-))
-numberMethods.set("gt", new WrappedFunction("Number.gt", (machine: Machine, other: number) => 
-    arithmetic.gt((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("lt", new WrappedFunction("Number.lt", (machine: Machine, other: number) => 
-    arithmetic.lt((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("gte", new WrappedFunction("Number.gte", (machine: Machine, other: number) => 
-    arithmetic.gte((machine.boundSelf! as ReflexNumber).value, other)
-))
-numberMethods.set("lte", new WrappedFunction("Number.lte", (machine: Machine, other: number) => 
-    arithmetic.lte((machine.boundSelf! as ReflexNumber).value, other)
-))
+const defineArithmetic = (methodName: ArithOp, customName?: string) => {
+  let name = customName || methodName
+  numberMethods.set(name, new WrappedFunction("Number." + name, (machine: Machine, other: number) =>
+    (arithmetic[methodName] as Function)((machine.boundSelf! as ReflexNumber).value, other)
+  ))
+}
+defineArithmetic('add');
+defineArithmetic('subtract');
+defineArithmetic('multiply');
+defineArithmetic('divide', 'rawDiv');
+defineArithmetic('mod', 'modulo');
+defineArithmetic('eq');
+defineArithmetic('neg', 'negate');
+defineArithmetic('gt');
+defineArithmetic('gte');
+defineArithmetic('lt');
+defineArithmetic('lte');
 
-// PositiveApeiron.get("instance_methods").set("value", Infinity)
-// NegativeInfinity.set("value", -Infinity)
+let arrayMethods = RArray.get("instance_methods");
+arrayMethods.set("get", new WrappedFunction("Array.get", (machine: Machine, index: number) =>
+  (machine.boundSelf! as ReflexArray).at(index)
+))
+arrayMethods.set("set", new WrappedFunction("Array.set", (machine: Machine, index: ReflexNumber, value: ReflexObject) =>
+  (machine.boundSelf! as ReflexArray).put(index, value),
+  false
+))
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>

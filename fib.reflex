@@ -1,6 +1,12 @@
 class Algorithm {
+    init() {
+        self.memo = Array.new()
+    }
     call(n) {
-        self.compute(n)
+        if (self.memo.get(n).nil()) {
+           self.memo.set(n, self.compute(n))
+        }
+        self.memo.get(n)
     }
 }
 

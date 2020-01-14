@@ -5,6 +5,7 @@ import { getLocal } from './instruction/getLocal';
 import { ReflexNumber } from './types/ReflexNumber';
 import { Indeterminate, RNumber } from './Bootstrap';
 import { Controller } from './Controller';
+import ReflexClass from './types/ReflexClass';
 // do conversions/casting?
 export class Converter {
     constructor(private ctrl: Controller) { }
@@ -48,12 +49,19 @@ export class Converter {
                 return (getLocal("NegativeInfinity", this.ctrl.frames));
             }
             else {
-                return (this.ctrl.makeObject(RNumber, [object as unknown as ReflexObject]));
+                if (Number.isInteger(object)) {
+                    return (this.ctrl.makeObject(getLocal("Integer", this.ctrl.frames) as ReflexClass, [object as unknown as ReflexObject]));
+                } else {
+                    return (this.ctrl.makeObject(getLocal("Float", this.ctrl.frames) as ReflexClass, [object as unknown as ReflexObject]));
+                }
             }
         }
         else if (object === true || object === false) {
             let varName = object ? 'true' : 'false';
             return (getLocal(varName, this.ctrl.frames));
+        }
+        else if (object === null) {
+            return (getLocal('nil', this.ctrl.frames));
         }
         else {
             throw new Error("won't return uncast JS object: " + util.inspect(object));

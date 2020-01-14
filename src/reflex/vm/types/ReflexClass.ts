@@ -5,10 +5,13 @@ import Machine from "../Machine";
 import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } from "./ReflexNumber";
 import { makeMetaclass } from "./makeMetaclass";
 import { log } from "../util/log";
+import { ReflexArray } from './ReflexArray';
+import { makeReflexObject } from './makeReflexObject';
 
 export const NATIVE_CLASSES: { [key: string]: any } = {
     "Function": ReflexFunction,
     "Number": ReflexNumber,
+    "Array": ReflexArray,
     // "Integer": ReflexInteger,
     // "Float": ReflexFloat,
     "Indeterminate": IndeterminateForm,
@@ -17,6 +20,13 @@ export const NATIVE_CLASSES: { [key: string]: any } = {
 }
 
 export const classRegistry: { [key: string]: ReflexClass } = {}
+
+// class FlatStore {
+//     private items: { [key: string]: any } = {}
+//     get(key: string) { return this.items[key] }
+//     set(key: string, value: any) { this.items[key] = value }
+//     has(key: string) { return Object.keys(this.items).includes(key) }
+// }
 
 export default class ReflexClass extends ReflexObject {
     isClass: boolean = true;
@@ -32,11 +42,6 @@ export default class ReflexClass extends ReflexObject {
         if (superclass && superclass.get("meta")) {
             meta = makeMetaclass(klass)
             klass.set("meta", meta);
-        } else {
-            // if (name !== 'Object') {
-                // log("WOULD CREATE META FOR " + name);
-                // klass.set("meta", ReflexClass.make("Meta(" + name + ")", Metaclass.klass)
-            // }
         }
         return klass;
     }

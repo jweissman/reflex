@@ -10,6 +10,7 @@ export class LogicalNot extends Tree {
   get code(): Code {
     return [
       ...this.expr.code,
+      ['dispatch', 'true'],
       ['dispatch', 'negate'],
     ];
   }

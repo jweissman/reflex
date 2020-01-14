@@ -802,3 +802,18 @@ what do we do about abstract types, generics etc? do we permit higher-order type
 ------------
 
 i think the VM is called 'diamond' (!)
+
+----------------------------------
+
+so we're a little LESS expressive than ruby in certain ways, on purpose
+
+some of this is to make it intentionally EASIER TO READ certain things
+
+we permit optional parens, but member access without args is always an object, never a method call
+
+so that's actually two dispatch mechanisms
+
+one of which goes through send, and another which is bare access
+
+we may want to disallow bare access to members outside of classes
+(this would compel us to start building attr accessor-style hooks for embedding data elements into structures like this)

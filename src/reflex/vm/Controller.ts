@@ -166,11 +166,14 @@ export class Controller {
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
             }
-            args = args.map(arg =>
-                arg instanceof ReflexObject
-                    ? Converter.castReflexToJavascript(arg)
-                    : arg
-            );
+            if (!!top.convertArgs) {
+                log("CONVERT ARGS")
+                args = args.map(arg =>
+                    arg instanceof ReflexObject
+                        ? Converter.castReflexToJavascript(arg)
+                        : arg
+                );
+            } else { log("DO NOT CONVERT ARGS")}
             let result = top.impl(this.machine, ...args);
             if (result !== undefined) {
                 let toPush = this.converter.castJavascriptToReflex(result);

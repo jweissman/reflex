@@ -20,6 +20,15 @@ class Class {
     isKindOf(other) { other == self || other.isAncestorOf(self) }
 }
 
+/**
+ * Function
+ *
+ * The class of functions.
+ */
+class Function {
+    meta.instanceEval { new(fn) { fn } }
+}
+
 /* 
  * Nihil
  *
@@ -113,6 +122,14 @@ class Apeiron < Number {
 }
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
+
+/**
+ * Array
+ *
+ * The class of object-valued index spaces.
+ */
+
+class Array {}
 
 # the universal constants
 nil = Nihil.new()
