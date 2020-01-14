@@ -133,8 +133,9 @@ export default class Machine {
         }
     }
 
+    active: boolean = false
     syncDelay(secs: number) {
-        if (secs > 0) {
+        if (this.active && secs > 0) {
             var wait = new Date(new Date().getTime() + secs * 1000);
             while (wait > new Date()) {
                 // spinlock

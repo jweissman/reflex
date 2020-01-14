@@ -84,8 +84,8 @@ Reflex {
       | FormalArguments
     
     CasualArguments
-      = BareArguments? PipedBlock -- block
-      | BareArguments
+      = ~"-" BareArguments? PipedBlock -- block
+      | ~"-" BareArguments
 
     FormalArguments
       = "(" ListOf<Arg, ","> ")"

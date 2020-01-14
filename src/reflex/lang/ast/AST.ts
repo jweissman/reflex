@@ -23,25 +23,9 @@ import { NumberLiteral } from "./NumberLiteral";
 import { Negate } from "./Negate";
 import { Binary } from "./Binary";
 import { Loop } from "./Loop";
-import { Code } from '../../vm/instruction/Instruction';
+import { LogicalNot } from './LogicalNot';
 
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
-
-export class LogicalNot extends Tree {
-  constructor(public expr: Tree) {
-    super();
-  }
-  inspect(): string {
-    return `!${this.expr.inspect()}`;
-  }
-  get code(): Code {
-    return [
-      ...this.expr.code,
-      ['dispatch', 'negate'],
-    ]
-  }
-}
- 
 
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Program: (_pre: Node, list: Node, _post: Node) =>

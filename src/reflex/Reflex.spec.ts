@@ -505,6 +505,15 @@ describe('Reflex', () => {
         expect(evaluate('2*x-3')).toEqual(-3)
     })
 
+    it('(unused?) vars in funcall do not trash the stack (?)', () => {
+        evaluate('f=->{a=0;b=1;c=4;2}')
+        expect(evaluate('f()')).toEqual(2)
+        expect(evaluate('f()+2')).toEqual(4)
+        expect(evaluate('f()/2')).toEqual(1)
+        expect(evaluate('2+2*2')).toEqual(6)
+        expect(evaluate('f()+f()*2')).toEqual(6)
+    })
+
     it('fib', () => {
         evaluate('fib=n=>(n.zero()||n.one())?1:fib(n-1)+fib(n-2)')
         expect(evaluate('fib 0')).toEqual(1)
@@ -516,7 +525,7 @@ describe('Reflex', () => {
     })
 
     it('fib example', () => {
-        evaluate('require "example"')
+        evaluate('require "fib"')
         evaluate('fibonacci=Fibonacci.new()')
         expect(evaluate('fibonacci 0')).toEqual(1)
         expect(evaluate('fibonacci 1')).toEqual(1)

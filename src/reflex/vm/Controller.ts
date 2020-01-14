@@ -125,7 +125,7 @@ export class Controller {
                 break;
             case 'jump_if':
                 let nowTop = this.stack[this.stack.length - 1];
-                this.pop();
+                // this.pop();
                 let shouldJump = (nowTop as ReflexObject).className === 'Truth';
                 if (shouldJump) {
                     let theLabel = value as string;
@@ -221,11 +221,13 @@ export class Controller {
     }
 
     protected mark(value: string) {
+        log("WOULD MARK FOR " + value)
         this.push(new Stone(value));
     }
 
     protected sweep(value: Value) {
-        while (!this.stackIsEmpty) {
+        log("WOULD SWEEP FOR " + value)
+        while (!this.stackIsEmpty()) {
             let top = this.stack[this.stack.length - 1];
             this.pop();
             if (top instanceof Stone) {
@@ -248,6 +250,7 @@ export class Controller {
             if (result instanceof ReflexFunction) {
                 result.frame.self = receiver;
             }
+            // this.push(receiver); // things seem to assume this??
             this.push(result);
         } else {
             dump(this.stack);
@@ -259,14 +262,27 @@ export class Controller {
         let frame = this.frames[this.frames.length - 1];
         this.frames.pop();
         this.frames.pop();
+        let top = this.stack[this.stack.length - 1]
+        let retValue: Value = null;
+        // log("RET from " + frame.currentMethod)
         if (frame.retValue) {
-            this.push(frame.retValue);
+            // log("RET -- frame ret value: " + frame.retValue)
+            retValue = frame.retValue;
+        } else if (this.stackIsEmpty() || (top instanceof Stone && top.name === 'invoke')) {
+            // log("RET -- stack was empty! providing Nihil...")
+            retValue = this.makeNil();
         } else {
-            log("RET")
-            if (this.stackIsEmpty()) {
-                log("RET -- stack was empty! providing Nihil...")
-                this.push(this.makeNil());
-            }
+            // pick stack top?
+            // log("RET -- picking stack top")
+            retValue = this.stack[this.stack.length - 1];
+        }
+
+        if (retValue !== null) {
+            log("RET -- returning: " + retValue)
+            this.sweep('invoke')
+            this.push(retValue);
+        } else {
+            throw new Error("No ret value at " + frame.currentMethod)
         }
     }
 
@@ -355,6 +371,7 @@ export class Controller {
             }
         }
         if (!nihilate) {
+            this.mark('invoke')
             this.frames.push(top.frame);
             this.frames.push(newFrame);
         } else {
@@ -397,6 +414,7 @@ export class Controller {
     }
 
     private stackIsEmpty() { return this.stack.length === 0 }
+    // private stackIsEmptyUntil() { return this.stack.length === 0 }
 }
 
 export default Controller;

@@ -1,5 +1,8 @@
 import Tree from "./Tree";
 import { Code } from "../../vm/instruction/Instruction";
+
+
+
 export class SendMessage extends Tree {
     constructor(public receiver: Tree, public message: Tree) {
         super();

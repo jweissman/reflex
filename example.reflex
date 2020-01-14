@@ -1,16 +1,4 @@
-class Algorithm {
-    call(n) {
-        self.compute(n)
-    }
-}
 
-algorithm Fibonacci {
-    compute(n) {
-        // breaks?? base = n.zero() || n.one()
-        if (n.zero() || n.one()) { 1 }
-        else { self.compute(n-1) + self.compute(n-2) }
-    }
-}
 
 //Fibonacci.get(10)
 

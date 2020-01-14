@@ -135,6 +135,12 @@ describe('Number', () => {
                 expect(evaluate("2+2*3")).toEqual(8)
                 expect(evaluate("2+2*3-1")).toEqual(7)
             })
+
+            it('precedence w variables', () => {
+                evaluate('x=2')
+                expect(evaluate("2+3*x")).toEqual(8)
+                expect(evaluate("2+3*x-1")).toEqual(7)
+            })
         })
     })
 })

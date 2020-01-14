@@ -8,9 +8,9 @@ let lastStack: Stack = [];
 export function trace(message: string, instruction: Instruction, frame: Frame, stack: Stack) {
     let msg = [
         // ...(message ? [chalk.yellow(message)] : []),
+        ...(stack.length && stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
         prettyInstruct(instruction),
         // chalk.gray("self: ") + frame.self.inspect(),
-        ...(stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
     ].join("\n");
     lastStack = [...stack];
     log(msg);

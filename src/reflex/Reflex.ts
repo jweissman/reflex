@@ -14,6 +14,7 @@ export default class Reflex {
 
     constructor() {
         this.evaluate("Kernel.import 'preamble'");
+        this.machine.active = true
     }
 
     evaluate(input: string) {

@@ -797,3 +797,8 @@ okay, if archetypes are ultimately about 'defining messages' (kind of interestin
 
 what do we do about abstract types, generics etc? do we permit higher-order types
 
+
+
+------------
+
+i think the VM is called 'diamond' (!)
