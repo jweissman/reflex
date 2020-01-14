@@ -8,58 +8,31 @@ import { fail } from './util/fail';
 import { trace } from './instruction/trace';
 import Reflex from '../Reflex';
 import { State } from './State';
-import fs from 'fs';
 import { debug } from "./util/log";
 import Controller from "./Controller";
 import { ReflexString } from "./types/ReflexString";
+import { Loader } from "./Loader";
 
-function disambiguateString(str: string | ReflexString) {
-    // console.log("DISAMBIGUATE_STRING", str)
-    if (str instanceof ReflexString) {
-        // console.log("reflex string", str.value)
-        return str.value;
-    } else {
-        // console.log("nonreflex string", str)
-        return str;
-    }
-}
 
-class Loader {
-    static PATH_TO_REFLEX_LIBRARY =__dirname + "\\..\\lib\\"
-    getContents(filename: string): string {
-        let str = filename; //disambiguateString(filename);
-        // console.log("GET CONTENTS", { given: str })
-        if (!str.endsWith(".reflex")) { str += ".reflex"; }
-        let paths = [
-            Loader.PATH_TO_REFLEX_LIBRARY + str,
-            process.cwd() + "\\" + str,
-        ];
-        let path = paths.find(p => fs.existsSync(p))
-        if (path) {
-            let contents: string = fs.readFileSync(path).toString();
-            return contents;
-        } else {
-            throw new Error("Could find find path " + str)
-        }
-    }
-}
 
 export default class Machine {
     controller: Controller = new Controller(this);
     loader: Loader = new Loader();
-    private stack: Value[] = []
+    // private stack: Value[] = []
     private frames: Frame[] = [{
         ip: 0, self: main(this),
-        locals: bootLocals
+        locals: bootLocals,
+        stack: []
     }];
     private currentProgram: Code = [];
 
     constructor(private reflex: Reflex) {}
 
-    get top() { return this.stack[this.stack.length - 1] }
     get frame() { return this.frames[this.frames.length - 1] }
+    get stack() { return this.frame.stack }
     get self() { return this.frame.self }
     get ip() { return this.frame.ip }
+    get top() { return this.stack[this.stack.length - 1] }
 
     get currentInstruction() { return this.currentProgram[this.ip]; }
 
@@ -67,7 +40,7 @@ export default class Machine {
     get activeFrames() { return this.frames }
     get activeProgram() { return this.currentProgram }
 
-    reset() { this.stack = [] }
+    reset() { this.frame.stack = [] }
 
     import(given: string) {
         this.reflex.evaluate(
@@ -109,6 +82,7 @@ export default class Machine {
         // if (code.length) {
             this.install(code);
             this.initiateExecution('.main');
+            // this.reset()
         // }
     }
 

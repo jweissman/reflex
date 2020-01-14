@@ -125,7 +125,7 @@ export class Controller {
                 break;
             case 'jump_if':
                 let nowTop = this.stack[this.stack.length - 1];
-                // this.pop();
+                this.pop();
                 let shouldJump = (nowTop as ReflexObject).className === 'Truth';
                 if (shouldJump) {
                     let theLabel = value as string;
@@ -167,13 +167,14 @@ export class Controller {
                 this.machine.bindSelf(top.boundSelf)
             }
             if (!!top.convertArgs) {
-                log("CONVERT ARGS")
+                // log("CONVERT ARGS")
                 args = args.map(arg =>
                     arg instanceof ReflexObject
                         ? Converter.castReflexToJavascript(arg)
                         : arg
                 );
-            } else { log("DO NOT CONVERT ARGS")}
+            }
+            // } else { log("DO NOT CONVERT ARGS")}
             let result = top.impl(this.machine, ...args);
             if (result !== undefined) {
                 let toPush = this.converter.castJavascriptToReflex(result);
@@ -223,19 +224,24 @@ export class Controller {
         }
     }
 
+    private enableMarkSweep: boolean = false
     protected mark(value: string) {
         log("WOULD MARK FOR " + value)
-        this.push(new Stone(value));
+        if (this.enableMarkSweep) {
+            this.push(new Stone(value));
+        }
     }
 
     protected sweep(value: Value) {
         log("WOULD SWEEP FOR " + value)
-        while (!this.stackIsEmpty()) {
-            let top = this.stack[this.stack.length - 1];
-            this.pop();
-            if (top instanceof Stone) {
-                if (top.name === value) {
-                    break;
+        if (this.enableMarkSweep) {
+            while (!this.stackIsEmpty()) {
+                let top = this.stack[this.stack.length - 1];
+                this.pop();
+                if (top instanceof Stone) {
+                    if (top.name === value) {
+                        break;
+                    }
                 }
             }
         }
@@ -263,21 +269,22 @@ export class Controller {
 
     protected ret() {
         let frame = this.frames[this.frames.length - 1];
-        this.frames.pop();
-        this.frames.pop();
         let top = this.stack[this.stack.length - 1]
+        this.frames.pop();
+        this.frames.pop();
+        // let top = this.stack[this.stack.length - 1]
         let retValue: Value = null;
         // log("RET from " + frame.currentMethod)
         if (frame.retValue) {
             // log("RET -- frame ret value: " + frame.retValue)
             retValue = frame.retValue;
-        } else if (this.stackIsEmpty() || (top instanceof Stone && top.name === 'invoke')) {
+        } else if (top === null || top === undefined || (top instanceof Stone && top.name === 'invoke')) {
             // log("RET -- stack was empty! providing Nihil...")
             retValue = this.makeNil();
         } else {
             // pick stack top?
             // log("RET -- picking stack top")
-            retValue = this.stack[this.stack.length - 1];
+            retValue = top; //this.stack[this.stack.length - 1];
         }
 
         if (retValue !== null) {
@@ -355,6 +362,7 @@ export class Controller {
             ...(ensureReturns ? { retValue: ensureReturns } : {}),
             currentMethod: top,
             ...(hasBlock ? { block } : {}),
+            stack: [],
         };
         let nihilate = false;
         if (top.frame.block) {

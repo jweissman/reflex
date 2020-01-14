@@ -131,7 +131,9 @@ class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
 class Array {
     each(&block) {
-        0.upto(self.length()-1) { |i| block(self.get(i)) }
+        0.upto(self.length()-1) { |i|
+            block(self.get(i))
+        }
     }
 }
 

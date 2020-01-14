@@ -817,3 +817,7 @@ one of which goes through send, and another which is bare access
 
 we may want to disallow bare access to members outside of classes
 (this would compel us to start building attr accessor-style hooks for embedding data elements into structures like this)
+
+--------------------------------
+
+maybe each frame should have its own stack??

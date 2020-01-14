@@ -10,6 +10,7 @@ import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } f
 import { Boots } from "./Boots";
 import { ReflexArray } from "./types/ReflexArray";
 import { ReflexString } from "./types/ReflexString";
+import { log } from "./util/log";
 
 let boots: Boots = new Boots();
 boots.lace();
@@ -106,7 +107,11 @@ let arithmetic: { [key in ArithOp]: Function} = {
   divide: (left: number, right: number) => left / right,
   mod: (left: number, right: number) => left % right,
   neg: (val: number) => -val,
-  eq: (left: number, right: number) => left === right,
+  eq: (left: number, right: number) => {
+    let equal = left === right
+    log("EQ? " + left + " / " + right + " => " + equal)
+    return equal
+  },
   gt: (left: number, right: number) => left > right,
   gte: (left: number, right: number) => left >= right,
   lt: (left: number, right: number) => left < right,

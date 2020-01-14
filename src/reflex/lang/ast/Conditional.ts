@@ -20,11 +20,11 @@ export class Conditional extends Tree {
     return [
       ['jump', labelTest],
       ['label', labelLeft],
-      ['pop', null],
+      // ['pop', null],
       ...this.left.code,
       ['jump', labelDone],
       ['label', labelRight],
-      ['pop', null],
+      // ['pop', null],
       ...this.right.code,
       ['jump', labelDone],
       ['label', labelTest],
