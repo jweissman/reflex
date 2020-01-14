@@ -129,14 +129,20 @@ class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
  * The class of object-valued index spaces.
  */
 
-class Array {}
+class Array {
+    each(&block) {
+        0.upto(self.length()-1) { |i| block(self.get(i)) }
+    }
+}
 
 /**
  * String
  *
  * The class of words
  */
-class String {}
+class String {
+    add(other) { self.concat(other) }
+}
 
 # the universal constants
 nil = Nihil.new()

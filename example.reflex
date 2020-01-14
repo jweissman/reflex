@@ -1,21 +1,12 @@
+class Greeter {
+    init() {
+        self.greeting = 'Hello, '
+    }
 
+    greet(subject) {
+        self.greeting + subject if subject
+    }
+}
 
-//Fibonacci.get(10)
-
-// todo a simple hello class (strings)
-// class Hello {
-//     init() {
-//         self.greeting = 'Hello, '
-//     }
-// 
-//     greet(subject) {
-//         self.greeting + subject if subject
-//     }
-// }
-// 
-// /* yup */
-// /*
-// nope
-// */
-// greeter = Hello.new()
-// greeter.greet("world")
+greeter = Greeter.new()
+greeter.greet("world")

@@ -139,6 +139,17 @@ arrayMethods.set("set", new WrappedFunction("Array.set", (machine: Machine, inde
   (machine.boundSelf! as ReflexArray).put(index, value),
   false
 ))
+arrayMethods.set("length", new WrappedFunction("Array.length", (machine: Machine, index: ReflexNumber, value: ReflexObject) =>
+  (machine.boundSelf! as ReflexArray).items.length
+))
+
+let stringMethods = RString.get("instance_methods");
+stringMethods.set("concat", new WrappedFunction("String.concat", (machine: Machine, other: string) =>
+  (machine.boundSelf! as ReflexString).value + (other)
+))
+stringMethods.set("length", new WrappedFunction("String.length", (machine: Machine) =>
+  (machine.boundSelf! as ReflexString).value.length
+))
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>
@@ -152,6 +163,7 @@ export const bootLocals = {
   Nihil,
   Metaclass,
   Kernel,
+  Array: RArray,
   String: RString,
   Number: RNumber,
   // Float: RFloat,

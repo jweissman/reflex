@@ -69,6 +69,7 @@ Reflex {
        | ParenExpr
        | NumberLit
        | StringLit
+       | ArrayLit
        | Message CarefulArguments -- funcall
        | Bareword
 
@@ -218,6 +219,9 @@ Reflex {
     FormalFunctionLiteral 
       = Params "=>" Block
       | Params "=>" Expr
+
+    ArrayLit
+      = "[" ListOf<Expr, ","> "]"
     
     NumberLit
       = digit+ "." digit+ -- float

@@ -24,8 +24,23 @@ import { Negate } from "./Negate";
 import { Binary } from "./Binary";
 import { Loop } from "./Loop";
 import { LogicalNot } from './LogicalNot';
+import { Code } from '../../vm/instruction/Instruction';
 
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
+
+class ArrayLiteral extends Tree {
+  constructor(public seq: Sequence<Tree>) { super();}
+  inspect(): string { return "[" + this.seq.inspect() + "]"; }
+  get code(): Code {
+    return [
+      ...this.seq.items.reverse().flatMap(it => it.code),
+      ['bare', 'Array'],
+      ['push', 'new'],
+      ['call', null],
+      ['invoke', this.seq.items.length],
+    ]
+  }
+}
 
 export const ast: { [key: string]: (...args: any[]) => Tree } = {
   Program: (_pre: Node, list: Node, _post: Node) =>
@@ -139,6 +154,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(
     Number(`${whole.sourceString}.${fraction.sourceString}`), true),
+  ArrayLit: (_lq: Node, seq: Node, _rq: Node) => new ArrayLiteral(seq.tree),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),
   EmptyListOf: () => new Sequence([]),
 }

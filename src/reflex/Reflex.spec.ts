@@ -10,7 +10,10 @@ describe('Reflex', () => {
 
             describe('instance methods', () => {
                 it('concat', () => {
-                    fail('test not impl')
+                    expect(evaluate("'hello' + ' world'")).toEqual("hello world")
+                })
+                it('len', () => {
+                    expect(evaluate("'hello'.length()")).toEqual(5)
                 })
             })
 
