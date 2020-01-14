@@ -1,49 +1,126 @@
 import { evaluate } from "./SpecHelper"
 describe('Reflex', () => {
     describe('structures', () => {
-        describe('Array', () => {
-            it('is the class of indexed object lists', () => {
-                expect(evaluate("Array")).toEqual("Class(Array)")
-                expect(evaluate("Array.class")).toEqual("Class(Class)")
+        describe('String', () => {
+            it('is the class of words', () => {
+                expect(evaluate("'hello'.class")).toEqual('Class(String)')
+                expect(evaluate("'world'.class")).toEqual('Class(String)')
+                // expect(evaluate("'hello'.length()")).toEqual('Class(String)')
             })
 
-            describe('new', ()=>{
-                it('creates a list of items', () => {
-                    expect(evaluate("Array.new()")).toEqual("[]")
-                    expect(evaluate("Array.new(1)")).toEqual("[1]")
-                    expect(evaluate("Array.new(1,Object.new(),()=>3)")).toEqual("[1,Object,->3]")
-                    expect(evaluate("Array.new(1,2,3,4,5)")).toEqual("[1,2,3,4,5]")
+            describe('instance methods', () => {
+                it('concat', () => {
+                    fail('test not impl')
                 })
             })
 
-            it('indexes list items', () => {
-                evaluate('a=Array.new(1,2,3)')
-                expect(evaluate("a.get(0)")).toEqual(1)
-                expect(evaluate("a.get(1)")).toEqual(2)
-                expect(evaluate("a.get(2)")).toEqual(3)
-                expect(evaluate("a.get(3)")).toEqual(null)
-            })
-            it('updates list items', () => {
-                evaluate('a=Array.new(1,2,3)')
-                evaluate("a.set(0,5)")
-                expect(evaluate("a")).toEqual("[5,2,3]")
-                evaluate("a.set(1,6)")
-                expect(evaluate("a")).toEqual("[5,6,3]")
-                evaluate("a.set(2,7)")
-                expect(evaluate("a")).toEqual("[5,6,7]")
-                evaluate("a.set(3,8)")
-                expect(evaluate("a")).toEqual("[5,6,7,8]")
+            describe('escapes', () => {
+                xit('unicode escapes', () => {
+                    fail('test not impl')
+                })
             })
         })
-        test.todo('String')
     })
 
     describe("syntax", () => {
         describe('core', () => {
-            
+            describe("blocks", () => {
+                it('modifies locals', () => {
+                    evaluate('x=Class')
+                    evaluate('mod(){x=Object}')
+                    expect(evaluate("x")).toEqual("Class(Class)")
+                    evaluate('mod()')
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                })
+
+                it('yields successive values', () => {
+                    evaluate("gen(){yield Object; yield Class}")
+                    evaluate("x=Function");
+                    expect(evaluate("x")).toEqual("Class(Function)")
+                    evaluate("gen(){|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                    evaluate("gen(){|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Class)")
+                })
+
+                it("funcalls with only blocks", () => {
+                    evaluate("g(){yield Object; yield Class; yield Function}")
+                    evaluate("x=Function")
+                    evaluate("g{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                    evaluate("g{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Class)")
+                    evaluate("g{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Function)")
+                })
+
+                it('creates a generator factory', () => {
+                    evaluate("thrice=(x)=>()=>{yield x; yield x; yield x; yield Class}")
+                    evaluate("x=Function")
+                    evaluate("three_obj = thrice(Object)")
+                    evaluate("three_obj{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                    evaluate("three_obj{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                    evaluate("three_obj{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                    evaluate("three_obj{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Class)")
+
+                    evaluate("three_fn = thrice(Function)")
+                    evaluate("three_fn{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Function)")
+                    evaluate("three_fn{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Function)")
+                    evaluate("three_fn{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Function)")
+                    evaluate("three_fn{|val|x=val}")
+                    expect(evaluate("x")).toEqual("Class(Class)")
+                })
+
+                it("passes args and blocks", () => {
+                    evaluate("dispatch(x,&block) { block(x); }")
+                    evaluate("y=Class")
+                    evaluate("dispatch(Object) { |val| y = val }")
+                    expect(evaluate("y")).toEqual("Class(Object)")
+                    evaluate("dispatch(Function) { |val| y = val }")
+                    expect(evaluate("y")).toEqual("Class(Function)")
+                })
+
+                // hrmm
+                it("passes blocks to instance methods", () => {
+                    evaluate("class Baz{next(){yield Object;yield Class; yield Function}}")
+                    evaluate("baz=Baz.new()")
+                    evaluate("x=nil")
+                    evaluate("baz.next { |v| x=v }")
+                    expect(evaluate("x")).toEqual("Class(Object)")
+                    evaluate("baz.next { |v| x=v }")
+                    expect(evaluate("x")).toEqual("Class(Class)")
+                    evaluate("baz.next { |v| x=v }")
+                    expect(evaluate("x")).toEqual("Class(Function)")
+                })
+
+                describe('unary ampersand', () => {
+                    it('binds a block parameter', () => {
+                        evaluate("x=Object; y=Object")
+                        evaluate("twice(&block) { x=block(); y=block() }")
+                        evaluate("twice {Function}")
+                        expect(evaluate("x")).toEqual("Class(Function)")
+                        expect(evaluate("y")).toEqual("Class(Function)")
+                    })
+                    it('passes functions as blocks', () => {
+                        evaluate('x=nil')
+                        evaluate('f(val){x=val}')
+                        evaluate('g(&b){b(Object)}')
+                        expect(evaluate("x")).toEqual(null)
+                        evaluate('g(&f)')
+                        expect(evaluate("x")).toEqual("Class(Object)")
+                    })
+                })
+            })
             describe('conditionals', () => {
                 describe('gates execution', () => {
-                    it('if-else', ()=> {
+                    it('if-else', () => {
                         expect(evaluate("if (true) { Object } else { Class }")).toEqual("Class(Object)")
                         expect(evaluate("if (false) { Object } else { Class }")).toEqual("Class(Class)")
                         expect(evaluate("x=if (true) { Object } else { Class };x")).toEqual("Class(Object)")
@@ -54,7 +131,7 @@ describe('Reflex', () => {
                         expect(evaluate("if false then Object else Class")).toEqual("Class(Class)")
                     });
 
-                    it('if', ()=> {
+                    it('if', () => {
                         expect(evaluate("if (true) { Object }")).toEqual("Class(Object)")
                         expect(evaluate("if (false) { Object }")).toEqual(null)
                         expect(evaluate("x=if (true) { Object };x")).toEqual("Class(Object)")
@@ -68,7 +145,7 @@ describe('Reflex', () => {
                         expect(evaluate("Object if false else Class")).toEqual("Class(Class)")
                     })
 
-                    it('unless', ()=> {
+                    it('unless', () => {
                         expect(evaluate("unless (true) { Object } else { Class }")).toEqual("Class(Class)")
                         expect(evaluate("unless (false) { Object } else { Class }")).toEqual("Class(Object)")
                         expect(evaluate("unless (true) { Object }")).toEqual(null)
@@ -266,7 +343,7 @@ describe('Reflex', () => {
                         expect(evaluate('1 < 1')).toEqual(false)
                         expect(evaluate('1 < 2')).toEqual(true)
                     })
-                    it('lte', ()=>{
+                    it('lte', () => {
                         expect(evaluate('1 <= 0')).toEqual(false)
                         expect(evaluate('1 <= 1')).toEqual(true)
                         expect(evaluate('1 <= 2')).toEqual(true)
@@ -276,7 +353,7 @@ describe('Reflex', () => {
                         expect(evaluate('1 > 1')).toEqual(false)
                         expect(evaluate('1 > 2')).toEqual(false)
                     })
-                    it('gte', ()=>{
+                    it('gte', () => {
                         expect(evaluate('1 >= 0')).toEqual(true)
                         expect(evaluate('1 >= 1')).toEqual(true)
                         expect(evaluate('1 >= 2')).toEqual(false)
@@ -319,100 +396,6 @@ describe('Reflex', () => {
             })
         })
 
-        describe("blocks", () => {
-            it('modifies locals', () => {
-                evaluate('x=Class')
-                evaluate('mod(){x=Object}')
-                expect(evaluate("x")).toEqual("Class(Class)")
-                evaluate('mod()')
-                expect(evaluate("x")).toEqual("Class(Object)")
-            })
-
-            it('yields successive values', () => {
-                evaluate("gen(){yield Object; yield Class}")
-                evaluate("x=Function");
-                expect(evaluate("x")).toEqual("Class(Function)")
-                evaluate("gen(){|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Object)")
-                evaluate("gen(){|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Class)")
-            })
-
-            it("funcalls with only blocks", () => {
-                evaluate("g(){yield Object; yield Class; yield Function}")
-                evaluate("x=Function")
-                evaluate("g{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Object)")
-                evaluate("g{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Class)")
-                evaluate("g{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Function)")
-            })
-
-            it('creates a generator factory', () => {
-                evaluate("thrice=(x)=>()=>{yield x; yield x; yield x; yield Class}")
-                evaluate("x=Function")
-                evaluate("three_obj = thrice(Object)")
-                evaluate("three_obj{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Object)")
-                evaluate("three_obj{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Object)")
-                evaluate("three_obj{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Object)")
-                evaluate("three_obj{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Class)")
-
-                evaluate("three_fn = thrice(Function)")
-                evaluate("three_fn{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Function)")
-                evaluate("three_fn{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Function)")
-                evaluate("three_fn{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Function)")
-                evaluate("three_fn{|val|x=val}")
-                expect(evaluate("x")).toEqual("Class(Class)")
-            })
-
-            it("passes args and blocks", () => {
-                evaluate("dispatch(x,&block) { block(x); }")
-                evaluate("y=Class")
-                evaluate("dispatch(Object) { |val| y = val }")
-                expect(evaluate("y")).toEqual("Class(Object)")
-                evaluate("dispatch(Function) { |val| y = val }")
-                expect(evaluate("y")).toEqual("Class(Function)")
-            })
-
-            // hrmm
-            it("passes blocks to instance methods", () => {
-                evaluate("class Baz{next(){yield Object;yield Class; yield Function}}")
-                evaluate("baz=Baz.new()")
-                evaluate("x=nil")
-                evaluate("baz.next { |v| x=v }")
-                expect(evaluate("x")).toEqual("Class(Object)")
-                evaluate("baz.next { |v| x=v }")
-                expect(evaluate("x")).toEqual("Class(Class)")
-                evaluate("baz.next { |v| x=v }")
-                expect(evaluate("x")).toEqual("Class(Function)")
-            })
-
-            describe('unary ampersand', () => {
-                it('binds a block parameter', () => {
-                    evaluate("x=Object; y=Object")
-                    evaluate("twice(&block) { x=block(); y=block() }")
-                    evaluate("twice {Function}")
-                    expect(evaluate("x")).toEqual("Class(Function)")
-                    expect(evaluate("y")).toEqual("Class(Function)")
-                })
-                it('passes functions as blocks', () => {
-                    evaluate('x=nil')
-                    evaluate('f(val){x=val}')
-                    evaluate('g(&b){b(Object)}')
-                    expect(evaluate("x")).toEqual(null)
-                    evaluate('g(&f)')
-                    expect(evaluate("x")).toEqual("Class(Object)")
-                })
-            })
-        })
     })
 
 
@@ -488,7 +471,7 @@ describe('Reflex', () => {
         z()
         `)).toEqual(true)
     })
-        
+
     it('delimits statements reasonably (ii)', () => {
         expect(evaluate(`
         x=10
@@ -526,11 +509,11 @@ describe('Reflex', () => {
 
     it('will not carefully call higher-order funs', () => {
         evaluate('g=->->3')
-        expect(()=>evaluate('g()()')).toThrow()
+        expect(() => evaluate('g()()')).toThrow()
     })
 
     it('does not casually call numeric literals', () => {
-        expect(()=>evaluate('1 2 3')).toThrow()
+        expect(() => evaluate('1 2 3')).toThrow()
     })
 
     it('orders operations with variables', () => {
@@ -576,7 +559,7 @@ describe('Reflex', () => {
 
     xit('self-spec', () => {
         expect(() => evaluate("Kernel.import 'spec'")).not.toThrow()
-        expect(()=>evaluate(`
+        expect(() => evaluate(`
         describe('reflex') {
             it('is great') {
                 true.should be true

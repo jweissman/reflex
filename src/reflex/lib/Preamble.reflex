@@ -131,6 +131,13 @@ class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
 class Array {}
 
+/**
+ * String
+ *
+ * The class of words
+ */
+class String {}
+
 # the universal constants
 nil = Nihil.new()
 true = Truth.new()

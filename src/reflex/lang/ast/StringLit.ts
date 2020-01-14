@@ -6,7 +6,14 @@ export class StringLiteral extends Tree {
         super();
     }
     get code(): Code {
-        return [['push', this.literal]]
+        return [
+            ['push', this.literal],
+            ['bare', 'String'],
+            ['push', 'new'],
+            ['call', null],
+            ['invoke', 1],
+
+        ]
     }
     inspect() { return '"' + this.literal + '"'; }
 

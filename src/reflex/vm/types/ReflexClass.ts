@@ -7,10 +7,12 @@ import { makeMetaclass } from "./makeMetaclass";
 import { log } from "../util/log";
 import { ReflexArray } from './ReflexArray';
 import { makeReflexObject } from './makeReflexObject';
+import { ReflexString } from './ReflexString';
 
 export const NATIVE_CLASSES: { [key: string]: any } = {
     "Function": ReflexFunction,
     "Number": ReflexNumber,
+    "String": ReflexString,
     "Array": ReflexArray,
     // "Integer": ReflexInteger,
     // "Float": ReflexFloat,

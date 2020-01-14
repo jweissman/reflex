@@ -6,6 +6,7 @@ import { ReflexNumber } from './types/ReflexNumber';
 import { Indeterminate, RNumber } from './Bootstrap';
 import { Controller } from './Controller';
 import ReflexClass from './types/ReflexClass';
+import { ReflexString } from './types/ReflexString';
 // do conversions/casting?
 export class Converter {
     constructor(private ctrl: Controller) { }
@@ -31,11 +32,18 @@ export class Converter {
         else if (object instanceof ReflexNumber) {
             return object.value;
         }
+        else if (object instanceof ReflexString) {
+            return object.value;
+        }
         return object;
     }
     public castJavascriptToReflex(object: any): ReflexObject {
         if (object instanceof ReflexObject) {
             return object;
+        }
+        else if (typeof object === "string") {
+            // this.ctrl.makeObject(RString.klass)
+            return (this.ctrl.makeObject(getLocal("String", this.ctrl.frames) as ReflexClass, [object as unknown as ReflexObject]));
         }
         else if (typeof object === "number") {
             if (isNaN(object)) {

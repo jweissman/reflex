@@ -9,6 +9,7 @@ import Machine from "./Machine";
 import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } from "./types/ReflexNumber";
 import { Boots } from "./Boots";
 import { ReflexArray } from "./types/ReflexArray";
+import { ReflexString } from "./types/ReflexString";
 
 let boots: Boots = new Boots();
 boots.lace();
@@ -36,6 +37,9 @@ NegativeInfinity.klass = NegativeApeiron;
 
 export const RArray = ReflexClass.make("Array")
 ReflexArray.klass = RArray;
+
+export const RString = ReflexClass.make("String")
+ReflexString.klass = RString;
 
 let objectMethods = RObject.get("instance_methods")
 objectMethods.set("eq", new WrappedFunction(`Object.eq`,
@@ -148,6 +152,7 @@ export const bootLocals = {
   Nihil,
   Metaclass,
   Kernel,
+  String: RString,
   Number: RNumber,
   // Float: RFloat,
   // Integer: RInt,

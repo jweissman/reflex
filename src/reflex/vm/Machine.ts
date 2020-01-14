@@ -11,21 +11,35 @@ import { State } from './State';
 import fs from 'fs';
 import { debug } from "./util/log";
 import Controller from "./Controller";
+import { ReflexString } from "./types/ReflexString";
+
+function disambiguateString(str: string | ReflexString) {
+    // console.log("DISAMBIGUATE_STRING", str)
+    if (str instanceof ReflexString) {
+        // console.log("reflex string", str.value)
+        return str.value;
+    } else {
+        // console.log("nonreflex string", str)
+        return str;
+    }
+}
 
 class Loader {
     static PATH_TO_REFLEX_LIBRARY =__dirname + "\\..\\lib\\"
-    getContents(given: string): string {
-        if (!given.endsWith(".reflex")) { given += ".reflex"; }
+    getContents(filename: string): string {
+        let str = filename; //disambiguateString(filename);
+        // console.log("GET CONTENTS", { given: str })
+        if (!str.endsWith(".reflex")) { str += ".reflex"; }
         let paths = [
-            Loader.PATH_TO_REFLEX_LIBRARY + given,
-            process.cwd() + "\\" + given,
+            Loader.PATH_TO_REFLEX_LIBRARY + str,
+            process.cwd() + "\\" + str,
         ];
         let path = paths.find(p => fs.existsSync(p))
         if (path) {
             let contents: string = fs.readFileSync(path).toString();
             return contents;
         } else {
-            throw new Error("Could find find path " + given)
+            throw new Error("Could find find path " + str)
         }
     }
 }
