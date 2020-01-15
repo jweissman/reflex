@@ -9,6 +9,7 @@ export function trace(message: string, instruction: Instruction, frame: Frame, s
     let msg = [
         // ...(message ? [chalk.yellow(message)] : []),
         ...(stack.length && stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
+        chalk.gray("current method: ") + frame.currentMethod?.name,
         prettyInstruct(instruction),
         // chalk.gray("self: ") + frame.self.inspect(),
     ].join("\n");

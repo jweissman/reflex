@@ -2,7 +2,7 @@ import { Instruction, Code, indexForLabel, labelStep, prettyCode } from "./instr
 import { Value } from "./instruction/Value";
 import ReflexObject from './types/ReflexObject';
 import main, { bootLocals } from './Bootstrap';
-import { ReflexFunction } from './types/ReflexFunction';
+import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
 import { Frame } from './Frame';
 import { fail } from './util/fail';
 import { trace } from './instruction/trace';
@@ -14,6 +14,9 @@ import { ReflexString } from "./types/ReflexString";
 import { Loader } from "./Loader";
 
 
+class FakeFunction extends ReflexFunction {
+    constructor(public name: string) { super(); }
+}
 
 export default class Machine {
     controller: Controller = new Controller(this);
@@ -22,7 +25,8 @@ export default class Machine {
     private frames: Frame[] = [{
         ip: 0, self: main(this),
         locals: bootLocals,
-        stack: []
+        stack: [],
+        currentMethod: new FakeFunction('(main)'),
     }];
     private currentProgram: Code = [];
 

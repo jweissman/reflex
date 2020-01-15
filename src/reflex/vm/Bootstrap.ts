@@ -48,7 +48,6 @@ objectMethods.set("eq", new WrappedFunction(`Object.eq`,
 ));
 objectMethods.set("instanceEval", new WrappedFunction(`Object.instanceEval`,
  (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(machine.boundSelf!, machine, fn)
-
 ));
 objectMethods.set("isInstanceOf", new WrappedFunction(
         `Object.isInstanceOf`,
@@ -84,9 +83,7 @@ classMethods.set("defineMethod", new WrappedFunction(`Class.defineMethod`,
   }
 ));
 classMethods.set("defineClassMethod", new WrappedFunction(`Class.defineClassMethod`,
-  (machine: Machine, name: string, fn: ReflexFunction) => {
-    defineClassMethod(machine.boundSelf! as ReflexClass, fn, name)
-  }
+  (machine: Machine, name: string, fn: ReflexFunction) => defineClassMethod(machine.boundSelf! as ReflexClass, fn, name)
 ))
 classMethods.set("isAncestorOf", new WrappedFunction(
   `Class.isAncestorOf`,
@@ -144,8 +141,12 @@ arrayMethods.set("set", new WrappedFunction("Array.set", (machine: Machine, inde
   (machine.boundSelf! as ReflexArray).put(index, value),
   false
 ))
-arrayMethods.set("length", new WrappedFunction("Array.length", (machine: Machine, index: ReflexNumber, value: ReflexObject) =>
+arrayMethods.set("length", new WrappedFunction("Array.length", (machine: Machine) =>
   (machine.boundSelf! as ReflexArray).items.length
+))
+arrayMethods.set("concat", new WrappedFunction("Array.concat", (machine: Machine, other: ReflexObject[]) =>
+  [...(machine.boundSelf! as ReflexArray).items, ...other],
+  // false
 ))
 
 let stringMethods = RString.get("instance_methods");

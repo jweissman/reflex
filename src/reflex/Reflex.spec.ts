@@ -90,7 +90,6 @@ describe('Reflex', () => {
                     expect(evaluate("y")).toEqual("Class(Function)")
                 })
 
-                // hrmm
                 it("passes blocks to instance methods", () => {
                     evaluate("class Baz{next(){yield Object;yield Class; yield Function}}")
                     evaluate("baz=Baz.new()")
@@ -118,6 +117,24 @@ describe('Reflex', () => {
                         expect(evaluate("x")).toEqual(null)
                         evaluate('g(&f)')
                         expect(evaluate("x")).toEqual("Class(Object)")
+                    })
+
+                    it('passes args through blocks', () => {
+                        evaluate('x=0')
+                        evaluate('c=->x=x+1')
+                        evaluate('10.times { c() }')
+                        expect(evaluate("x")).toEqual(10)
+                        evaluate('10.times(&c)')
+                        expect(evaluate("x")).toEqual(20)
+                    })
+
+                    it('passes args with blocks through blocks', () => {
+                        evaluate('x=0')
+                        evaluate('b=v=>x=x+v')
+                        evaluate('0.upto(5) { |i| b(i) }')
+                        expect(evaluate("x")).toEqual(15)
+                        evaluate('0.upto(5, &b)')
+                        expect(evaluate("x")).toEqual(30)
                     })
                 })
             })
@@ -484,26 +501,14 @@ describe('Reflex', () => {
         `)).toEqual(13)
     })
 
-    // i'm okay with this NOT working??
-    xit('funcalls from parens', () => {
-        expect(evaluate(`
-        x=10
-        y=3.times
-        (y) { x = x + 1 }
-        x
-        `)).toEqual(13)
-    })
-
     it('archetype with simple class name', () => {
         evaluate('class Model {}')
         expect(evaluate('Model')).toEqual('Class(Model)')
         evaluate('model Car {}')
         expect(evaluate('Car.new()')).toEqual('Car')
-        // expect(evaluate('Car.archetype')).toEqual('Class(Model)')
         expect(evaluate('Car.super')).toEqual('Class(Model)')
         evaluate('model Taxi < Car {}')
         expect(evaluate('Taxi.new()')).toEqual('Taxi')
-        // expect(evaluate('Taxi.archetype')).toEqual('Class(Model)')
         expect(evaluate('Taxi.super')).toEqual('Class(Car)')
     })
 

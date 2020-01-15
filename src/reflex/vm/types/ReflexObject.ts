@@ -1,6 +1,6 @@
 import ReflexClass from "./ReflexClass";
 import { WrappedFunction } from "./ReflexFunction";
-import { debug } from "../util/log";
+import { debug, log } from "../util/log";
 // import { SuperFacade } from "./SuperFacade";
 
 class MethodMissing extends Error {}
@@ -60,11 +60,14 @@ export default class ReflexObject {
                 return response
             } else {
                 if (this.surroundingObject && this.surroundingObject !== this) { // why are we embedded in ourselves?
-                    return this.surroundingObject.send(message);
-                } else {
-                    return this.methodMissing(message);
-                }
+                    if (this.surroundingObject.surroundingObject && this.surroundingObject.surroundingObject === this) {
+                        log('not recursing on surrounding obj?')
+                    } else {
+                        return this.surroundingObject.send(message);
+                    }
+                } 
             }
+            return this.methodMissing(message);
         }
     }
 

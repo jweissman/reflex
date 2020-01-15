@@ -25,6 +25,7 @@ import { Binary } from "./Binary";
 import { Loop } from "./Loop";
 import { LogicalNot } from './LogicalNot';
 import { Code } from '../../vm/instruction/Instruction';
+import { log } from '../../vm/util/log';
 
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
 
@@ -56,8 +57,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Defclass(name.tree, block.tree, superclass.tree),
   ClassName: (id: Node) => new Message(id.sourceString),
   ExtendsClass: (_extends: Node, name: Node) => name.tree,
-  Defun: (name: Node, args: Node, block: Node) =>
-    new Defun(name.tree, args.tree, block.tree),
+  Defun: (name: Node, params: Node, block: Node) =>
+    new Defun(name.tree, params.tree, block.tree),
   FunctionName: (id: Node) => new Message(id.sourceString),
   PipedBlock: (_lb: Node, pipeVars: Node, block: Node, _rb: Node) => {
     let pipe = pipeVars.tree[0] || new Sequence([]);
@@ -65,15 +66,10 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   },
   PipeVars: (_lp: Node, pipeVars: Node, _rp: Node) => pipeVars.tree,
   CasualArguments: (args: Node) => Arguments.from(args.tree),
-  CasualArguments_block: (args: Node, block: Node) => {
-    let argTree = args.tree[0] || new Sequence([]);
-    return new Arguments(argTree, block.tree);
-  },
+  CasualArguments_block: (args: Node, block: Node) => Arguments.from(args.tree, block.tree),
   CarefulArguments: (args: Node) => Arguments.from(args.tree),
-  CarefulArguments_block: (args: Node, block: Node) => {
-    let argTree = args.tree[0] || new Sequence([]);
-    return new Arguments(argTree, block.tree);
-  },
+  CarefulArguments_block: (block: Node) => Arguments.from(new Sequence([]), block.tree),
+  CarefulArguments_args_block: (args: Node, block: Node) => Arguments.from(args.tree, block.tree),
   FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
   Arg_ref: (_amp: Node, expr: Node) => new Argument(expr.tree, true),
   Arg: (expr: Node) => expr.tree instanceof Argument ? expr.tree : new Argument(expr.tree, false),
@@ -95,7 +91,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
   EqExpr_local_eq: (message: Node, _eq: Node, expr: Node) => new LocalVarSet(message.tree, expr.tree),
   Message: (contents: Node) => new Message(contents.sourceString),
   Bareword: (word: Node) => new Bareword((word.tree as Message).key),
-  CasualCall_obj: (objDot: Node, _dot: Node, msg: Node, args: Node) => new SendMethodCall(objDot.tree, msg.tree, args.tree),
+  CasualCall_obj: (objDot: Node, _dot: Node, msg: Node, args: Node) => new SendMethodCall(objDot.tree, msg.tree, Arguments.from(args.tree)),
   CasualCall_msg: (message: Node, args: Node) => new Barecall(message.tree, args.tree),
   ObjectDot_call: (objDot: Node, _dot: Node, msg: Node, args: Node, _nextDot: Node) => new SendMethodCall(objDot.tree, msg.tree, args.tree),
   ObjectExpr_dot: (objDot: Node, _dot: Node, msg: Node) => new SendMessage(objDot.tree, msg.tree),

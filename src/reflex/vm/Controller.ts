@@ -147,18 +147,17 @@ export class Controller {
         ensureReturns?: ReflexObject
     ) {
         let top = this.stack[this.stack.length - 1];
-        // log("INVOKE " + top + " (arity: " + arity + ") -- stack: " + dump(this.stack))
-        // log("HAS BLOCK? " + hasBlock)
-        this.pop()
+        log("INVOKE " + top); 
+        log("  arity: " + arity); // + ") -- stack: " + dump(this.stack))
+        log("  block? " + hasBlock)
+        this.pop();
         let args = [];
         for (let i = 0; i < arity; i++) {
             let newTop = this.stack[this.stack.length - 1];
             args.push(newTop);
             this.pop();
         }
-        // log("...okay, invoke: " + util.inspect(top))
         if (top instanceof WrappedFunction) {
-            // log("invoke wrapped")
             if (hasBlock) {
                 args.push(this.stack[this.stack.length - 1]);
                 this.pop();
@@ -167,14 +166,12 @@ export class Controller {
                 this.machine.bindSelf(top.boundSelf)
             }
             if (!!top.convertArgs) {
-                // log("CONVERT ARGS")
                 args = args.map(arg =>
                     arg instanceof ReflexObject
                         ? Converter.castReflexToJavascript(arg)
                         : arg
                 );
             }
-            // } else { log("DO NOT CONVERT ARGS")}
             let result = top.impl(this.machine, ...args);
             if (result !== undefined) {
                 let toPush = this.converter.castJavascriptToReflex(result);
@@ -184,14 +181,27 @@ export class Controller {
                 this.machine.unbindSelf()
             }
         } else if (top instanceof ReflexFunction) {
-            // log("invoke reflex...")
+            if (hasBlock) {
+                log("INVOKE REFLEX FN WITH BLOCK...")
+            
+                    args.push(this.stack[this.stack.length-1]) 
+                    //    debugger;
+                // let block = this.frames[this.frames.length - 1]?.block
+                // top.blockParamName
+                // if (block) {
+                //     args.push(block)
+                // } else {
+                    // throw new Error("invoke reflex function with block, without block on stack? ")
+                // }
+                // args.push(this.stack[this.stack.length - 1]);
+                // this.pop();
+            }
             this.invokeReflex(top, args, hasBlock, ensureReturns);
         }
         else {
             if (top instanceof ReflexObject) {
-                // log("call obj")
+                log("FALLBACK TO CALL OBJ...")
                 let call = top.send('call');
-                // log("WOULD CALL " + call)
                 args.reverse().forEach(arg => this.push(arg))
                 if (call instanceof WrappedFunction) { call.bind(top) }
                 if (call instanceof ReflexFunction) { call.frame.self = top }
@@ -224,7 +234,7 @@ export class Controller {
         }
     }
 
-    private enableMarkSweep: boolean = false
+    private enableMarkSweep: boolean = true
     protected mark(value: string) {
         log("WOULD MARK FOR " + value)
         if (this.enableMarkSweep) {
@@ -259,7 +269,6 @@ export class Controller {
             if (result instanceof ReflexFunction) {
                 result.frame.self = receiver;
             }
-            // this.push(receiver); // things seem to assume this??
             this.push(result);
         } else {
             dump(this.stack);
@@ -272,24 +281,17 @@ export class Controller {
         let top = this.stack[this.stack.length - 1]
         this.frames.pop();
         this.frames.pop();
-        // let top = this.stack[this.stack.length - 1]
         let retValue: Value = null;
-        // log("RET from " + frame.currentMethod)
         if (frame.retValue) {
-            // log("RET -- frame ret value: " + frame.retValue)
             retValue = frame.retValue;
         } else if (top === null || top === undefined || (top instanceof Stone && top.name === 'invoke')) {
-            // log("RET -- stack was empty! providing Nihil...")
             retValue = this.makeNil();
         } else {
-            // pick stack top?
-            // log("RET -- picking stack top")
-            retValue = top; //this.stack[this.stack.length - 1];
+            retValue = top;
         }
 
         if (retValue !== null) {
             log("RET -- returning: " + retValue)
-            this.sweep('invoke')
             this.push(retValue);
         } else {
             throw new Error("No ret value at " + frame.currentMethod)
@@ -340,6 +342,7 @@ export class Controller {
 
     private invokeReflex(top: ReflexFunction, args: Value[], hasBlock: boolean, ensureReturns?: ReflexObject) {
         log("INVOKE REFLEX " + top.inspect())
+        log("args: " + args.map(a=>a&&a.toString()).join(","))
         let ip = indexForLabel(this.code, top.label);
         let frame = this.frames[this.frames.length - 1];
         let self = frame.self as ReflexObject;
@@ -347,8 +350,15 @@ export class Controller {
         let block;
         if (hasBlock) {
             block = this.stack[this.stack.length - 1] as ReflexFunction;
-            this.pop();
+            if (block) {
+                log("block!: " + block)
+                this.pop();
+            } else {
+                log("Method " + top.name + " (called in " + frame.currentMethod?.name + ") expected a block (?)")
+                throw new Error("Method " + top.name + " expected a block")
+            }
         }
+
         if (top.frame.self) {
             self = top.frame.self.within(self);
         }
@@ -382,7 +392,7 @@ export class Controller {
             }
         }
         if (!nihilate) {
-            this.mark('invoke')
+            // this.mark('invoke')
             this.frames.push(top.frame);
             this.frames.push(newFrame);
         } else {

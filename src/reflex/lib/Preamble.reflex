@@ -100,8 +100,25 @@ class Number {
     }
 
     upto(stop, &b) {
+        // Range.new(self, stop).call(&b)
         val = self;
         end = stop + 1;
+        until (val == end) {
+           b(val);
+           val = val + 1
+        }
+    }
+}
+
+class Range {
+    init(start, stop) {
+        self.start = start;
+        self.stop = stop;
+    }
+
+    call(&b) {
+        val = self.start;
+        end = self.stop + 1;
         until (val == end) {
             b(val);
             val = val + 1
@@ -130,10 +147,14 @@ class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
  */
 
 class Array {
-    each(&block) {
-        0.upto(self.length()-1) { |i|
-            block(self.get(i))
+    add(other) { self.concat(other) }
+    each(&b) {
+        len = self.length() - 1
+        0.upto(len) { |i|
+            element = self.get(i)
+            b(element)
         }
+        nil
     }
 }
 

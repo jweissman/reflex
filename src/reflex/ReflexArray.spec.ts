@@ -7,11 +7,11 @@ describe('Array', () => {
     })
 
     describe('new', () => {
-        it('creates a list of items', () => {
-            expect(evaluate("Array.new()")).toEqual("[]")
-            expect(evaluate("Array.new(1)")).toEqual("[1]")
-            expect(evaluate("Array.new(1,Object.new(),()=>3)")).toEqual("[1,Object,->3]")
-            expect(evaluate("Array.new(1,2,3,4,5)")).toEqual("[1,2,3,4,5]")
+        xit('creates a list of items', () => {
+            expect(evaluate("Array.new()")).toEqual([])
+            expect(evaluate("Array.new(1)")).toEqual([1])
+            expect(evaluate("Array.new(1,Object.new(),()=>3)")).toEqual([1,"Object","->3"])
+            expect(evaluate("Array.new(1,2,3,4,5)")).toEqual([1,2,3,4,5])
         })
     })
 
@@ -35,18 +35,25 @@ describe('Array', () => {
             it('updates list items', () => {
                 evaluate('a=Array.new(1,2,3)')
                 evaluate("a.set(0,5)")
-                expect(evaluate("a")).toEqual("[5,2,3]")
+                expect(evaluate("a")).toEqual([5,2,3])
                 evaluate("a.set(1,6)")
-                expect(evaluate("a")).toEqual("[5,6,3]")
+                expect(evaluate("a")).toEqual([5,6,3])
                 evaluate("a.set(2,7)")
-                expect(evaluate("a")).toEqual("[5,6,7]")
+                expect(evaluate("a")).toEqual([5,6,7])
                 evaluate("a.set(3,8)")
-                expect(evaluate("a")).toEqual("[5,6,7,8]")
+                expect(evaluate("a")).toEqual([5,6,7,8])
+            })
+        })
+
+        describe('concat', () => {
+           it('welds arrays', () => {
+                evaluate('a=[1,2];b=[3,4,5]')
+                expect(evaluate("a+b")).toEqual([1,2,3,4,5])
             })
         })
 
         describe('each', () => {
-            xit('iterates over list items', () => {
+            fit('iterates over list items', () => {
                 evaluate('a=Array.new(1,2,3)')
                 evaluate('x=0')
                 evaluate("a.each { |v| x = x + v }")
@@ -56,7 +63,7 @@ describe('Array', () => {
     })
 
     it('literals', () => {
-        expect(evaluate("[1,2,3]")).toEqual("[1,2,3]")
+        expect(evaluate("[1,2,3]")).toEqual([1,2,3])
     })
 
 })

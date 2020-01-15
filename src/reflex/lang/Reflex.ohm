@@ -81,11 +81,12 @@ Reflex {
       | Bareword CasualArguments -- msg
       
     CarefulArguments
-      = FormalArguments? PipedBlock -- block
+      = FormalArguments PipedBlock -- args_block
       | FormalArguments
+      | PipedBlock -- block
     
     CasualArguments
-      = ~"-" BareArguments? PipedBlock -- block
+      = ~"-" BareArguments PipedBlock -- block
       | ~"-" BareArguments
 
     FormalArguments
