@@ -123,7 +123,7 @@ export class Controller {
 
     localVarSet(key: string) {
         let top = this.stack[this.stack.length - 1];
-        this.pop()
+        // this.pop()
         if (top instanceof ReflexObject) {
             let localFrame: Frame = findFrameWithLocal(key, this.frames);
             localFrame.locals[key] = top;
@@ -159,7 +159,7 @@ export class Controller {
         if (top instanceof ReflexFunction) {
             debug("about to invoke reflex fn " + top + " (with block? " + withBlock +")")
             debug("arity is " + arity + ", actual arg len: " + args.length)
-            this.invokeReflex(top, args, withBlock, ensureReturns);
+            this.invokeReflex(top, args, withBlock || !!top.blockParamName, ensureReturns);
         } else if (top instanceof WrappedFunction) {
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
@@ -365,7 +365,7 @@ private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensu
         let recv = this.stack[this.stack.length - 1];
         this.pop();
         let obj = this.stack[this.stack.length - 1];
-        this.pop();
+        // this.pop();
         if (obj instanceof ReflexObject) {
             if (recv instanceof ReflexObject) {
                 if (this.frames[this.frames.length - 1].self === recv) {

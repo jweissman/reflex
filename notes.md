@@ -821,3 +821,44 @@ we may want to disallow bare access to members outside of classes
 --------------------------------
 
 maybe each frame should have its own stack??
+
+------
+
+wow, each is actually going!!!!!!!!!
+
+--------------------------------
+
+came to say:
+ 
+   maybe we should have different 'bases' for reflection/reification?
+   mirrors are clearly for reflection, maybe they could give you a binding
+   binding is for reification, maybe you could just get one directly from kernel
+   (it should be really clear you're doing metaprogramming stuff at this point, is one idea...)
+   is there a different metaphor for binding, something that wraps around it?
+   (mechanically it ofc can just live on the kernel...)
+
+---
+
+just struck me: ruby has implicit tuples for destructuring, so it wouldn't be too weird to have them as an explicit structure
+(maybe it would play merry hell with the existing grammar to have to add a tuple-lit though?? between fn lits and parenthesizes exprs it is already kind of busy territory...)
+((can you omit parens on a tuple lit? that seems crazy but!))
+
+--------
+
+(thinking abt checklist for 0.1 --)
+hash lit
+tuples?
+modules
+enumerable
+unicode
+web repl
+mirror
+binding
+wand??
+sketch of programming reference/guide?
+--
+files/network/math
+webserver
+docs?
+packages?
+

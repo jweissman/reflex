@@ -66,6 +66,13 @@ describe('Array', () => {
                 expect(evaluate('x')).toEqual(6)
             })
         })
+
+        describe('map', () => {
+            it('applies fn to each element', () => {
+                expect(evaluate("[1,2,3,4,5].map{|v|v*2}")).toEqual([2,4,6,8,10])
+                expect(evaluate("[1,2,4,8,16].map(v=>v*2)")).toEqual([2,4,8,16,32])
+            })
+        })
     })
 
     it('literals', () => {

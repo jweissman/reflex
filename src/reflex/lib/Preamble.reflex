@@ -89,8 +89,6 @@ class Number {
         }
     }
 
-    //call(other) { other.add(self) }
-
     times(&timesBlock) {
         counter = self;
         until (counter.zero()) {
@@ -100,13 +98,10 @@ class Number {
     }
 
     upto(stop, &uptoBlock) {
-        // Range.new(self, stop).call(&b)
-        val = self;
-        end = stop;
-        uptoBlock(val);
-        until (val >= end) {
-           val = val + 1
-           uptoBlock(val);
+        i = self;
+        while (i <= stop) {
+           uptoBlock(i);
+           i = i + 1
         }
     }
 }
@@ -128,12 +123,31 @@ class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
  *
  * The class of object-valued index spaces.
  */
-
 class Array {
     add(other) { self.concat(other) }
     each(&eachBlock) {
-        // len = self.length() - 1
-        0.upto(self.length() -1) { |i| element = self.get(i); eachBlock(element) }
+        0.upto(self.length()-1) { |it|
+            element = self.get(it);
+            eachBlock(element);
+        }
+    }
+
+    //eachWithIndex(&eachBlock) {
+    //    0.upto(self.length()-1) { |i|
+    //        element = self.get(i);
+    //        eachBlock(element, i);
+    //    }
+    //}
+
+    map(&mapFn) {
+        res = Array.new()
+        index=0
+        self.each { |e|
+            mapped = mapFn(e)
+            res.set(index, mapped);
+            index=index+1
+        }
+        res
     }
 }
 

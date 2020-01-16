@@ -10,7 +10,7 @@ export default class LocalVarSet extends Tree {
             // ...this.message.code,
             // ...this.receiver.code,
             ["local_var_set",this.message.key],
-            ["local_var_get",this.message.key],
+            // ["local_var_get",this.message.key],
         ]
     }
 

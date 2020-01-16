@@ -5,7 +5,6 @@ describe('Reflex', () => {
             it('is the class of words', () => {
                 expect(evaluate("'hello'.class")).toEqual('Class(String)')
                 expect(evaluate("'world'.class")).toEqual('Class(String)')
-                // expect(evaluate("'hello'.length()")).toEqual('Class(String)')
             })
 
             describe('instance methods', () => {

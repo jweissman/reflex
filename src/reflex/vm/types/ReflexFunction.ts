@@ -13,7 +13,7 @@ export class ReflexFunction extends ReflexObject {
 
     inspect() { return this.displayName; }
     get displayName() {
-        if (this.name && this.name.match(/lambda/) && this.source && this.source.length < 25) {
+        if (this.name && this.name.match(/lambda/) && this.source && this.source.length < 60) {
             return this.source
         } else if (this.name) {
             return this.name; //`${this.name}`

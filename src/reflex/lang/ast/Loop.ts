@@ -11,7 +11,7 @@ export class Loop extends Tree {
   }
   get code(): Code {
     // throw new Error("Loop.code -- Method not implemented.");
-    let name = `loop-${Loop.count++}`;
+    let name = `loop-${Loop.count++}-${this.test.inspect()}`;
     let prefix = (msg: string) => `${name}-${msg}`;
     let labelBegin = prefix('begin');
     let labelEnd = prefix('end');
