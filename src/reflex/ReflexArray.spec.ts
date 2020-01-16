@@ -53,13 +53,13 @@ describe('Array', () => {
         })
 
         describe('each', () => {
-            xit('runs on empty', () => {
+            it('runs on empty', () => {
                 expect(()=>evaluate("[].each{}")).not.toThrow()
             })
-            xit('runs on one element', () => {
+            it('runs on one element', () => {
                 expect(()=>evaluate("[1].each{}")).not.toThrow()
             })
-            xit('iterates over list items', () => {
+            it('iterates over list items', () => {
                 evaluate('a=Array.new(1,2,3)')
                 evaluate('x=0')
                 evaluate("a.each { |v| x = x + v }")

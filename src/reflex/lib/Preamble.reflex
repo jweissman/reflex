@@ -104,7 +104,7 @@ class Number {
         val = self;
         end = stop;
         uptoBlock(val);
-        until (val == end) {
+        until (val >= end) {
            val = val + 1
            uptoBlock(val);
         }
