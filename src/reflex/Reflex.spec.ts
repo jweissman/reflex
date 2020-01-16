@@ -9,16 +9,28 @@ describe('Reflex', () => {
 
             describe('instance methods', () => {
                 it('concat', () => {
-                    expect(evaluate("'hello' + ' world'")).toEqual("hello world")
+                    expect(evaluate("'hello'.concat(' world')")).toEqual("hello world")
                 })
-                it('len', () => {
+                it('length', () => {
                     expect(evaluate("'hello'.length()")).toEqual(5)
                 })
             })
 
+            describe('operators', () => {
+                it('add is concat', () => {
+                    expect(evaluate("'hello' + ' world'")).toEqual("hello world")
+                })
+
+                it('multiply is replicate', () => {
+                    expect(evaluate("'hello' * 3")).toEqual("hellohellohello")
+                })
+            })
+
             describe('escapes', () => {
-                xit('unicode escapes', () => {
-                    fail('test not impl')
+                it('unicode escapes', () => {
+                    evaluate(`code(value) { "\\u001b[" + value + "m" }`)
+                    expect(evaluate("code('123')")).toEqual("\u001b[123m")
+                    expect(evaluate("code('31')+'town'+code('0')")).toEqual("\u001b[31mtown\u001b[0m");
                 })
             })
         })
@@ -596,6 +608,12 @@ describe('Reflex', () => {
         expect(evaluate('fibonacci 9')).toEqual(55)
         expect(evaluate('fibonacci 60')).toEqual(2504730781961)
         expect(evaluate('fibonacci 70')).toEqual(308061521170129)
+    })
+
+    xit('prints', () => {
+        expect(evaluate("print 'hello world'")).toEqual(null)
+        // expect(Reflex.tracedOut).toEqual("hello world")
+
     })
 
     xit('self-spec', () => {

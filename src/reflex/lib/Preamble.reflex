@@ -159,6 +159,15 @@ class Array {
  */
 class String {
     add(other) { self.concat(other) }
+    multiply(other) {
+        if (other.isInstanceOf(Number)) {
+            res = ''
+            other.times { res = res + self }
+            res
+        } else {
+            '' // need a throw!
+        }
+    }
 }
 
 /**

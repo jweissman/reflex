@@ -43,7 +43,7 @@ class ArrayLiteral extends Tree {
   }
 }
 
-export const ast: { [key: string]: (...args: any[]) => Tree } = {
+export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Program: (_pre: Node, list: Node, _post: Node) =>
     new Program(list.tree),
   Stmt: (_pre: Node, expr: Node) => expr.tree,
@@ -146,7 +146,27 @@ export const ast: { [key: string]: (...args: any[]) => Tree } = {
     new Binary('%', left.tree, right.tree),
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
-  StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.sourceString),
+  StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.tree.join("")),
+  doubleStringCharacter_escaped: (_esc: Node, lit: Node) => lit.tree,
+  
+  unicodeLiteral: (_u: Node, a: Node, b: Node, c: Node, d: Node) => {
+   let alpha = parseInt(a.sourceString, 16);
+   let beta = parseInt(b.sourceString, 16);
+   let gamma = parseInt(c.sourceString, 16);
+   let delta = parseInt(d.sourceString, 16);
+   return String.fromCharCode(
+     alpha * 0x1000 +
+     beta * 0x0100 +
+     gamma * 0x0010 +
+     delta * 0x0001
+   );
+  },
+  
+  sourceCharacter: (char: Node) => {
+    // console.log("SRC", char.sourceString)
+    return char.sourceString
+  },
+
   NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(
     Number(`${whole.sourceString}.${fraction.sourceString}`), true),

@@ -234,16 +234,16 @@ Reflex {
 
     singleStringCharacter
       = ~("\'" | "\\" | "\n") sourceCharacter -- non_escaped
-    //   | "\\" unicodeLiteral                   -- escaped
+      // | "\\" unicodeLiteral                   -- escaped
    
     doubleStringCharacter
       = ~("\"" | "\\" | "\n") sourceCharacter -- non_escaped
-    //   | "\\" unicodeLiteral                   -- escaped
+      | "\\" unicodeLiteral                   -- escaped
     
     sourceCharacter = any
     
-    // unicodeLiteral
-    //   = "u" hexDigit hexDigit hexDigit hexDigit
+    unicodeLiteral
+      = "u" hexDigit hexDigit hexDigit hexDigit
 
     capitalIdent
       = "A".."Z" idChar*
