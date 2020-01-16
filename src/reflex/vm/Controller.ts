@@ -1,7 +1,7 @@
 import util from 'util';
 import { Value } from './instruction/Value';
 import Machine from './Machine';
-import { Instruction, indexForLabel, Code, nextOperativeCommand } from './instruction/Instruction';
+import { Instruction, indexForLabel, Code } from './instruction/Instruction';
 import { Stone } from './instruction/Stone';
 import { log, debug } from './util/log';
 import ReflexObject from './types/ReflexObject';
@@ -28,6 +28,7 @@ export class Controller {
     get stack() { return this.machine.activeStack; }
     get frames() { return this.machine.activeFrames; }
     get code() { return this.machine.activeProgram; }
+    get frame() { return this.frames[this.frames.length - 1]; }
 
     constructor(private machine: Machine) { }
 
@@ -37,10 +38,9 @@ export class Controller {
 
     execute(instruction: Instruction) {
         let [op, value] = instruction;
-        let { frame, top } = this.machine
         switch (op) {
             case 'label': break;
-            case 'halt': break;
+            case 'halt': this.machine.halted = true; break;
             case 'push': this.push(value); break;
             case 'pop': this.pop(); break;
             case 'mark': this.mark(value as string); break;
@@ -61,14 +61,7 @@ export class Controller {
                 }
                 break;
             case 'local_var_set':
-                let key = value as string;
-                this.pop()
-                if (top instanceof ReflexObject) {
-                    let localFrame: Frame = findFrameWithLocal(key, this.frames);
-                    localFrame.locals[key] = top;
-                } else {
-                    fail("local_var_set expects top is be reflex obj to assign");
-                }
+                this.localVarSet(value as string)
                 break;
             case 'local_var_or_eq':
                 let k = value as string;
@@ -76,9 +69,9 @@ export class Controller {
                 this.pop()
                 if (t instanceof ReflexObject) {
                     let localFrame: Frame = findFrameWithLocal(k, this.frames);
-                    if (localFrame === frame &&
-                        !frame.locals[k]) {
-                        frame.locals[k] = t;
+                    if (localFrame === this.frame &&
+                        !this.frame.locals[k]) {
+                        this.frame.locals[k] = t;
                     }
                 } else {
                     fail("local_var_set expects top is reflex obj to assign");
@@ -88,34 +81,20 @@ export class Controller {
                 let v: string = value as string;
                 if (hasLocal(v, this.frames)) {
                     this.push(getLocal(v, this.frames));
-                } else if (v === 'yield') {
-                    if (frame.currentMethod && frame.block) {
-                        let yieldFn = new WrappedFunction('yielder', (...args: ReflexObject[]) => {
-                            frame.currentMethod!.frame = { ...frame };
-                            this.ret();
-                            let fn = frame.block as ReflexFunction;
-                            args.forEach(arg => this.push(arg))
-                            this.push(fn);
-                            this.invoke(fn.arity, !!fn.blockParamName)
-                        });
-                        this.push(yieldFn)
-                    } else {
-                        throw new Error("tried to yield from outermost scope or without a block on frame?")
-                    }
                 } else {
-                    this.push(frame.self)
+                    this.push(this.frame.self)
                     this.push(value as string)
                     this.call()
                 }
                 break;
             case 'send':
                 let val: string = value as string;
-                let result = frame.self.send(val);
+                let result = this.frame.self.send(val);
                 this.push(result);
                 break;
             case 'send_or_eq':
                 let theKey = value as string;
-                if (!frame.self.respondsTo(theKey)) {
+                if (!this.frame.self.respondsTo(theKey)) {
                     this.sendEq(value as string);
                 }
                 break;
@@ -133,6 +112,7 @@ export class Controller {
                 }
                 break;
             case 'dispatch':
+                let top = this.machine.top
                 this.pop();
                 this.dispatch(value as string, top as ReflexObject);
                 break;
@@ -141,27 +121,46 @@ export class Controller {
         return;
     }
 
+    localVarSet(key: string) {
+        let top = this.stack[this.stack.length - 1];
+        this.pop()
+        if (top instanceof ReflexObject) {
+            let localFrame: Frame = findFrameWithLocal(key, this.frames);
+            localFrame.locals[key] = top;
+            // if (top instanceof ReflexFunction && top.name?.match(/lambda/)) {
+            //     top.name = top.name + ' [' + key + ']'
+            // }
+        } else {
+            fail("local_var_set expects top is be reflex obj to assign");
+        }
+    }
+
     invoke(
         arity: number,
-        hasBlock: boolean,
+        withBlock: boolean,
         ensureReturns?: ReflexObject
     ) {
         let top = this.stack[this.stack.length - 1];
-        log("INVOKE " + top); 
-        log("  arity: " + arity); // + ") -- stack: " + dump(this.stack))
-        log("  block? " + hasBlock)
         this.pop();
+        log("Invoking " + top + "..."); 
+        debug("  with arity: " + arity);
+        debug("  with block? " + withBlock)
         let args = [];
         for (let i = 0; i < arity; i++) {
             let newTop = this.stack[this.stack.length - 1];
             args.push(newTop);
             this.pop();
         }
-        if (top instanceof WrappedFunction) {
-            if (hasBlock) {
-                args.push(this.stack[this.stack.length - 1]);
-                this.pop();
-            }
+        if (withBlock) {
+            debug("block provided, popping stack and pushing to args...")
+            args.push(this.stack[this.stack.length - 1])
+            this.pop()
+        }
+        if (top instanceof ReflexFunction) {
+            debug("about to invoke reflex fn " + top + " (with block? " + withBlock +")")
+            debug("arity is " + arity + ", actual arg len: " + args.length)
+            this.invokeReflex(top, args, withBlock, ensureReturns);
+        } else if (top instanceof WrappedFunction) {
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
             }
@@ -180,36 +179,16 @@ export class Controller {
             if (top.boundSelf) {
                 this.machine.unbindSelf()
             }
-        } else if (top instanceof ReflexFunction) {
-            if (hasBlock) {
-                log("INVOKE REFLEX FN WITH BLOCK...")
-            
-                    args.push(this.stack[this.stack.length-1]) 
-                    //    debugger;
-                // let block = this.frames[this.frames.length - 1]?.block
-                // top.blockParamName
-                // if (block) {
-                //     args.push(block)
-                // } else {
-                    // throw new Error("invoke reflex function with block, without block on stack? ")
-                // }
-                // args.push(this.stack[this.stack.length - 1]);
-                // this.pop();
-            }
-            this.invokeReflex(top, args, hasBlock, ensureReturns);
-        }
-        else {
-            if (top instanceof ReflexObject) {
-                log("FALLBACK TO CALL OBJ...")
-                let call = top.send('call');
-                args.reverse().forEach(arg => this.push(arg))
-                if (call instanceof WrappedFunction) { call.bind(top) }
-                if (call instanceof ReflexFunction) { call.frame.self = top }
-                this.push(call);
-                this.invoke(arity, hasBlock, ensureReturns)
-            } else {
-                throw new Error("Top was not reflex function or object at invoke")
-            }
+        } else if (top instanceof ReflexObject) {
+            log("FALLBACK TO CALL OBJ...")
+            let call = top.send('call');
+            args.reverse().forEach(arg => this.push(arg))
+            if (call instanceof WrappedFunction) { call.bind(top) }
+            if (call instanceof ReflexFunction) { call.frame.self = top }
+            this.push(call);
+            this.invoke(arity, withBlock, ensureReturns)
+        } else {
+            throw new Error("Top was not reflex function or object at invoke")
         }
     }
 
@@ -279,7 +258,7 @@ export class Controller {
     protected ret() {
         let frame = this.frames[this.frames.length - 1];
         let top = this.stack[this.stack.length - 1]
-        this.frames.pop();
+        // this.frames.pop();
         this.frames.pop();
         let retValue: Value = null;
         if (frame.retValue) {
@@ -340,71 +319,47 @@ export class Controller {
         }
     }
 
-    private invokeReflex(top: ReflexFunction, args: Value[], hasBlock: boolean, ensureReturns?: ReflexObject) {
-        log("INVOKE REFLEX " + top.inspect())
-        log("args: " + args.map(a=>a&&a.toString()).join(","))
-        let ip = indexForLabel(this.code, top.label);
-        let frame = this.frames[this.frames.length - 1];
-        let self = frame.self as ReflexObject;
-        let locals = Object.fromEntries(zip(top.params, args));
-        let block;
-        if (hasBlock) {
-            block = this.stack[this.stack.length - 1] as ReflexFunction;
-            if (block) {
-                log("block!: " + block)
-                this.pop();
-            } else {
-                log("Method " + top.name + " (called in " + frame.currentMethod?.name + ") expected a block (?)")
-                throw new Error("Method " + top.name + " expected a block")
-            }
-        }
-
-        if (top.frame.self) {
-            self = top.frame.self.within(self);
-        }
-        if (block && top.blockParamName) {
-            locals[top.blockParamName] = block;
-        }
-        let newFrame: Frame = {
-            ip,
-            locals,
-            self,
-            ...(ensureReturns ? { retValue: ensureReturns } : {}),
-            currentMethod: top,
-            ...(hasBlock ? { block } : {}),
-            stack: [],
-        };
-        let nihilate = false;
-        if (top.frame.block) {
-            newFrame.ip = top.frame.ip;
-        }
-        if (hasBlock) {
-            let line = newFrame.ip;
-            let next = nextOperativeCommand(this.code.slice(line));
-            if (next) {
-                let [nextOp] = next;
-                let exhausted = nextOp === 'ret'
-                if (exhausted) {
-                    nihilate = true;
+private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensureReturns?: ReflexObject) {
+        log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
+        debug("source: " + fn.source)
+        debug("looking for label: " + fn.label)
+        if (!fn?.name?.match(/_setup/)) { debugger; }
+        // let locals: Store = {};
+        let fnArgs = Object.fromEntries(zip(fn.params, args))
+        if (withBlock) {
+            if (args.length && args[args.length - 1] instanceof ReflexFunction) {
+                // log("Method " + fn.name + " (called in " + frame.currentMethod?.name + ") expected a block (?) -- picking from args")
+                let block = args[args.length - 1] as ReflexFunction
+                args.pop()
+                if (fn.blockParamName) {
+                    log("Assign BLOCK " + block.source + " to " + fn.blockParamName)
+                    fnArgs[fn.blockParamName] = block;
+                } else {
+                    throw new Error("Given block arg but no explicit block param")
                 }
             } else {
-                throw new Error("could not determine next upcoming command? (at least a halt should be present...?)")
+                // log("Method " + fn.name + " (called in " + frame.currentMethod?.name + ") did not get block...")
+                throw new Error("Method " + fn.name + " expected a block")
             }
         }
-        if (!nihilate) {
-            // this.mark('invoke')
-            this.frames.push(top.frame);
-            this.frames.push(newFrame);
-        } else {
-            if (block) {
-                let nil = this.makeNil();
-                this.invokeReflex(block, [nil], false);
-            } else {
-                throw new Error("tried to pass nihil to a block, but there wasn't a block??")
-            }
-        }
+        debug("args: " + util.inspect(fnArgs));
+        let self = fn.frame.self ? fn.frame.self.within(this.frame.self) : this.frame.self;
+        debug("self: " + self);
+        // this.frames.push(fn.frame);
+        this.frames.push({
+            ip: indexForLabel(this.code, fn.label),
+            locals: fnArgs,
+            self,
+            ...(ensureReturns || fn.frame.retValue ? { retValue: ensureReturns } : {}),
+            currentMethod: fn,
+            stack: [],
+            backingFrame: fn.frame,
+        });
+
+        // log("Invoke done!")
+        if (!fn?.name?.match(/_setup/)) { debugger; }
     }
-    
+
     protected sendEq(value: string) {
         let k = value as string;
         let recv = this.stack[this.stack.length - 1];
@@ -426,12 +381,11 @@ export class Controller {
         }
     }
 
-    private dispatch(message: string, object: ReflexObject, doRet?: boolean) {
-        let fn = object.send(message) as ReflexFunction;
-        this.stack.push(fn);
-        let arity = fn.arity;
-        this.invoke(arity, !!fn.blockParamName);
-        if (doRet) { this.ret(); }
+    private dispatch(message: string, object: ReflexObject) { //}, doRet?: boolean) {
+        this.push(object);
+        this.push(message);
+        this.call();
+        this.invoke(0, false)
     }
 
     private stackIsEmpty() { return this.stack.length === 0 }

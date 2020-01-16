@@ -28,6 +28,41 @@ describe('Reflex', () => {
     describe("syntax", () => {
         describe('core', () => {
             describe("blocks", () => {
+                it('simple blocks', () => {
+                    evaluate('x=0')
+                    evaluate('3.times { x = x + 1 }')
+                    expect(evaluate('x')).toEqual(3)
+                    evaluate('c=->x=x+1')
+                    evaluate('three = 3.times') //(&b) { 3.times(&b) }')
+                    evaluate('three &c')
+                    expect(evaluate('x')).toEqual(6)
+                    evaluate('d=b=>x=x+b')
+                    evaluate('1.upto(3, &d)')
+                    expect(evaluate('x')).toEqual(12)
+                    evaluate('1.upto(3) { |i| x = x + i }')
+                    expect(evaluate('x')).toEqual(18)
+                })
+
+                it('blocks in blocks', () => {
+                    evaluate('x=0')
+                    evaluate('upToEleven(&b) { 1.upto(11) { |i| b(i) }}')
+                    evaluate('upToEleven { |v| x = x + v }')
+                    expect(evaluate('x')).toEqual(66)
+                    evaluate('d=b=>x=x+b')
+                    evaluate('upToEleven(&d)')
+                    expect(evaluate('x')).toEqual(132)
+                })
+
+                it('eachlike', () => {
+                    evaluate('a=[1,2,3]')
+                    evaluate(`each(&eachBlock) {
+                        0.upto(a.length() - 1) { |i| element = a.get(i); eachBlock(element) }
+                    }`)
+                    evaluate('x=0')
+                    evaluate('each { |i| x=x+i }')
+                    expect(evaluate('x')).toEqual(6)
+                })
+
                 it('modifies locals', () => {
                     evaluate('x=Class')
                     evaluate('mod(){x=Object}')
@@ -36,7 +71,7 @@ describe('Reflex', () => {
                     expect(evaluate("x")).toEqual("Class(Object)")
                 })
 
-                it('yields successive values', () => {
+                xit('yields successive values', () => {
                     evaluate("gen(){yield Object; yield Class}")
                     evaluate("x=Function");
                     expect(evaluate("x")).toEqual("Class(Function)")
@@ -46,7 +81,7 @@ describe('Reflex', () => {
                     expect(evaluate("x")).toEqual("Class(Class)")
                 })
 
-                it("funcalls with only blocks", () => {
+                xit("funcalls with only blocks", () => {
                     evaluate("g(){yield Object; yield Class; yield Function}")
                     evaluate("x=Function")
                     evaluate("g{|val|x=val}")
@@ -57,7 +92,7 @@ describe('Reflex', () => {
                     expect(evaluate("x")).toEqual("Class(Function)")
                 })
 
-                it('creates a generator factory', () => {
+                xit('creates a generator factory', () => {
                     evaluate("thrice=(x)=>()=>{yield x; yield x; yield x; yield Class}")
                     evaluate("x=Function")
                     evaluate("three_obj = thrice(Object)")
@@ -90,7 +125,7 @@ describe('Reflex', () => {
                     expect(evaluate("y")).toEqual("Class(Function)")
                 })
 
-                it("passes blocks to instance methods", () => {
+                xit("passes blocks to instance methods", () => {
                     evaluate("class Baz{next(){yield Object;yield Class; yield Function}}")
                     evaluate("baz=Baz.new()")
                     evaluate("x=nil")
@@ -390,7 +425,7 @@ describe('Reflex', () => {
             })
 
             it('permits bare params', () => {
-                expect(evaluate("parent=klass=>klass.super")).toMatch("(klass) => klass.:super")
+                expect(evaluate("parent=klass=>klass.super")).toMatch("(klass) => klass.super")
                 expect(evaluate("parent(Object)")).toMatch("Class(Object)")
                 expect(evaluate("parent(Class.new('Bar', Class.new('Baz')))")).toMatch("Class(Baz)")
             });
@@ -407,7 +442,6 @@ describe('Reflex', () => {
                 expect(evaluate("Bar.new().baz()")).toEqual("Class(Class)")
             })
 
-            // was just a sanity check, can probably remove this
             it("dot access never falls back", () => {
                 evaluate("class Ladder { climb() { Class }}")
                 evaluate("fall=Object")

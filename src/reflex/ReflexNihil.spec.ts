@@ -25,7 +25,7 @@ describe('Nihil', () => {
         expect(evaluate("f(){};f()")).toEqual(null)
     })
 
-    it("is the piped value of an exhausted generator", () => {
+    xit("is the piped value of an exhausted generator", () => {
         evaluate("x=Function")
         evaluate("g=()=>{}")
         evaluate("g { |v| x=v }")

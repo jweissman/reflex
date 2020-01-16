@@ -6,6 +6,8 @@ export function findFrameWithLocal(key: string, frames: Frame[]) {
             let nextFrame = frames[i];
             if (nextFrame.locals[key]) {
                 return nextFrame;
+            } else if (nextFrame.backingFrame?.locals[key]) {
+                return nextFrame.backingFrame
             }
         }
     }

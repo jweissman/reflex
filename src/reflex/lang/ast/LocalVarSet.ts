@@ -14,5 +14,5 @@ export default class LocalVarSet extends Tree {
         ]
     }
 
-    inspect() { return ["<local>",this.message].join(".") + "=" + this.expr.inspect()}
+    inspect() { return this.message + "=" + this.expr.inspect()}
 }

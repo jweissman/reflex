@@ -78,7 +78,7 @@ Reflex {
       
     CasualCall
       = ObjectDot "." Message CasualArguments -- obj
-      | Bareword CasualArguments -- msg
+      | PriExpr CasualArguments -- msg
       
     CarefulArguments
       = FormalArguments PipedBlock -- args_block

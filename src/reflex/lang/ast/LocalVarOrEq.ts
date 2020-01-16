@@ -10,6 +10,6 @@ export class LocalVarOrEq extends Tree {
         ];
     }
     inspect(): string {
-        return ['<local>', this.message].join(".") + "||=" + this.expr.inspect();
+        return this.message + "||=" + this.expr.inspect();
     }
 }

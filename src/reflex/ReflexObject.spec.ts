@@ -13,7 +13,7 @@ describe('Object', () => {
     
     describe(".new", () => {
         it('is a Function', () => {
-            expect(evaluate("Object.new")).toEqual("Function(Class(Object).new)")
+            expect(evaluate("Object.new")).toEqual("Class(Object).new")
         })
         it('constructs new Object', () => {
             expect(evaluate("Object.new()")).toEqual("Object")

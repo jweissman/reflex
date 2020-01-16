@@ -91,9 +91,9 @@ export class Arguments extends Tree {
   inspect(): string {
     let disp = this.args.inspect();
     if (this.block && this.block instanceof Tree) {
-      disp += this.block.inspect();
+      disp += '{' + this.block.inspect() + '}';
     } else {
-      disp += "[no-block]"
+      // disp += "[no-block]"
     }
     return disp;
   }

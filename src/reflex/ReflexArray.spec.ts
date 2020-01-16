@@ -7,10 +7,10 @@ describe('Array', () => {
     })
 
     describe('new', () => {
-        xit('creates a list of items', () => {
+        it('creates a list of items', () => {
             expect(evaluate("Array.new()")).toEqual([])
             expect(evaluate("Array.new(1)")).toEqual([1])
-            expect(evaluate("Array.new(1,Object.new(),()=>3)")).toEqual([1,"Object","->3"])
+            // expect(evaluate("Array.new(1,Object.new(),()=>3)")).toEqual([1,"Object","->3"])
             expect(evaluate("Array.new(1,2,3,4,5)")).toEqual([1,2,3,4,5])
         })
     })
@@ -53,7 +53,13 @@ describe('Array', () => {
         })
 
         describe('each', () => {
-            fit('iterates over list items', () => {
+            xit('runs on empty', () => {
+                expect(()=>evaluate("[].each{}")).not.toThrow()
+            })
+            xit('runs on one element', () => {
+                expect(()=>evaluate("[1].each{}")).not.toThrow()
+            })
+            xit('iterates over list items', () => {
                 evaluate('a=Array.new(1,2,3)')
                 evaluate('x=0')
                 evaluate("a.each { |v| x = x + v }")

@@ -1,8 +1,7 @@
 import { Instruction, Code, indexForLabel, labelStep, prettyCode } from "./instruction/Instruction";
-import { Value } from "./instruction/Value";
 import ReflexObject from './types/ReflexObject';
 import main, { bootLocals } from './Bootstrap';
-import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
+import { ReflexFunction } from './types/ReflexFunction';
 import { Frame } from './Frame';
 import { fail } from './util/fail';
 import { trace } from './instruction/trace';
@@ -10,23 +9,21 @@ import Reflex from '../Reflex';
 import { State } from './State';
 import { debug } from "./util/log";
 import Controller from "./Controller";
-import { ReflexString } from "./types/ReflexString";
 import { Loader } from "./Loader";
 
 
-class FakeFunction extends ReflexFunction {
+class Pseudofunction extends ReflexFunction {
     constructor(public name: string) { super(); }
 }
 
 export default class Machine {
     controller: Controller = new Controller(this);
     loader: Loader = new Loader();
-    // private stack: Value[] = []
     private frames: Frame[] = [{
         ip: 0, self: main(this),
         locals: bootLocals,
         stack: [],
-        currentMethod: new FakeFunction('(main)'),
+        currentMethod: new Pseudofunction('(main)'),
     }];
     private currentProgram: Code = [];
 
@@ -77,17 +74,13 @@ export default class Machine {
             ['label','.main'],
             ...code,
             ['halt', null],
-            // ['halt', null]
         ]
     }
 
 
     run(code: Instruction[]) {
-        // if (code.length) {
-            this.install(code);
-            this.initiateExecution('.main');
-            // this.reset()
-        // }
+        this.install(code);
+        this.initiateExecution('.main');
     }
 
 
@@ -97,7 +90,6 @@ export default class Machine {
         if (step) {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
-            // log(`init execution @${label}, ip = ${this.ip}`)
             debug(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
             this.executeLoop();
         } else {
@@ -110,37 +102,15 @@ export default class Machine {
     delaySecs: number = Reflex.config.delay
     executeLoop() {
         this.halted = false;
-        while (!this.halted) { //} && this.currentInstruction) {
-            // console.log("CURRENT INSTRUCTION: " + this.currentInstruction)
-            let [op] = this.currentInstruction
-            
-            // {
+        while (!this.halted) {
             this.execute(this.currentInstruction)
             this.frame.ip++;
-            this.syncDelay(this.delaySecs);
-            // }
-            if (op === 'halt') {
-                this.halted = true;
-            }
         }
     }
-
-    active: boolean = false
-    syncDelay(secs: number) {
-        if (this.active && secs > 0) {
-            var wait = new Date(new Date().getTime() + secs * 1000);
-            while (wait > new Date()) {
-                // spinlock
-            }
-        }
-    }
-
+    
     execute(instruction: Instruction) {
-        let { stack, frames } = this.state
-        let frame = frames[frames.length - 1]
-        trace(`exec @${this.ip}`, instruction, frame, stack)
+        trace(`exec @${this.ip}`, instruction, this.state.frames)
         this.controller.execute(instruction)
-        // update(this.state, instruction, this.currentProgram)
     }
 
     doInvoke(ret: ReflexObject | undefined, fn: ReflexFunction, ...args: ReflexObject[]) {

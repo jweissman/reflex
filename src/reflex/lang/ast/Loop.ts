@@ -21,9 +21,9 @@ export class Loop extends Tree {
       ...this.test.code,
       ...flipTest,
       ['jump_if', labelEnd],
-      ['mark', 'loopBlock'],
+      ['mark', name],
       ...this.block.code,
-      ['sweep', 'loopBlock'],
+      ['sweep', name],
       ['jump', labelBegin],
       ['label', labelEnd],
     ];

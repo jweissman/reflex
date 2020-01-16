@@ -117,7 +117,7 @@ let arithmetic: { [key in ArithOp]: Function} = {
 let numberMethods = RNumber.get("instance_methods");
 const defineArithmetic = (methodName: ArithOp, customName?: string) => {
   let name = customName || methodName
-  numberMethods.set(name, new WrappedFunction("Number." + name, (machine: Machine, other: number) =>
+  numberMethods.set(name, new WrappedFunction("Number#" + name, (machine: Machine, other: number) =>
     (arithmetic[methodName] as Function)((machine.boundSelf! as ReflexNumber).value, other)
   ))
 }
@@ -134,17 +134,17 @@ defineArithmetic('lt');
 defineArithmetic('lte');
 
 let arrayMethods = RArray.get("instance_methods");
-arrayMethods.set("get", new WrappedFunction("Array.get", (machine: Machine, index: number) =>
+arrayMethods.set("get", new WrappedFunction("Array#get", (machine: Machine, index: number) =>
   (machine.boundSelf! as ReflexArray).at(index)
 ))
-arrayMethods.set("set", new WrappedFunction("Array.set", (machine: Machine, index: ReflexNumber, value: ReflexObject) =>
+arrayMethods.set("set", new WrappedFunction("Array#set", (machine: Machine, index: ReflexNumber, value: ReflexObject) =>
   (machine.boundSelf! as ReflexArray).put(index, value),
   false
 ))
-arrayMethods.set("length", new WrappedFunction("Array.length", (machine: Machine) =>
+arrayMethods.set("length", new WrappedFunction("Array#length", (machine: Machine) =>
   (machine.boundSelf! as ReflexArray).items.length
 ))
-arrayMethods.set("concat", new WrappedFunction("Array.concat", (machine: Machine, other: ReflexObject[]) =>
+arrayMethods.set("concat", new WrappedFunction("Array#concat", (machine: Machine, other: ReflexObject[]) =>
   [...(machine.boundSelf! as ReflexArray).items, ...other],
   // false
 ))

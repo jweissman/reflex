@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import ReflexObject from "../types/ReflexObject"
 import Tree from "../../lang/ast/Tree"
 import { Value } from './Value';
+import { log } from '../util/log';
 export type Op
   = 'push'
   | 'pop'
@@ -55,7 +56,9 @@ export const labelStep = (code: Code, label: string) => code.find(([op, val]) =>
 export const indexForLabel = (code: Code, label: string) => {
     let step = labelStep(code, label) 
     if (step) {
-        return code.indexOf(step)
+        let lineNumber = code.indexOf(step)
+        log("FOUND " + label + " AT " + lineNumber)
+        return lineNumber
     } else {
         throw new Error("no such label found: " + label)
     }

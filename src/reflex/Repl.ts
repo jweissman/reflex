@@ -38,10 +38,10 @@ export class Repl {
             help: 'Echo current program instructions',
             action: () => { console.log(prettyCode(interpreter.machine.activeProgram)); }
         });
-        // server.defineCommand('stack', {
-        //     help: 'Dump current stack elements',
-        //     action: () => { console.log(interpreter.machine.stack) }
-        // })
+        server.defineCommand('slow', {
+            help: 'Dump current stack elements',
+            action: () => { console.log('slowdown'); interpreter.machine.delaySecs=1.0; }
+        })
         server.defineCommand('trace', {
             help: 'Activate code trace',
             action: () => {

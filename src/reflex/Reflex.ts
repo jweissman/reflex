@@ -12,10 +12,7 @@ export default class Reflex {
     parser: Parser = new Parser();
     machine: Machine = new Machine(this)
 
-    constructor() {
-        this.evaluate("Kernel.import 'preamble'");
-        this.machine.active = true
-    }
+    constructor() { this.evaluate("Kernel.import 'preamble'"); }
 
     evaluate(input: string) {
         let lines: [Tree, Code][] = this.parser.analyze(input)

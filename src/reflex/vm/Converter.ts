@@ -3,7 +3,7 @@ import { log } from './util/log';
 import ReflexObject from './types/ReflexObject';
 import { getLocal } from './instruction/getLocal';
 import { ReflexNumber } from './types/ReflexNumber';
-import { Indeterminate, RNumber } from './Bootstrap';
+import { Indeterminate } from './Bootstrap';
 import { Controller } from './Controller';
 import ReflexClass from './types/ReflexClass';
 import { ReflexString } from './types/ReflexString';

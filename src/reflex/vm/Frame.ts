@@ -11,4 +11,6 @@ export interface Frame {
     currentMethod?: ReflexFunction;
     block?: ReflexFunction;
     // fake: boolean;
+
+    backingFrame?: Frame;
 }
