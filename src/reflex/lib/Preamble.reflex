@@ -27,6 +27,7 @@ class Class {
  */
 class Function {
     meta.instanceEval { new(fn) { fn } }
+    call() { self() }
 }
 
 /* 
@@ -97,12 +98,15 @@ class Number {
         }
     }
 
-    upto(stop, &uptoBlock) {
-        i = self;
-        while (i <= stop) {
-           uptoBlock(i);
-           i = i + 1
-        }
+    upto(stop,&block) { //}, &uptoBlock) {
+        r=Range.new(self, stop)
+        r.each(&block) if block_given
+        r
+        //i = self;
+        //while (i <= stop) {
+        //   uptoBlock(i);
+        //   i = i + 1
+        //}
     }
 }
 
@@ -124,20 +128,16 @@ class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
  * The class of object-valued index spaces.
  */
 class Array {
+    push(it) { self.set(self.length(),it) }
+
     add(other) { self.concat(other) }
     each(&eachBlock) {
-        0.upto(self.length()-1) { |it|
-            element = self.get(it);
-            eachBlock(element);
+        i = 0;
+        while (i <= self.length()-1) {
+           eachBlock(self.get(i));
+           i = i + 1
         }
     }
-
-    //eachWithIndex(&eachBlock) {
-    //    0.upto(self.length()-1) { |i|
-    //        element = self.get(i);
-    //        eachBlock(element, i);
-    //    }
-    //}
 
     map(&mapFn) {
         res = Array.new()
@@ -151,6 +151,7 @@ class Array {
     }
 }
 
+
 /**
  * String
  *
@@ -158,6 +159,31 @@ class Array {
  */
 class String {
     add(other) { self.concat(other) }
+}
+
+/**
+ * Range
+ * The class of bounded natural intervals.
+ */
+class Range {
+    init(start,stop) { self.start=start; self.stop=stop }
+    toArray() {
+        arr = []
+        i = self.start;
+        while (i <= self.stop) {
+           arr.push(i)
+           i = i + 1
+        }
+        arr
+    }
+    each(&eachBlock) { self.toArray().each(&eachBlock) }
+    map(&mapFn) { self.toArray().map(&mapFn) }
+
+    call(&block) { self.each(&block) }
+}
+
+class Module {
+    // inject(klass) {}
 }
 
 # the universal constants

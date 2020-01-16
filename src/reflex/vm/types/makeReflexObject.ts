@@ -25,7 +25,7 @@ export function makeReflexObject(machine: Machine, klass: ReflexClass, args: Ref
         let init = mu.send('init');
         if (init instanceof ReflexFunction) {
             init.frame.self = mu;
-            machine.doInvoke(mu, init, ...args);
+            machine.doInvoke(mu, init, ...args.reverse());
         }
     }
     return mu;

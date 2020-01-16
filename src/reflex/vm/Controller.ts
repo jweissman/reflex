@@ -334,12 +334,15 @@ private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensu
                 if (fn.blockParamName) {
                     log("Assign BLOCK " + block.source + " to " + fn.blockParamName)
                     fnArgs[fn.blockParamName] = block;
+                    fnArgs['block_given'] = getLocal('true', this.frames);
                 } else {
                     throw new Error("Given block arg but no explicit block param")
                 }
             } else {
-                // log("Method " + fn.name + " (called in " + frame.currentMethod?.name + ") did not get block...")
-                throw new Error("Method " + fn.name + " expected a block")
+                log("Method " + fn.name + " (called in " + this.frame.currentMethod?.name + ") did not get block...")
+                // throw new Error("Method " + fn.name + " expected a block")
+                // fnArgs['block_given'] = false;
+                    fnArgs['block_given'] = getLocal('false', this.frames);
             }
         }
         debug("args: " + util.inspect(fnArgs));

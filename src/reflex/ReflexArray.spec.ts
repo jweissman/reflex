@@ -77,6 +77,7 @@ describe('Array', () => {
 
     it('literals', () => {
         expect(evaluate("[1,2,3]")).toEqual([1,2,3])
+        expect(evaluate("[1,2,4,8,16,32,64,128,256]")).toEqual([1,2,4,8,16,32,64,128,256])
     })
 
 })

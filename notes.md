@@ -846,16 +846,18 @@ just struck me: ruby has implicit tuples for destructuring, so it wouldn't be to
 --------
 
 (thinking abt checklist for 0.1 --)
+unicode
+binding
+yield
 hash lit
-tuples?
+mirror
 modules
 enumerable
-unicode
-web repl
-mirror
-binding
-wand??
+tuples?
+tree lit
+wand?
 sketch of programming reference/guide?
+web repl
 --
 files/network/math
 webserver
