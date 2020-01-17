@@ -8,6 +8,8 @@ class Object {
     nil() { false }
     true() { true }
     false() { Boolean.negate(self.true()) }
+    // kind of weird ??
+    // call(other) { self.eq(other) }
 }
 
 /*
@@ -18,6 +20,7 @@ class Object {
 class Class {
     isDescendantOf(other) { other.isAncestorOf(self) }
     isKindOf(other) { other == self || other.isAncestorOf(self) }
+    auto(&blk) { meta.instanceEval(&blk) }
 }
 
 /**
@@ -129,14 +132,49 @@ class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
  */
 class Array {
     push(it) { self.set(self.length(),it) }
-
     add(other) { self.concat(other) }
+
     each(&eachBlock) {
         i = 0;
         while (i <= self.length()-1) {
            eachBlock(self.get(i));
            i = i + 1
         }
+    }
+    
+    eachWithIndex(&eachBlock) {
+        i = 0;
+        while (i <= self.length()-1) {
+           eachBlock(self.get(i), i);
+           i = i + 1
+        }
+    }
+
+    split(sep) {
+        puts("split " + self + " by " + sep)
+        groups = [];
+        fragment = [];
+        i = 0;
+        while (i <= self.length()-1) {
+            e = self.get(i);
+            puts("is e (" + e + ") == " + sep + "?")
+            if (sep == e) {
+                puts("yes!")
+                if (fragment.length() > 0) {
+                    groups.push(fragment)
+                    fragment=[]
+                }
+            } else {
+                puts("nope!")
+                fragment.push(e)
+            }
+            i=i+1
+        }
+        if (fragment.length() > 0) {
+            groups.push(fragment)
+            fragment=[]
+        }
+        groups
     }
 
     map(&mapFn) {
@@ -158,6 +196,19 @@ class Array {
  * The class of words
  */
 class String {
+    split(delim) {
+        chars = self.toArray()
+        if (delim == '') {
+            chars
+        } else {
+            chars.split(delim).map { |letters| letters.join() }
+        }
+    }
+
+    eq(other) {
+        self.toArray().eachWithIndex { |letter,i| other.toArray().get(i) == letter }
+    }
+
     add(other) { self.concat(other) }
     multiply(other) {
         if (other.isInstanceOf(Number)) {
@@ -202,8 +253,11 @@ false = Falsity.new()
 Infinity = PositiveApeiron.new()
 NegativeInfinity = NegativeApeiron.new()
 
+using = Kernel.import
+
 // old ways die hard
 require = Kernel.import
+puts = Kernel.print
 
 // wire up main so it can define instance methods on itself...
 self.defineMethod = meta.defineMethod

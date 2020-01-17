@@ -91,12 +91,18 @@ classMethods.set("isAncestorOf", new WrappedFunction(
 ));
 
 let Kernel = ReflexClass.make("Kernel")
-Kernel.eigenclass.get("instance_methods").set("import", new WrappedFunction(
+let kernelMethods = Kernel.eigenclass.get("instance_methods");
+kernelMethods.set("import", new WrappedFunction(
   `Kernel.import`,
   (machine: Machine, filename: string) => machine.import(filename))
 )
+kernelMethods.set("print", new WrappedFunction(`Kernel.print`, (machine: Machine, ...args: any[]) => {
+  machine.tracedOutput.push(args.join(""))
+  console.log(...args)
+  return null
+}))
 
-type ArithOp = 'add' | 'subtract' | 'multiply' | 'divide' | 'mod' | 'neg' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte'
+type ArithOp = 'add' | 'subtract' | 'multiply' | 'divide' | 'mod' | 'neg' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'to_s'
 let arithmetic: { [key in ArithOp]: Function} = {
   add: (left: number, right: number) => left + right,
   subtract: (left: number, right: number) => left - right,
@@ -113,8 +119,10 @@ let arithmetic: { [key in ArithOp]: Function} = {
   gte: (left: number, right: number) => left >= right,
   lt: (left: number, right: number) => left < right,
   lte: (left: number, right: number) => left <= right,
+  to_s: (num: number) => num.toString(),
 }
 let numberMethods = RNumber.get("instance_methods");
+
 const defineArithmetic = (methodName: ArithOp, customName?: string) => {
   let name = customName || methodName
   numberMethods.set(name, new WrappedFunction("Number#" + name, (machine: Machine, other: number) =>
@@ -132,6 +140,7 @@ defineArithmetic('gt');
 defineArithmetic('gte');
 defineArithmetic('lt');
 defineArithmetic('lte');
+// defineArithmetic('to_s', 'toString');
 
 let arrayMethods = RArray.get("instance_methods");
 arrayMethods.set("get", new WrappedFunction("Array#get", (machine: Machine, index: number) =>
@@ -155,6 +164,9 @@ stringMethods.set("concat", new WrappedFunction("String.concat", (machine: Machi
 ))
 stringMethods.set("length", new WrappedFunction("String.length", (machine: Machine) =>
   (machine.boundSelf! as ReflexString).value.length
+))
+stringMethods.set("toArray", new WrappedFunction("String.toArray", (machine: Machine) =>
+  (machine.boundSelf! as ReflexString).value.split('')
 ))
 
 let Main = ReflexClass.make("Main")

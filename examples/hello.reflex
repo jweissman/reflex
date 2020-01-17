@@ -1,10 +1,12 @@
+using 'paint'
+paint = Paint.new()
 class Greeter {
     init() {
         self.greeting = 'Hello, '
     }
 
     greet(subject) {
-        self.greeting + subject if subject
+        self.greeting + paint.blue(subject) if subject
     }
 }
 

@@ -1,0 +1,10 @@
+using 'paint'
+paint = Paint.new()
+puts(paint.red("red for all the roses"))
+puts(paint.blue("as blue is for the sky"))
+puts(paint.yellow("bright yellow for the sun above"))
+puts(paint.green("deep green for trees to climb"))
+puts(paint.magenta("cool magenta for the mountain range"))
+puts(paint.cyan("and cyan for the dew"))
+puts(paint.white("now together all the colors say"))
+puts(paint.rainbow("THIS LITTLE LANGUAGE IS FOR YOU"))

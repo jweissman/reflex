@@ -26,6 +26,7 @@ export default class Machine {
         currentMethod: new Pseudofunction('(main)'),
     }];
     private currentProgram: Code = [];
+    tracedOutput: string[] = [];
 
     constructor(private reflex: Reflex) {}
 

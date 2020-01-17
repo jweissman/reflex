@@ -1,0 +1,22 @@
+class Color {}
+class Paint {
+    meta.instanceEval {
+        code(value) { "\u001b[" + value + "m" }
+        apply(color, msg) {
+            code(color) + msg  + code('0')
+        }
+    }
+
+    red(msg) { Paint.apply('31', msg) }
+    green(msg) { Paint.apply('32', msg) }
+    yellow(msg) { Paint.apply('33', msg) }
+    blue(msg) { Paint.apply('34', msg) }
+    magenta(msg) { Paint.apply('35', msg) }
+    cyan(msg) { Paint.apply('36', msg) }
+    white(msg) { Paint.apply('37', msg) }
+
+    rainbow(msg) {
+        colors = ['31','32','33','34']
+        msg.split(' ').map { |word| Paint.apply(colors.sample(), word)}.join(' ')
+    }
+}

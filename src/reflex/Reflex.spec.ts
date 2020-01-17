@@ -1,4 +1,4 @@
-import { evaluate } from "./SpecHelper"
+import { evaluate, tracedOutput, out } from "./SpecHelper"
 describe('Reflex', () => {
     describe('structures', () => {
         describe('String', () => {
@@ -594,7 +594,7 @@ describe('Reflex', () => {
     })
 
     it('fib example', () => {
-        evaluate('require "fib"')
+        evaluate('require "examples/fib"')
         evaluate('fibonacci=Fibonacci.new()')
         expect(evaluate('fibonacci 0')).toEqual(1)
         expect(evaluate('fibonacci 1')).toEqual(1)
@@ -610,10 +610,18 @@ describe('Reflex', () => {
         expect(evaluate('fibonacci 70')).toEqual(308061521170129)
     })
 
-    xit('prints', () => {
-        expect(evaluate("print 'hello world'")).toEqual(null)
-        // expect(Reflex.tracedOut).toEqual("hello world")
+    it('prints', () => {
+        expect(evaluate("puts 'hello world'")).toEqual(null)
+        expect(out()).toEqual("hello world")
+    })
 
+    it('paints', () => {
+        evaluate("using 'paint'; paint=Paint.new()")
+        expect(evaluate("puts paint.yellow('hi there!')")).toEqual(null)
+        expect(out()).toEqual("\u001b[33mhi there!\u001b[0m")
+        expect(evaluate("puts paint.red('town')")).toEqual(null)
+        expect(out()).toEqual("\u001b[31mtown\u001b[0m")
+        //expect(()=>evaluate("using 'examples/poem'")).not.toThrow()
     })
 
     xit('self-spec', () => {

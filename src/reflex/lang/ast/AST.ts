@@ -162,10 +162,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
    );
   },
   
-  sourceCharacter: (char: Node) => {
-    // console.log("SRC", char.sourceString)
-    return char.sourceString
-  },
+  sourceCharacter: (char: Node) => char.sourceString,
 
   NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(

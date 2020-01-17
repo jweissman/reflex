@@ -11,8 +11,10 @@ export default class Reflex {
     static get trace(): boolean { return this.config.trace }
     parser: Parser = new Parser();
     machine: Machine = new Machine(this)
+    get tracedOutput(): string[] { return this.machine.tracedOutput; };
 
     constructor() { this.evaluate("Kernel.import 'preamble'"); }
+
 
     evaluate(input: string) {
         let lines: [Tree, Code][] = this.parser.analyze(input)
