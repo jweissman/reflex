@@ -46,8 +46,30 @@ let objectMethods = RObject.get("instance_methods")
 objectMethods.set("eq", new WrappedFunction(`Object.eq`,
  (machine: Machine, other: ReflexObject) => machine.boundSelf!.isEqual(other)
 ));
+objectMethods.set("send", new WrappedFunction(`Object.send`,
+ (machine: Machine, message: string, ...args: ReflexObject[]) => {
+   log("MANUAL OBJECT SEND: " + message)
+   let fn = (machine.boundSelf!.send(message));
+   log("MANUAL OBJECT SEND: " + message + " -> " + fn)
+    if (fn instanceof ReflexFunction) { //} || fn instanceof WrappedFunction) {
+      return machine.doInvoke(
+        undefined,
+        fn,
+        ...args
+      );
+    } else if (fn instanceof WrappedFunction) { //} || fn instanceof WrappedFunction) {
+      // throw new Error("send wrapped fn not impl -- " + message)
+      args.forEach(arg => machine.stack.push(arg))
+      machine.stack.push(fn)
+      machine.controller.invoke(args.length, false);
+
+    } else {
+      throw new Error("Not a function -- " + message)
+    }
+  }
+));
 objectMethods.set("instanceEval", new WrappedFunction(`Object.instanceEval`,
- (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(machine.boundSelf!, machine, fn)
+  (machine: Machine, fn: ReflexFunction) => ReflexClass.instanceEval(machine.boundSelf!, machine, fn)
 ));
 objectMethods.set("isInstanceOf", new WrappedFunction(
         `Object.isInstanceOf`,

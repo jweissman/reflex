@@ -95,7 +95,9 @@ describe('Array', () => {
             it('injects fn between elements', () => {
                 expect(evaluate("[1,2,3,4,5].inject { |a,b| a+b }")).toEqual(1+2+3+4+5)
                 expect(evaluate("[1,2,4,8,16].inject((a,b)=>a+b)")).toEqual(1+2+4+8+16)
-                // expect(evaluate("[1,2,4,8,16].inject &'add'")).toEqual([2,4,8,16,32])
+
+                expect(evaluate("[1,2,4,8,16].inject &'add'")).toEqual(1+2+4+8+16)
+                // expect(()=>evaluate("[1,2,4,8,16].inject 'add'")).toThrow()
             })
         })
 
