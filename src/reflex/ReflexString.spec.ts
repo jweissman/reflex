@@ -18,6 +18,14 @@ describe('String', () => {
             expect(evaluate("'hello'.eq('world')")).toEqual(false)
             expect(evaluate("'world'.eq('world')")).toEqual(true)
         })
+
+        it('call', () => {
+            expect(evaluate("'add'.call(1,2)")).toEqual(3)
+        })
+
+        xit('add calls concat with correct args', () => {
+            expect(evaluate("'add'.call('hello', 'world')")).toEqual('hello world')
+        })
     })
 
     describe('operators', () => {

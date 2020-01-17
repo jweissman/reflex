@@ -48,9 +48,9 @@ objectMethods.set("eq", new WrappedFunction(`Object.eq`,
 ));
 objectMethods.set("send", new WrappedFunction(`Object.send`,
  (machine: Machine, message: string, ...args: ReflexObject[]) => {
-   log("MANUAL OBJECT SEND: " + message)
+   log("MANUAL OBJECT SEND: " + message + " TO " + machine.boundSelf!.inspect())
    let fn = (machine.boundSelf!.send(message));
-   log("MANUAL OBJECT SEND: " + message + " -> " + fn)
+   log("MANUAL OBJECT SEND: " + message + " -> sent: " + fn)
     if (fn instanceof ReflexFunction) { //} || fn instanceof WrappedFunction) {
       return machine.doInvoke(
         undefined,

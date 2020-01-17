@@ -150,9 +150,6 @@ export class Controller {
         let top = this.stack[this.stack.length - 1];
         this.pop();
         debug("Call " + chalk.green(top))
-        // log("Invoking " + top + "..."); 
-        // debug("  with arity: " + arity);
-        // debug("  with block? " + withBlock)
         let args: Value[] = [];
         let foundBlock = false;
         let block;
@@ -171,36 +168,12 @@ export class Controller {
             args.push((block as Reference))
             withBlock = true;
         }
-        // let foundBlock = false;
-        // if (args.find(arg => arg instanceof Reference)) {
-        //     debug("reference provided, pushing to args...")
-        //     let ref = args.find(arg => arg instanceof Reference) as Reference;
-        //     args.filter(arg => !!(arg instanceof Reference))
-        //     args.push(ref.item); //this.stack[this.stack.length - 1])
-        //     withBlock = true;
-        //     foundBlock = true;
-        // }
         if (withBlock && !foundBlock) {
-            // debug("block given but not as arg reference, popping stack and pushing to args...")
             args.push(this.stack[this.stack.length - 1])
             this.pop()
         }
         if (top instanceof ReflexFunction) {
-            // debug("about to invoke reflex fn " + top + " (with block? " + withBlock +")")
-            // debug("arity is " + arity + ", actual arg len: " + args.length)
-            // debug("args: " + args)
-            // if (!!top.blockParamName) {
-            //     if (!withBlock && args.find(arg => arg instanceof Reference)) {
-            //         log("WE HAVE A BLOCK PARAM on FN...")
-            //         log("...and A REFERNCE to provide it")
-            //         let ref = args.find(arg => arg instanceof Reference) as Reference;
-            //         withBlock = true;
-            //         args.filter(arg => !!(arg instanceof Reference))
-            //         args.push(ref.item); //this.stack[this.stack.length - 1])
-            //     }
-            // }
             this.invokeReflex(top, args as Value[], withBlock, ensureReturns)
-                //  || !!top.blockParamName, ensureReturns);
         } else if (top instanceof WrappedFunction) {
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
@@ -221,7 +194,6 @@ export class Controller {
                 this.machine.unbindSelf()
             }
         } else if (top instanceof ReflexObject) {
-            // log("FALLBACK TO CALL OBJ...")
             let call = top.send('call');
             args.reverse().forEach(arg => this.push(arg))
             if (call instanceof WrappedFunction) { call.bind(top) }
@@ -232,7 +204,6 @@ export class Controller {
             throw new Error("Top was not reflex function or object at invoke")
         }
     }
-
 
     protected push(object: Value) {
         if (object === undefined) {
@@ -361,7 +332,7 @@ export class Controller {
     }
 
     private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensureReturns?: ReflexObject) {
-        log("Invoke " + fn + args.length ? (" with " + args) : "without args")
+        log("Invoke " + fn + chalk.gray((args.length ? (" with " + chalk.yellow(args)) : " without args")))
         // log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
         // debug("with block: " + withBlock)
         // debug("source: " + fn.source)

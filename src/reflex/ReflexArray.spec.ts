@@ -105,6 +105,8 @@ describe('Array', () => {
                 expect(()=>evaluate("[1,2,4,8,16].inject plus")).toThrow()
                 expect(()=>evaluate("[1,2,4,8,16].inject 'add'")).toThrow()
             })
+
+            test.todo('better failures for missing call/send refs')
         })
 
         describe('split', () => {
