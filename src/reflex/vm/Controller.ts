@@ -159,6 +159,13 @@ export class Controller {
         if (top instanceof ReflexFunction) {
             debug("about to invoke reflex fn " + top + " (with block? " + withBlock +")")
             debug("arity is " + arity + ", actual arg len: " + args.length)
+            debug("args: " + args)
+            // let blockArg = args.length === 0 ? [] : (withBlock || top.blockParamName ? [args.pop()] : []) //args[args.length - 1]]);
+            // let concreteArgs = [
+            //     ...args.slice(0, args.length).reverse(),
+            //     ...(blockArg as ReflexObject[])
+            // ]
+            // debug("concrete args: " + concreteArgs)
             this.invokeReflex(top, args, withBlock || !!top.blockParamName, ensureReturns);
         } else if (top instanceof WrappedFunction) {
             if (top.boundSelf) {
@@ -322,10 +329,11 @@ export class Controller {
 private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensureReturns?: ReflexObject) {
         log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
         debug("source: " + fn.source)
-        debug("looking for label: " + fn.label)
+        debug("args: " + args)
+        // debug("looking for label: " + fn.label)
         if (!fn?.name?.match(/_setup/)) { debugger; }
         // let locals: Store = {};
-        let fnArgs = Object.fromEntries(zip(fn.params, args))
+        let fnArgs = Object.fromEntries(zip(fn.params, args)) //.reverse()))
         if (withBlock) {
             if (args.length && args[args.length - 1] instanceof ReflexFunction) {
                 // log("Method " + fn.name + " (called in " + frame.currentMethod?.name + ") expected a block (?) -- picking from args")

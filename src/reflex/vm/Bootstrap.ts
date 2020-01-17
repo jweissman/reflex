@@ -168,6 +168,9 @@ stringMethods.set("length", new WrappedFunction("String.length", (machine: Machi
 stringMethods.set("toArray", new WrappedFunction("String.toArray", (machine: Machine) =>
   (machine.boundSelf! as ReflexString).value.split('')
 ))
+stringMethods.set("eq", new WrappedFunction("String.eq", (machine: Machine, other: string) =>
+  (machine.boundSelf! as ReflexString).value === other
+))
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>

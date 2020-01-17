@@ -125,6 +125,10 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
+// hmmmmmmmm
+class Iterator {
+}
+
 /**
  * Array
  *
@@ -145,27 +149,25 @@ class Array {
     eachWithIndex(&eachBlock) {
         i = 0;
         while (i <= self.length()-1) {
+            // why are args reversed???
            eachBlock(self.get(i), i);
            i = i + 1
         }
     }
 
-    split(sep) {
-        puts("split " + self + " by " + sep)
+    split(sep, &blk) {
         groups = [];
         fragment = [];
         i = 0;
+        delim = if block_given then elem=>blk(elem) else elem=>sep==elem
         while (i <= self.length()-1) {
             e = self.get(i);
-            puts("is e (" + e + ") == " + sep + "?")
-            if (sep == e) {
-                puts("yes!")
+            if (delim(e)) {
                 if (fragment.length() > 0) {
                     groups.push(fragment)
                     fragment=[]
                 }
             } else {
-                puts("nope!")
                 fragment.push(e)
             }
             i=i+1
@@ -187,6 +189,19 @@ class Array {
         }
         res
     }
+
+    first() { self.get(0) }
+    rest() {
+        rst=[]
+        1.upto(self.length()-1) { |i| rst.push(self.get(i)) }
+        rst
+    }
+
+    inject(&injectFn) {
+        res = self.first()
+        self.rest().each { |e| res = injectFn(res, e) }
+        res
+    }
 }
 
 
@@ -205,10 +220,6 @@ class String {
         }
     }
 
-    eq(other) {
-        self.toArray().eachWithIndex { |letter,i| other.toArray().get(i) == letter }
-    }
-
     add(other) { self.concat(other) }
     multiply(other) {
         if (other.isInstanceOf(Number)) {
@@ -216,7 +227,8 @@ class String {
             other.times { res = res + self }
             res
         } else {
-            '' // need a throw!
+            // todo throw!
+            nil
         }
     }
 }

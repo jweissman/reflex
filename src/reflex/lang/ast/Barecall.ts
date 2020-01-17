@@ -10,7 +10,7 @@ export class Barecall extends Tree {
     let op: 'invoke_block' | 'invoke' =
       (!!this.args.block ? 'invoke_block' : 'invoke');
     return [
-      ...this.args.code,
+      ...this.args.reverse().code,
       ...this.fn.code,
       // [ 'bare', this.key ],
       [ op, this.args.length ]

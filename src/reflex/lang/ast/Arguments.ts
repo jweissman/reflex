@@ -88,6 +88,8 @@ export class Arguments extends Tree {
 
   get length() { return this.args.length}
 
+  reverse() { this.args = this.args.reverse(); return this }
+
   inspect(): string {
     let disp = this.args.inspect();
     if (this.block && this.block instanceof Tree) {

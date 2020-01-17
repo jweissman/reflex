@@ -846,21 +846,25 @@ just struck me: ruby has implicit tuples for destructuring, so it wouldn't be to
 --------
 
 (thinking abt checklist for 0.1 --)
-unicode
-binding
-yield
-hash lit
-mirror
-modules
-enumerable
-tuples?
-tree lit
-wand?
-sketch of programming reference/guide?
+[x] unicode
+[ ] basic array/string/number suite
+[ ] hash lit + suite
+[ ] binding
+[ ] mirror
+[ ] throw
+[ ] yield
+[ ] iterators
+[ ] enumerable
+[ ] modules
+[ ] hammer (spec framework) / chisel (spec runner?)
+[ ] tree lit
+[ ] tuples?
+--
+wand (ffi objs)
+sketch of programming reference/guide
 web repl
 --
 files/network/math
 webserver
 docs?
 packages?
-

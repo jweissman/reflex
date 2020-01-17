@@ -1,43 +1,20 @@
-import { evaluate, tracedOutput, out } from "./SpecHelper"
+import { evaluate, out } from "./SpecHelper"
 describe('Reflex', () => {
     describe('structures', () => {
-        describe('String', () => {
-            it('is the class of words', () => {
-                expect(evaluate("'hello'.class")).toEqual('Class(String)')
-                expect(evaluate("'world'.class")).toEqual('Class(String)')
-            })
-
-            describe('instance methods', () => {
-                it('concat', () => {
-                    expect(evaluate("'hello'.concat(' world')")).toEqual("hello world")
-                })
-                it('length', () => {
-                    expect(evaluate("'hello'.length()")).toEqual(5)
-                })
-            })
-
-            describe('operators', () => {
-                it('add is concat', () => {
-                    expect(evaluate("'hello' + ' world'")).toEqual("hello world")
-                })
-
-                it('multiply is replicate', () => {
-                    expect(evaluate("'hello' * 3")).toEqual("hellohellohello")
-                })
-            })
-
-            describe('escapes', () => {
-                it('unicode escapes', () => {
-                    evaluate(`code(value) { "\\u001b[" + value + "m" }`)
-                    expect(evaluate("code('123')")).toEqual("\u001b[123m")
-                    expect(evaluate("code('31')+'town'+code('0')")).toEqual("\u001b[31mtown\u001b[0m");
-                })
-            })
-        })
+       test.todo("hash") 
+       test.todo("tree") 
+       test.todo("graph") 
     })
 
     describe("syntax", () => {
         describe('core', () => {
+            describe("calls", () => {
+                it('multiple args', () => {
+                    evaluate('s=(a,b)=>puts "a="+a+",b="+b')
+                    evaluate("s 100, 250")
+                    expect(out()).toEqual("a=100,b=250")
+                })
+            })
             describe("blocks", () => {
                 it('simple blocks', () => {
                     evaluate('x=0')
@@ -72,6 +49,13 @@ describe('Reflex', () => {
                     evaluate('x=0')
                     evaluate('each { |i| x=x+i }')
                     expect(evaluate('x')).toEqual(6)
+                })
+
+                it('blocks with multiple args', () => {
+                    evaluate('fn=(&b)=>b 1,2,3')
+                    evaluate('say=(a,b,c)=>puts "a="+a+",b="+b+",c="+c')
+                    evaluate('fn say')
+                    expect(out()).toEqual("a=1,b=2,c=3")
                 })
 
                 it('modifies locals', () => {
@@ -621,7 +605,10 @@ describe('Reflex', () => {
         expect(out()).toEqual("\u001b[33mhi there!\u001b[0m")
         expect(evaluate("puts paint.red('town')")).toEqual(null)
         expect(out()).toEqual("\u001b[31mtown\u001b[0m")
-        //expect(()=>evaluate("using 'examples/poem'")).not.toThrow()
+    })
+
+    xit('poetry', () => {
+        expect(()=>evaluate("using 'examples/poem'")).not.toThrow()
     })
 
     xit('self-spec', () => {

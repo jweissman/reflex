@@ -100,7 +100,7 @@ export default class Machine {
 
     halt() { this.halted = true; }
     halted = false;
-    delaySecs: number = Reflex.config.delay
+    // delaySecs: number = Reflex.config.delay
     executeLoop() {
         this.halted = false;
         while (!this.halted) {

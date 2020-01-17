@@ -17,7 +17,7 @@ export function trace(message: string, instruction: Instruction, frames: Frame[]
     }
 
     let msg = [
-        ...(message ? [chalk.yellow(message)] : []),
+        // ...(message ? [chalk.yellow(message)] : []),
         ...(stack.length && stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
         ...(method !== lastMethod ? [(chalk.gray("current method: ") + method)] : []),
         prettyInstruct(instruction),

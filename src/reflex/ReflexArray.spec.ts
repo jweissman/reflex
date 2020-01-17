@@ -67,10 +67,44 @@ describe('Array', () => {
             })
         })
 
+        describe('eachWithIndex', () => {
+            it('runs on empty', () => {
+                expect(()=>evaluate("[].eachWithIndex{}")).not.toThrow()
+            })
+            it('runs on one element', () => {
+                expect(()=>evaluate("[1].eachWithIndex{}")).not.toThrow()
+            })
+            it('iterates over list items', () => {
+                evaluate('a=Array.new(10,20,30,40)')
+                evaluate('x=0')
+                evaluate('y=0')
+                evaluate("a.eachWithIndex { |v,i| x = x + v; y = y + i }")
+                expect(evaluate('x')).toEqual(10+20+30+40)
+                expect(evaluate('y')).toEqual(0+1+2+3)
+            })
+        })
+
         describe('map', () => {
             it('applies fn to each element', () => {
                 expect(evaluate("[1,2,3,4,5].map{|v|v*2}")).toEqual([2,4,6,8,10])
                 expect(evaluate("[1,2,4,8,16].map(v=>v*2)")).toEqual([2,4,8,16,32])
+            })
+        })
+
+        describe('reduce', () => {
+            it('injects fn between elements', () => {
+                expect(evaluate("[1,2,3,4,5].inject { |a,b| a+b }")).toEqual(1+2+3+4+5)
+                expect(evaluate("[1,2,4,8,16].inject((a,b)=>a+b)")).toEqual(1+2+4+8+16)
+                // expect(evaluate("[1,2,4,8,16].inject &'add'")).toEqual([2,4,8,16,32])
+            })
+        })
+
+        describe('split', () => {
+            it('decomposes an array', () => {
+                expect(evaluate("[1,2,3,4,5].split 3")).toEqual([[1,2],[4,5]])
+            })
+            it('decomposes an array with a block', () => {
+                expect(evaluate("[1,2,3,4,5].split { |x| x%2==0 }")).toEqual([[1],[3],[5]])
             })
         })
     })
