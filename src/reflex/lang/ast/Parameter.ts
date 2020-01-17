@@ -8,6 +8,18 @@ export class Parameter extends Tree {
     return this.reference ? `&${this.name}` : this.name;
   }
   get code(): Code {
-    return [['bare', this.name]];
+    if (this.reference) {
+      return [
+        // do we send call to it???
+        // i.e. just get a ref to its call
+        ['bare', this.name],
+        // ['push', 'call'],
+        ['ref', this.name],
+      // ['bare', this.name]
+        // ['invoke', 0],
+      ];
+    } else {
+      return [['bare', this.name]];
+    }
   }
 }

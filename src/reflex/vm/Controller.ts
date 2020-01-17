@@ -1,5 +1,5 @@
 import util from 'util';
-import { Value } from './instruction/Value';
+import { Value, Reference } from './instruction/Value';
 import Machine from './Machine';
 import { Instruction, indexForLabel, Code } from './instruction/Instruction';
 import { Stone } from './instruction/Stone';
@@ -12,7 +12,7 @@ import ReflexClass from './types/ReflexClass';
 import Tree from '../lang/ast/Tree';
 import { hasLocal } from './instruction/hasLocal';
 import { getLocal } from './instruction/getLocal';
-import { Frame } from './Frame';
+import { Frame, Store } from './Frame';
 import { findFrameWithLocal } from './instruction/findFrameWithLocal';
 import assertNever from 'assert-never';
 import { Defun } from '../lang/ast/Defun';
@@ -21,6 +21,7 @@ import { Parameter } from '../lang/ast/Parameter';
 import { zip } from './util/zip';
 import { makeReflexObject } from './types/makeReflexObject';
 import { Converter } from './Converter';
+import chalk from 'chalk';
 
 export class Controller {
     private converter: Converter = new Converter(this);
@@ -87,6 +88,12 @@ export class Controller {
                     this.call()
                 }
                 break;
+            case 'ref':
+                let obj = this.stack[this.stack.length - 1];
+                let ref = new Reference(value as string, obj);
+                this.pop();
+                this.push(ref);
+                break;
             case 'send':
                 let val: string = value as string;
                 let result = this.frame.self.send(val);
@@ -142,25 +149,58 @@ export class Controller {
     ) {
         let top = this.stack[this.stack.length - 1];
         this.pop();
-        log("Invoking " + top + "..."); 
-        debug("  with arity: " + arity);
-        debug("  with block? " + withBlock)
-        let args = [];
+        debug("Call " + chalk.green(top))
+        // log("Invoking " + top + "..."); 
+        // debug("  with arity: " + arity);
+        // debug("  with block? " + withBlock)
+        let args: Value[] = [];
+        let foundBlock = false;
+        let block;
         for (let i = 0; i < arity; i++) {
             let newTop = this.stack[this.stack.length - 1];
-            args.push(newTop);
+            if (newTop instanceof Reference) {
+                if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top)}
+                foundBlock = true;
+                block = newTop;
+            } else {
+                args.push(newTop);
+            }
             this.pop();
         }
-        if (withBlock) {
-            debug("block provided, popping stack and pushing to args...")
+        if (foundBlock) {
+            args.push((block as Reference))
+            withBlock = true;
+        }
+        // let foundBlock = false;
+        // if (args.find(arg => arg instanceof Reference)) {
+        //     debug("reference provided, pushing to args...")
+        //     let ref = args.find(arg => arg instanceof Reference) as Reference;
+        //     args.filter(arg => !!(arg instanceof Reference))
+        //     args.push(ref.item); //this.stack[this.stack.length - 1])
+        //     withBlock = true;
+        //     foundBlock = true;
+        // }
+        if (withBlock && !foundBlock) {
+            // debug("block given but not as arg reference, popping stack and pushing to args...")
             args.push(this.stack[this.stack.length - 1])
             this.pop()
         }
         if (top instanceof ReflexFunction) {
-            debug("about to invoke reflex fn " + top + " (with block? " + withBlock +")")
-            debug("arity is " + arity + ", actual arg len: " + args.length)
-            debug("args: " + args)
-            this.invokeReflex(top, args, withBlock || !!top.blockParamName, ensureReturns);
+            // debug("about to invoke reflex fn " + top + " (with block? " + withBlock +")")
+            // debug("arity is " + arity + ", actual arg len: " + args.length)
+            // debug("args: " + args)
+            // if (!!top.blockParamName) {
+            //     if (!withBlock && args.find(arg => arg instanceof Reference)) {
+            //         log("WE HAVE A BLOCK PARAM on FN...")
+            //         log("...and A REFERNCE to provide it")
+            //         let ref = args.find(arg => arg instanceof Reference) as Reference;
+            //         withBlock = true;
+            //         args.filter(arg => !!(arg instanceof Reference))
+            //         args.push(ref.item); //this.stack[this.stack.length - 1])
+            //     }
+            // }
+            this.invokeReflex(top, args as Value[], withBlock, ensureReturns)
+                //  || !!top.blockParamName, ensureReturns);
         } else if (top instanceof WrappedFunction) {
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
@@ -181,7 +221,7 @@ export class Controller {
                 this.machine.unbindSelf()
             }
         } else if (top instanceof ReflexObject) {
-            log("FALLBACK TO CALL OBJ...")
+            // log("FALLBACK TO CALL OBJ...")
             let call = top.send('call');
             args.reverse().forEach(arg => this.push(arg))
             if (call instanceof WrappedFunction) { call.bind(top) }
@@ -216,14 +256,14 @@ export class Controller {
 
     private enableMarkSweep: boolean = true
     protected mark(value: string) {
-        log("WOULD MARK FOR " + value)
+        // log("WOULD MARK FOR " + value)
         if (this.enableMarkSweep) {
             this.push(new Stone(value));
         }
     }
 
     protected sweep(value: Value) {
-        log("WOULD SWEEP FOR " + value)
+        // log("WOULD SWEEP FOR " + value)
         if (this.enableMarkSweep) {
             while (!this.stackIsEmpty()) {
                 let top = this.stack[this.stack.length - 1];
@@ -271,7 +311,7 @@ export class Controller {
         }
 
         if (retValue !== null) {
-            log("RET -- returning: " + retValue)
+            debug("Returning: " + chalk.blue(retValue))
             this.push(retValue);
         } else {
             throw new Error("No ret value at " + frame.currentMethod)
@@ -320,23 +360,35 @@ export class Controller {
         }
     }
 
-private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensureReturns?: ReflexObject) {
-        log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
-        debug("source: " + fn.source)
-        debug("args: " + args)
+    private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensureReturns?: ReflexObject) {
+        log("Invoke " + fn + args.length ? (" with " + args) : "without args")
+        // log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
+        // debug("with block: " + withBlock)
+        // debug("source: " + fn.source)
+        // debug("args: " + args)
         // debug("looking for label: " + fn.label)
         if (!fn?.name?.match(/_setup/)) { debugger; }
         // let locals: Store = {};
-        let fnArgs = Object.fromEntries(zip(fn.params, args)) //.reverse()))
+        let fnArgs: Store = {}
+        let foundBlock = false;
         if (withBlock) {
             if (args.length && args[args.length - 1]) { //} instanceof ReflexFunction) {
                 // log("Method " + fn.name + " (called in " + frame.currentMethod?.name + ") expected a block (?) -- picking from args")
-                let block = args[args.length - 1] as ReflexFunction
+                let block = args[args.length - 1] //as ReflexFunction
                 args.pop()
-                if (fn.blockParamName) {
-                    log("Assign BLOCK " + block.source + " to " + fn.blockParamName)
+                if (fn.blockParamName && block !== undefined) {
+                    if (block instanceof ReflexFunction) {
+                        log("Assign BLOCK " + block.source + " to " + fn.blockParamName)
+                    } else if (block instanceof ReflexObject) {
+                        log("Assign OBJECT " + block + " to " + fn.blockParamName)
+                        // block = block.send('call')
+                        // if (block !== undefined) {}
+                    } else {
+                        throw new Error("Expected block or object, got " + block)
+                    }
                     fnArgs[fn.blockParamName] = block;
                     fnArgs['block_given'] = getLocal('true', this.frames);
+                    foundBlock = true;
                 } else {
                     throw new Error("Given block arg but no explicit block param")
                 }
@@ -344,12 +396,16 @@ private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensu
                 log("Method " + fn.name + " (called in " + this.frame.currentMethod?.name + ") did not get block...")
                 // throw new Error("Method " + fn.name + " expected a block")
                 // fnArgs['block_given'] = false;
-                    fnArgs['block_given'] = getLocal('false', this.frames);
             }
         }
-        debug("args: " + util.inspect(fnArgs));
+
+        fnArgs = {...fnArgs, ...Object.fromEntries(zip(fn.params, args))} //.reverse()))
+        if (!foundBlock && hasLocal('false', this.frames)) {
+            fnArgs['block_given'] = getLocal('false', this.frames);
+        }
+        // debug("args: " + (fnArgs));
         let self = fn.frame.self ? fn.frame.self.within(this.frame.self) : this.frame.self;
-        debug("self: " + self);
+        // debug("self: " + self);
         // this.frames.push(fn.frame);
         this.frames.push({
             ip: indexForLabel(this.code, fn.label),

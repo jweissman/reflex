@@ -54,7 +54,7 @@ describe('Reflex', () => {
                 it('blocks with multiple args', () => {
                     evaluate('fn=(&b)=>b 1,2,3')
                     evaluate('say=(a,b,c)=>puts "a="+a+",b="+b+",c="+c')
-                    evaluate('fn say')
+                    evaluate('fn &say')
                     expect(out()).toEqual("a=1,b=2,c=3")
                 })
 

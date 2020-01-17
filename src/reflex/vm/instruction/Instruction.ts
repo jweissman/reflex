@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import ReflexObject from "../types/ReflexObject"
 import Tree from "../../lang/ast/Tree"
 import { Value } from './Value';
-import { log } from '../util/log';
+import { log, debug } from '../util/log';
 export type Op
   = 'push'
   | 'pop'
@@ -16,6 +16,7 @@ export type Op
   | 'jump' // unconditional
   | 'jump_if' // ie jump to label if top is truthy
   | 'call' // call second with top
+  | 'ref' // create a ref for calling top
   | 'ret'
   | 'halt'
   | 'send' // send message to self
@@ -57,7 +58,7 @@ export const indexForLabel = (code: Code, label: string) => {
     let step = labelStep(code, label) 
     if (step) {
         let lineNumber = code.indexOf(step)
-        log("FOUND " + label + " AT " + lineNumber)
+        debug("FOUND " + label + " AT " + lineNumber)
         return lineNumber
     } else {
         throw new Error("no such label found: " + label)

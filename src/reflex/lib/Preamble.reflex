@@ -77,7 +77,7 @@ class Number {
     one() { self == 1 }
     positive() { self.gt(0) }
     true() { self.zero().negate() }
-    call(other) { other == self }
+    // call(other) { other == self }
     divide(other) {
         if (other.zero()) {
             if (self.zero()) {
@@ -160,7 +160,7 @@ class Array {
         groups = [];
         fragment = [];
         i = 0;
-        delim = if block_given then elem=>blk(elem) else elem=>sep==elem
+        delim = if block_given then blk else sep.eq 
         while (i <= self.length()-1) {
             e = self.get(i);
             if (delim(e)) {
@@ -221,7 +221,7 @@ class String {
         }
     }
 
-    call(a,b) { a.send(self, b)}
+    call(a,b) { a.send(self, b) }
     add(other) { self.concat(other) }
     multiply(other) {
         if (other.isInstanceOf(Number)) {

@@ -87,17 +87,23 @@ describe('Array', () => {
         describe('map', () => {
             it('applies fn to each element', () => {
                 expect(evaluate("[1,2,3,4,5].map{|v|v*2}")).toEqual([2,4,6,8,10])
-                expect(evaluate("[1,2,4,8,16].map(v=>v*2)")).toEqual([2,4,8,16,32])
+                expect(evaluate("[1,2,4,8,16].map(&(v=>v*2))")).toEqual([2,4,8,16,32])
             })
         })
 
         describe('reduce', () => {
             it('injects fn between elements', () => {
                 expect(evaluate("[1,2,3,4,5].inject { |a,b| a+b }")).toEqual(1+2+3+4+5)
-                expect(evaluate("[1,2,4,8,16].inject((a,b)=>a+b)")).toEqual(1+2+4+8+16)
-
+                expect(evaluate("[1,2,4,8,16].inject(&((a,b)=>a+b))")).toEqual(1+2+4+8+16)
+            })
+            it('injects by fn and name ref', () => {
+                // really more about block semantics, could have tests there...?
+                // this is the first place it really 'matters' though
+                evaluate('plus(a,b) {a+b}')
+                expect(evaluate("[1,2,4,8,16].inject &plus")).toEqual(1+2+4+8+16)
                 expect(evaluate("[1,2,4,8,16].inject &'add'")).toEqual(1+2+4+8+16)
-                // expect(()=>evaluate("[1,2,4,8,16].inject 'add'")).toThrow()
+                expect(()=>evaluate("[1,2,4,8,16].inject plus")).toThrow()
+                expect(()=>evaluate("[1,2,4,8,16].inject 'add'")).toThrow()
             })
         })
 

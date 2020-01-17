@@ -13,17 +13,17 @@ export function trace(message: string, instruction: Instruction, frames: Frame[]
     let stack = frame.stack
     if (frames.length > 1) {
         // construct frame list
-        method = frames.flatMap(frame => frame.currentMethod?.name).reverse().join(" called by ")
+        method = frames.flatMap(frame => frame.currentMethod?.name).reverse().join(chalk.gray(" called by "))
     }
 
-    let msg = [
+    let msg = //[
         // ...(message ? [chalk.yellow(message)] : []),
-        ...(stack.length && stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
-        ...(method !== lastMethod ? [(chalk.gray("current method: ") + method)] : []),
-        prettyInstruct(instruction),
+        // ...(stack.length && stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
+        method !== lastMethod ? (chalk.gray("current method: ") + method) : '';
+        // prettyInstruct(instruction),
         // chalk.gray("self: ") + frame.self.inspect(),
-    ].join("\n");
+    // ].join("\n");
     lastStack = [...stack];
     lastMethod = method;
-    log(msg);
+    if (msg) log(msg);
 }

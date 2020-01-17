@@ -868,3 +868,16 @@ files/network/math
 webserver
 docs?
 packages?
+
+------
+
+we need a full model/class for the 'reference' to a function, so we can differentiate
+(between having a block arg, having one passed as a reference, and not having one at all)
+
+---------------------
+
+difference for xml lit could be tree diff!!
+(a 'tree delta' object consisting of paths/cuts/additions??)
+
+i was thinking that multiply is replicate, that should work for arrays/strings
+but maybe it works for hashes, in that it gives you a graph with a number of connections (the number of connections could be an analogue for 'weight' maybe??) -- you could get a doubly-connected graph with `(hash * hash.transpose)`
