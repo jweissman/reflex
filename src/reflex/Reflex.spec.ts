@@ -13,6 +13,12 @@ describe('Reflex', () => {
            it('shorthand', () => {
                expect(evaluate("0..100")).toEqual("0..100")
            })
+
+           describe('step', () => {
+               it('sets increment', () => {
+                   expect(evaluate("0..10.step(3).toArray()")).toEqual([0,3,6,9])
+               })
+           })
        })
 
        test.todo("hash") 

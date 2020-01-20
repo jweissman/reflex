@@ -239,14 +239,15 @@ class String {
  * The class of bounded natural intervals.
  */
 class Range {
-    init(start,stop) { self.start=start; self.stop=stop }
+    init(start,stop) { self.start=start; self.stop=stop; self.inc=1 }
     inspect() { start + ".." + stop }
+    step(i) { self.inc=i; self }
     toArray() {
         arr = []
         i = self.start;
         while (i <= self.stop) {
            arr.push(i)
-           i = i + 1
+           i = i + self.inc
         }
         arr
     }
