@@ -28,6 +28,8 @@ export default class Reflex {
         this.machine.reset(); // = [];
         if (castResult) {
             return this.convertedResult;
+        } else {
+            return this.lastResult;
         }
     }
 
