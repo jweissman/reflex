@@ -1,6 +1,20 @@
 import { evaluate, out } from "./SpecHelper"
 describe('Reflex', () => {
     describe('structures', () => {
+       describe('range', () => {
+           it('is the class of intervals', () => {
+               expect(evaluate("Range")).toEqual('Class(Range)')
+           })
+
+           it('is the class of intervals', () => {
+               expect(evaluate("Range.new(0,10)")).toEqual('0..10')
+           })
+
+           it('shorthand', () => {
+               expect(evaluate("0..100")).toEqual("0..100")
+           })
+       })
+
        test.todo("hash") 
        test.todo("tree") 
        test.todo("graph") 

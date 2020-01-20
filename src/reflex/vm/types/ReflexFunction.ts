@@ -32,9 +32,11 @@ export class WrappedFunction extends ReflexObject {
 
     constructor(public name: string, public impl: Function, public convertArgs: boolean = true) {
         super();
+        this.set("class", ReflexFunction.klass)
     }
 
     get displayName() { return this.name; } //`Function(${this.name})`; }
+    inspect() { return this.displayName; }
 
     get isClassMethod() {
         if (this.name.indexOf('.') === -1) {

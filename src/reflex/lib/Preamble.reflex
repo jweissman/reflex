@@ -221,7 +221,6 @@ class String {
         }
     }
 
-    call(a,b) { a.send(self, b) }
     add(other) { self.concat(other) }
     multiply(other) {
         if (other.isInstanceOf(Number)) {
@@ -241,6 +240,7 @@ class String {
  */
 class Range {
     init(start,stop) { self.start=start; self.stop=stop }
+    inspect() { start + ".." + stop }
     toArray() {
         arr = []
         i = self.start;

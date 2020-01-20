@@ -67,9 +67,10 @@ Reflex {
        
      CoreExpr =
        | ParenExpr
-       | NumberLit
        | StringLit
        | ArrayLit
+       | RangeLit
+       | NumberLit
        | Message CarefulArguments -- funcall
        | Bareword
 
@@ -223,6 +224,9 @@ Reflex {
 
     ArrayLit
       = "[" ListOf<Expr, ","> "]"
+
+    RangeLit
+      = CoreExpr ".." CoreExpr
     
     NumberLit
       = digit+ "." digit+ -- float

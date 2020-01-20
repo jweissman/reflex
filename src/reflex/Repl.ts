@@ -17,7 +17,7 @@ export class Repl {
             eval: (input: string, _ctx: any, _filename: any, cb: any) => {
                 let out = '(nothing)';
                 try {
-                    out = (interpreter.evaluate(input));
+                    out = (interpreter.evaluate(input, true));
                     if (out === undefined) {
                         out = '(no-result)';
                     }

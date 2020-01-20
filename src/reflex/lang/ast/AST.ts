@@ -43,6 +43,21 @@ class ArrayLiteral extends Tree {
   }
 }
 
+class RangeLiteral extends Tree {
+  constructor(public start: Tree, public stop: Tree) { super();}
+  inspect(): string { return this.start + ".." + this.stop; }
+  get code(): Code {
+    return [
+      ...this.stop.code,
+      ...this.start.code,
+      ['bare', 'Range'],
+      ['push', 'new'],
+      ['call', null],
+      ['invoke', 2 ], //this.seq.items.length],
+    ]
+  }
+}
+
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Program: (_pre: Node, list: Node, _post: Node) =>
     new Program(list.tree),
@@ -164,9 +179,11 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   
   sourceCharacter: (char: Node) => char.sourceString,
 
+  RangeLit: (start: Node, _dots: Node, stop: Node) => new RangeLiteral(start.tree, stop.tree),
   NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(
     Number(`${whole.sourceString}.${fraction.sourceString}`), true),
+
   ArrayLit: (_lq: Node, seq: Node, _rq: Node) => new ArrayLiteral(seq.tree),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),
   EmptyListOf: () => new Sequence([]),

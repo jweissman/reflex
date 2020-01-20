@@ -413,7 +413,7 @@ export class Controller {
         }
     }
 
-    private dispatch(message: string, object: ReflexObject) { //}, doRet?: boolean) {
+    dispatch(message: string, object: ReflexObject) { //}, doRet?: boolean) {
         this.push(object);
         this.push(message);
         this.call();

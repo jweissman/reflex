@@ -19,7 +19,7 @@ describe('String', () => {
             expect(evaluate("'world'.eq('world')")).toEqual(true)
         })
 
-        it('call', () => {
+        xit('call', () => {
             expect(evaluate("'add'.call(1,2)")).toEqual(3)
         })
 

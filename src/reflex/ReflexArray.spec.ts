@@ -101,7 +101,7 @@ describe('Array', () => {
                 // this is the first place it really 'matters' though
                 evaluate('plus(a,b) {a+b}')
                 expect(evaluate("[1,2,4,8,16].inject &plus")).toEqual(1+2+4+8+16)
-                expect(evaluate("[1,2,4,8,16].inject &'add'")).toEqual(1+2+4+8+16)
+                expect(()=>evaluate("[1,2,4,8,16].inject &'add'")).toThrow() //toEqual(1+2+4+8+16)
                 expect(()=>evaluate("[1,2,4,8,16].inject plus")).toThrow()
                 expect(()=>evaluate("[1,2,4,8,16].inject 'add'")).toThrow()
             })

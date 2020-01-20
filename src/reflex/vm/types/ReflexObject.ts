@@ -26,7 +26,7 @@ export default class ReflexObject {
     get klass(): ReflexClass { return this.get('class') as ReflexClass }
     get superclass(): ReflexClass { return this.klass.get('super') as ReflexClass }
     get eigenclass(): ReflexClass { return this.get('meta') as ReflexClass }
-    get ancestors(): ReflexClass[] { return [ this.klass, ...this.klass.ancestors] }
+    get ancestors(): ReflexClass[] { return this.klass ? [ this.klass, ...this.klass.ancestors] : [] }
     get super() { return new SuperFacade(this) }
     get className(): string {return this.klass ? (this.klass as ReflexObject & {name: string}).name : 'Unknown'}
     get displayName(): string { return this.className }
@@ -39,8 +39,8 @@ export default class ReflexObject {
 
     get messageSources() {
         let eigen = this.eigenclass && this.eigenclass.get("instance_methods")
-        let shared = this.klass.get("instance_methods")
-        let supershared = this.ancestors.map(a => a.get("instance_methods"))
+        let shared = this.klass && this.klass.get("instance_methods")
+        let supershared = this.ancestors.flatMap(a => a ? [a.get("instance_methods")] : [])
         return [ eigen, shared, ...supershared ]
     }
 
@@ -50,7 +50,7 @@ export default class ReflexObject {
         else if (this.isClass === false && message === 'super') { return this.super }
         else if (this.has(message)) { return this.get(message) }
         else {
-            let responder = [this, ...this.messageSources].find(source => source.has(message))
+            let responder = [this, ...this.messageSources].find(source => source && source.has(message))
             if (responder) {
                 let response = responder.get(message)
                 if (response.wrapped) {
