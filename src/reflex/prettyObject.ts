@@ -18,6 +18,15 @@ export function prettyObject(object: ReflexObject): string {
     else if (object.className === 'Range') {
         return chalk.magenta(object.get('start')) + chalk.gray("..") + chalk.magenta(object.get('stop'));
     }
+    else if (object.className === 'Truth') {
+        return chalk.yellow('true')
+    }
+    else if (object.className === 'Falsity') {
+        return chalk.yellow('false')
+    }
+    else if (object.className === 'Nihil') {
+        return chalk.gray('nil')
+    }
     else if (object instanceof ReflexArray) {
         return chalk.gray('[') + object.items.flatMap(item => prettyObject(item)).join(chalk.gray(', ')) + chalk.gray(']');
     }

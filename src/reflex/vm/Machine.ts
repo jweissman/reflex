@@ -48,6 +48,7 @@ export default class Machine {
         this.reflex.evaluate(
             this.loader.getContents(given)
         )
+        this.stack.push(this.controller.localVarGet('true'))
     }
 
     sideload(newCode: Code) {

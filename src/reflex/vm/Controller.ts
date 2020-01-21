@@ -128,6 +128,14 @@ export class Controller {
         return;
     }
 
+    localVarGet(value: string): ReflexObject {
+        if (hasLocal(value as string, this.frames)) {
+            return (getLocal(value as string, this.frames))
+        } else {
+            throw new Error("no such local variable '" + value as string + "'")
+        }
+    }
+
     localVarSet(key: string) {
         let top = this.stack[this.stack.length - 1];
         // this.pop()
@@ -156,7 +164,7 @@ export class Controller {
         for (let i = 0; i < arity; i++) {
             let newTop = this.stack[this.stack.length - 1];
             if (newTop instanceof Reference) {
-                if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top)}
+                if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top) }
                 foundBlock = true;
                 block = newTop;
             } else {
