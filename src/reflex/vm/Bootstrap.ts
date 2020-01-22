@@ -11,6 +11,7 @@ import { Boots } from "./Boots";
 import { ReflexArray } from "./types/ReflexArray";
 import { ReflexString } from "./types/ReflexString";
 import { log } from "./util/log";
+import { prettyObject } from "../prettyObject";
 
 let boots: Boots = new Boots();
 boots.lace();
@@ -121,6 +122,27 @@ kernelMethods.set("import", new WrappedFunction(
   `Kernel.import`,
   (machine: Machine, filename: string) => machine.import(filename))
 )
+kernelMethods.set("include", new WrappedFunction(
+  `Kernel.include`,
+  (_machine: Machine, theModule: ReflexObject, theSelf: ReflexObject) => {
+    console.log("WOULD INCLUDE MODULE: " + prettyObject(theModule))
+    if (theModule instanceof ReflexClass) {
+      console.log("MODULE IS CLASS!");
+      let self = theSelf as ReflexClass; //machine.boundSelf! as ReflexClass
+      console.log("would copy methods to " + prettyObject(self));
+      // throw new Error("kernel.include not impl")
+      let selfMethods = self.get("instance_methods")
+      let moduleMethods = theModule.get("instance_methods")
+      Object.keys(moduleMethods.members).forEach(memberKey => {
+        console.log("COPY MODULE METHOD " + memberKey + "TO INSTANCE METHOD ON " + prettyObject(self))
+        selfMethods.set(memberKey, moduleMethods.get(memberKey))
+      })
+        console.log("DONE")
+      // moduleMethods.forEach(moduleMethod => selfMethods.push(moduleMethod))
+    }
+    return theModule;
+  }
+));
 kernelMethods.set("throw", new WrappedFunction(
   `Kernel.throw`,
   (machine: Machine, err: string) => machine.throw(err))

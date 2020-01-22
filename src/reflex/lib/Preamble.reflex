@@ -20,6 +20,7 @@ class Class {
     isDescendantOf(other) { other.isAncestorOf(self) }
     isKindOf(other) { other == self || other.isAncestorOf(self) }
     auto(&b) { meta.instanceEval(b) }
+    include(mod) { mod.inject(self) }
 }
 
 /**
@@ -119,9 +120,6 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
-class Module {
-}
-
 
 
 class Enumerator {
@@ -175,6 +173,10 @@ class Enumerator {
     }
 }
 
+class Module {
+    inject(target) { Kernel.include(self, target) }
+}
+
 module Enumerable {
     map(&mapFn) { self.each().map(&mapFn) }
 }
@@ -185,6 +187,8 @@ module Enumerable {
  * The class of object-valued index spaces.
  */
 class Array {
+    include Enumerable
+
     push(it) {
         self.set(self.length(), it)
         self
@@ -242,17 +246,17 @@ class Array {
         groups
     }
 
-    map(&mapFn) {
-        self.each().map(&mapFn)
-        //res = Array.new()
-        //index=0
-        //self.each { |e|
-        //    mapped = mapFn(e)
-        //    res.set(index, mapped);
-        //    index=index+1
-        //}
-        //res
-    }
+    //map(&mapFn) {
+    //    self.each().map(&mapFn)
+    //    //res = Array.new()
+    //    //index=0
+    //    //self.each { |e|
+    //    //    mapped = mapFn(e)
+    //    //    res.set(index, mapped);
+    //    //    index=index+1
+    //    //}
+    //    //res
+    //}
 
     first() { self.get(0) }
     rest() {
@@ -352,7 +356,7 @@ NegativeInfinity = NegativeApeiron.new()
 using = Kernel.import
 prints = Kernel.println
 fail = Kernel.throw
-include = Kernel.include
+//include = Kernel.include
 noop = ->{}
 
 // old ways die hard

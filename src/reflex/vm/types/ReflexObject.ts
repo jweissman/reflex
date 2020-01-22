@@ -10,10 +10,10 @@ export default class ReflexObject {
     static count: number = 0;
     isClass: boolean = false;
     isFacade: boolean = false;
-    protected members: Store = {}
     wrapped: boolean = false;
     id: number = ReflexObject.count++;
     // name: string;
+    members: Store = {}
 
     has(k: string) { return Object.keys(this.members).includes(k) }
     set(k: string,v: ReflexObject) { this.members[k] = v }
