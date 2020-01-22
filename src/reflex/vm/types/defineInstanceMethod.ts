@@ -12,4 +12,6 @@ export function defineInstanceMethod(klass: ReflexClass, fn: ReflexFunction, nam
     let methods = klass.get("instance_methods") || new ReflexObject();
     methods.set(name, fn);
     klass.set("instance_methods", methods);
+    return fn;
+    // return null;
 }

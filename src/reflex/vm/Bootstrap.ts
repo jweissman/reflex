@@ -103,9 +103,9 @@ let newObjectFunction = new WrappedFunction(
 // console.log("NEW OBJ FN", newObjectFunction.inspect())
 classMethods.set("new", newObjectFunction)
 classMethods.set("defineMethod", new WrappedFunction(`Class.defineMethod`,
-  (machine: Machine, name: string, fn: ReflexFunction) => {
+  (machine: Machine, name: string, fn: ReflexFunction) => 
     defineInstanceMethod(machine.boundSelf! as ReflexClass, fn, name)
-  }
+  
 ));
 classMethods.set("defineClassMethod", new WrappedFunction(`Class.defineClassMethod`,
   (machine: Machine, name: string, fn: ReflexFunction) => defineClassMethod(machine.boundSelf! as ReflexClass, fn, name)
@@ -121,13 +121,17 @@ kernelMethods.set("import", new WrappedFunction(
   `Kernel.import`,
   (machine: Machine, filename: string) => machine.import(filename))
 )
-kernelMethods.set("print", new WrappedFunction(`Kernel.print`, (machine: Machine, ...args: any[]) => {
+kernelMethods.set("throw", new WrappedFunction(
+  `Kernel.throw`,
+  (machine: Machine, err: string) => machine.throw(err))
+)
+kernelMethods.set("println", new WrappedFunction(`Kernel.println`, (machine: Machine, ...args: any[]) => {
   machine.tracedOutput.push(args.join(""))
-  // args.forEach(arg => {
-  // process.stdout.write(arg)
-  // })
-  // process.stdout.write("\n")
-  console.log(...args)
+  args.forEach(arg => {
+    process.stdout.write(arg)
+  })
+  process.stdout.write("\n")
+  // console.log(...args)
   return null
 }))
 

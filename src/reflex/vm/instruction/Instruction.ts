@@ -33,7 +33,9 @@ export type Op
   | 'sweep'
 
 export const prettyValue = (v: Value) => {
-  if (v === null) { return ''; }
+  if (v === undefined) { return chalk.bgRed('<undef>');}
+  else if (v instanceof Error) { return chalk.red(v) }
+  else if (v === null) { return ''; }
   else if (typeof v === 'string') { return v; }
   else if (typeof v === 'number') { return String(v); }
   else if (Array.isArray(v)) { return '['+v+']'; }
@@ -43,6 +45,7 @@ export const prettyValue = (v: Value) => {
   else {
     // return 'undefined!!'
     console.trace("pretty value failure: " + v)
+
     throw new Error("Called pretty value on unknown: " + v)
     // return v.toString();
   }

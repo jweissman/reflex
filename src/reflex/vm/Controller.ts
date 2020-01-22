@@ -159,19 +159,25 @@ export class Controller {
     ) {
         let top = this.stack[this.stack.length - 1];
         this.pop();
+        log("INVOKE " + top + " WITH ARITY " + arity + " (stack len is " + this.stack.length + ")");
         let args: Value[] = [];
         let foundBlock = false;
         let block;
         for (let i = 0; i < arity; i++) {
-            let newTop = this.stack[this.stack.length - 1];
-            if (newTop instanceof Reference) {
-                if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top) }
-                foundBlock = true;
-                block = newTop;
+            if (this.stack.length===0) { //newTop === undefined) {
+                log("NO ARG FOR PARAM " + i + ", passing nil...")
+                args.push(getLocal('nil', this.frames))
             } else {
-                args.push(newTop);
+                let newTop = this.stack[this.stack.length - 1];
+                if (newTop instanceof Reference) {
+                    if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top) }
+                    foundBlock = true;
+                    block = newTop;
+                } else {
+                    args.push(newTop);
+                }
+                this.pop();
             }
-            this.pop();
         }
         if (foundBlock) {
             args.push((block as Reference))
@@ -192,7 +198,7 @@ export class Controller {
                 self = (top.boundSelf);
                 debug("Call " + chalk.green(top) + " on " + prettyValue(self) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
             } else {
-                debug("Invoke wrapped fn " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
+                debug("Call " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
             }
             if (!!top.convertArgs) {
                 args = args.map(arg =>
@@ -354,7 +360,7 @@ export class Controller {
         // log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
         // debug("with block: " + withBlock)
         // debug("source: " + fn.source)
-        debug("invoke " + fn + " with args: " + args, this.frames)
+        debug("Call reflex " + fn + " with args: " + args, this.frames)
         // debug("looking for label: " + fn.label)
         if (!fn?.name?.match(/_setup/)) { debugger; }
         // let locals: Store = {};
@@ -387,6 +393,13 @@ export class Controller {
                 // fnArgs['block_given'] = false;
             }
         }
+
+        // fill in nils...
+        // if (fn.params.length > args.length) {
+        //     for (let i = args.length; i < fn.params.length; i++) {
+        //         args.push(getLocal('nil', this.frames))
+        //     }
+        // }
 
         fnArgs = {...fnArgs, ...Object.fromEntries(zip(fn.params, args))} //.reverse()))
         if (!foundBlock && hasLocal('false', this.frames)) {

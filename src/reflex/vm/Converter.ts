@@ -12,6 +12,7 @@ import { ReflexArray } from './types/ReflexArray';
 export class Converter {
     constructor(private ctrl: Controller) { }
     static castReflexToJavascript(object: ReflexObject): any {
+        // if (object === undefined) { return undefined }
         if (object.className === 'Truth') {
             return true;
         }

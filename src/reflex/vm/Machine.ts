@@ -125,6 +125,10 @@ export default class Machine {
         this.frame.ip = newIp;
     }
 
+    throw(err: string) {
+        throw new Error(err) //"Machine#throw -- Method not implemented.");
+    }
+
     get state(): State { return { stack: this.stack, frames: this.frames, machine: this } }
 
     boundSelf: ReflexObject | null = null

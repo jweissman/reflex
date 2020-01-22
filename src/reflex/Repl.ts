@@ -1,4 +1,4 @@
-import { prettyCode } from "./vm/instruction/Instruction";
+import { prettyCode, prettyValue } from "./vm/instruction/Instruction";
 import chalk from 'chalk';
 import Reflex from "./Reflex";
 import ReflexObject from "./vm/types/ReflexObject";
@@ -16,7 +16,7 @@ export class Repl {
 
         const server = repl.start({
             prompt: chalk.gray("> "),
-            writer: prettyObject,
+            writer: prettyValue, //(o) => o instanceof Reflex prettyObject(o),
             eval: (input: string, _ctx: any, _filename: any, cb: any) => {
                 let out = '(nothing)';
                 try {

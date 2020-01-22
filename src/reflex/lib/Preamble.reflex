@@ -8,8 +8,6 @@ class Object {
     nil() { false }
     true() { true }
     false() { Boolean.negate(self.true()) }
-    // kind of weird ??
-    // call(other) { self.eq(other) }
 }
 
 /*
@@ -77,7 +75,6 @@ class Number {
     one() { self == 1 }
     positive() { self.gt(0) }
     true() { self.zero().negate() }
-    // call(other) { other == self }
     divide(other) {
         if (other.zero()) {
             if (self.zero()) {
@@ -102,15 +99,10 @@ class Number {
         }
     }
 
-    upto(stop,&block) { //}, &uptoBlock) {
+    upto(stop,&block) {
         r=Range.new(self, stop)
         r.each(&block) if block_given
         r
-        //i = self;
-        //while (i <= stop) {
-        //   uptoBlock(i);
-        //   i = i + 1
-        //}
     }
 }
 
@@ -250,8 +242,7 @@ class String {
             other.times { res = res + self }
             res
         } else {
-            // todo throw!
-            nil
+            fail "won't multiply string with non-numeric"
         }
     }
 }
@@ -275,7 +266,6 @@ class Range {
     }
     each(&eachBlock) { self.toArray().each(&eachBlock) }
     map(&mapFn) { self.toArray().map(&mapFn) }
-
     call(&block) { self.each(&block) }
 }
 
@@ -287,11 +277,13 @@ Infinity = PositiveApeiron.new()
 NegativeInfinity = NegativeApeiron.new()
 
 using = Kernel.import
+prints = Kernel.println
+fail = Kernel.throw
+noop = ->{}
 
 // old ways die hard
 require = Kernel.import
-noop = ->{}
-puts = Kernel.print
+puts = Kernel.println
 
 // wire up main so it can define instance methods on itself...
 self.defineMethod = meta.defineMethod
