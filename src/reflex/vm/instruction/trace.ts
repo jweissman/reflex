@@ -6,6 +6,7 @@ import { Stack } from '../Stack';
 import { dump } from '../util/dump';
 let lastStack: Stack = [];
 // let lastMethod: string | undefined = '[none]';
+const traceDepth = 3
 
 export function trace(message: string, instruction: Instruction, frames: Frame[]) {//}, stack: Stack) {
     let frame = frames[frames.length - 1]
@@ -33,5 +34,5 @@ export function trace(message: string, instruction: Instruction, frames: Frame[]
     ]//.join("\n");
     lastStack = [...stack];
     // lastMethod = method;
-    if (msg.length) debug(msg.join("\n"), frames);
+    if (msg.length && frames.length < traceDepth) debug(msg.join("\n"), frames);
 }

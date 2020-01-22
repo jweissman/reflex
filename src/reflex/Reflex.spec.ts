@@ -19,6 +19,10 @@ describe('Reflex', () => {
                    expect(evaluate("0..10.step(3).toArray()")).toEqual([0,3,6,9])
                })
            })
+
+           it('enumerates', () => { 
+               expect(evaluate("(1..20).step(3).map { |x| x*x + 2*x + 1 }.collect()")).toEqual([4,25,64,121,196,289,400])
+           })
        })
 
        test.todo("hash") 

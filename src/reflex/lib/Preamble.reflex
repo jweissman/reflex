@@ -21,6 +21,8 @@ class Class {
     isKindOf(other) { other == self || other.isAncestorOf(self) }
     auto(&b) { meta.instanceEval(b) }
     include(mod) { mod.inject(self) }
+    // call(...args) { new(args)
+    // meta.instanceEval { call}
 }
 
 /**
@@ -120,39 +122,68 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
+class Iterator {}
 
-
-class Enumerator {
-    init(enumerable) {
-        self.enumerable = enumerable;
+class ArrayIterator < Iterator {
+    init(arr) {
+        self.array = arr
         self.index = 0;
         self.indicate = false;
         self.exhausted = false;
-        self.mapFn = i=>i
+        // self.mapFn = i=>i
     }
-    map(&fn) {
-        self.mapFn = fn;
-        self
-    }
-    withIndex() {
-        self.indicate = true;
-        self
-    }
+
     advance() {
         self.index = self.index + 1;
-        if (self.index >= self.enumerable.length()) {
+        if (self.index >= self.array.length()) {
             self.exhausted = true;
         }
     }
+
     next() {
         if (!self.exhausted) {
-            val=self.mapFn(self.enumerable.get(self.index))
+            val=self.array.get(self.index)
             self.advance()
             val
         } else {
         //   nil
             fail 'stop iteration'
         }
+    }
+}
+
+id = z=>z
+class Enumerator {
+    init(enumerable) {
+        self.it = ArrayIterator.new(enumerable)
+        // if (source.isA(Enumerable)) {
+        // }
+        //self.enumerable = enumerable;
+        //self.index = 0;
+        self.indicate = false;
+        //self.exhausted = false;
+        self.mapFn = id
+    }
+    map(&fn) {
+       if (self.mapFn == id) {
+          self.mapFn = fn
+       } else {
+           oldFn = self.mapFn
+           self.mapFn = arg => fn(oldFn(arg))
+       }
+       self
+    }
+    withIndex(&b) {
+        self.indicate = true;
+        if (block_given) {
+            self.call(&b)
+        }
+        self
+    }
+
+    each(&b) { if (block_given) { self.call(&b) } else { self } }
+    next() {
+        self.mapFn(self.it.next())
     }
     call(&b) {
         self.tilExhausted(&b)
@@ -162,10 +193,11 @@ class Enumerator {
         self.tilExhausted { |v| arr.push v }
         arr
     }
+    toArray() { self.collect() }
     tilExhausted(&block) {
-        until (self.exhausted) {
+        until (self.it.exhausted) {
             if (self.indicate) {
-                block(self.next(), self.index)
+                block(self.next(), self.it.index)
             } else {
                 block(self.next())
             }
@@ -179,6 +211,25 @@ class Module {
 
 module Enumerable {
     map(&mapFn) { self.each().map(&mapFn) }
+    collect() { self.each().collect() }
+    first() { self.collect().first() }
+    rest() { self.collect().rest() }
+
+    // 'hard eval' def which falls back to toArray
+    each(&b) {
+        if (block_given) { self.toArray().each(&b) }
+        else { self.toArray().each() }
+    }
+
+    eachWithIndex(&b) {
+        it = self.each().withIndex()
+        if (block_given) { it(&b) }
+        it
+    }
+
+    all() { self.collect()}
+
+    join(delim) { self.collect().join(delim) }
 }
 
 /**
@@ -210,18 +261,14 @@ class Array {
         isEq
     }
 
+    toArray() { self }
+
     each(&b) {
         it = Enumerator.new(self)
         if (block_given) { it(&b) }
         it
     }
     
-    eachWithIndex(&b) {
-        it = self.each().withIndex()
-        if (block_given) { it(&b) }
-        it
-    }
-
     split(sep, &blk) {
         groups = [];
         fragment = [];
@@ -245,18 +292,6 @@ class Array {
         }
         groups
     }
-
-    //map(&mapFn) {
-    //    self.each().map(&mapFn)
-    //    //res = Array.new()
-    //    //index=0
-    //    //self.each { |e|
-    //    //    mapped = mapFn(e)
-    //    //    res.set(index, mapped);
-    //    //    index=index+1
-    //    //}
-    //    //res
-    //}
 
     first() { self.get(0) }
     rest() {
@@ -283,13 +318,13 @@ class Array {
     }
 
     join(delim) {
-        d=delim||''
-        sum = (a,b) => { a+d+b }
-        self.inject &sum
+        if (self.length() > 1) {
+          d=delim||''
+          sum = (a,b) => { a+d+b }
+          self.inject &sum
+        } else { self.get(0) }
     }
 }
-
-
 
 
 /**
@@ -298,17 +333,24 @@ class Array {
  * The class of words
  */
 class String {
+    include Enumerable
     split(delim) {
         chars = self.toArray()
         if (delim.nil() || delim == '') {
             chars
         } else {
             groups = chars.split(delim)
-            groups.map { |letters| letters.join() }
+            groups.map { |letters| letters.join() }.collect()
         }
     }
 
     toString() { self }
+    //each(&b) {
+    //    if (block_given) { self.toArray().each(&b) }
+    //    else { self.toArray().each() }
+    //}
+
+    reverse() { self.toArray().reverse().join() }
 
     get(i) { self.toArray().get(i) }
 
@@ -329,6 +371,7 @@ class String {
  * The class of bounded natural intervals.
  */
 class Range {
+    include Enumerable
     init(start,stop) { self.start=start; self.stop=stop; self.inc=1 }
     inspect() { start + ".." + stop }
     step(i) { self.inc=i; self }
@@ -341,8 +384,6 @@ class Range {
         }
         arr
     }
-    each(&eachBlock) { self.toArray().each(&eachBlock) }
-    map(&mapFn) { self.toArray().map(&mapFn) }
     call(&block) { self.each(&block) }
 }
 
