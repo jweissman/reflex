@@ -126,23 +126,26 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
-// hmmmmmmmm
-class Iterator {
-}
-
 /**
  * Array
  *
  * The class of object-valued index spaces.
  */
 class Array {
-    push(it) { self.set(self.length(),it) }
-    add(other) { self.concat(other) }
+    push(it) {
+        self.set(self.length(), it)
+        self
+    }
+
+    add(other) {
+        self.concat(other)
+    }
 
     each(&eachBlock) {
         i = 0;
         while (i <= self.length()-1) {
-           eachBlock(self.get(i));
+            val = self.get(i)
+           eachBlock(val); //self.get(i));
            i = i + 1
         }
     }
@@ -150,7 +153,6 @@ class Array {
     eachWithIndex(&eachBlock) {
         i = 0;
         while (i <= self.length()-1) {
-            // why are args reversed???
            eachBlock(self.get(i), i);
            i = i + 1
         }
@@ -198,10 +200,27 @@ class Array {
         rst
     }
 
-    inject(&injectFn) {
+    reverse() {
+        if (self.length().zero()) { [] }
+        else {
+            self.rest().reverse() + [self.first()]
+        }
+    }
+
+    inject(&fn) {
         res = self.first()
-        self.rest().each { |e| res = injectFn(res, e) }
+        apply = e => {
+            partial = fn(res, e)
+            res = partial
+        }
+        self.rest().each &apply
         res
+    }
+
+    join(delim) {
+        // d=delim||''
+        sum = (a,b) => { a+b }
+        self.inject &sum
     }
 }
 
@@ -214,12 +233,15 @@ class Array {
 class String {
     split(delim) {
         chars = self.toArray()
-        if (delim == '') {
+        if (delim.nil() || delim == '') {
             chars
         } else {
-            chars.split(delim).map { |letters| letters.join() }
+            groups = chars.split(delim)
+            groups.map { |letters| letters.join() }
         }
     }
+
+    get(i) { self.toArray().get(i) }
 
     add(other) { self.concat(other) }
     multiply(other) {
@@ -268,6 +290,7 @@ using = Kernel.import
 
 // old ways die hard
 require = Kernel.import
+noop = ->{}
 puts = Kernel.print
 
 // wire up main so it can define instance methods on itself...

@@ -28,13 +28,14 @@ export class Arguments extends Tree {
       // log("NO BLOCK... CHECKING FOR BLOCK ARG")
       let blockArg = this.args.items.find((arg: Argument) => arg.isReference)
       if (blockArg) {
-        // log("FOUND BLOCK ARG: " + blockArg.inspect())
         this.block = blockArg;
         // log("REMOVING ITEMS FROM ARGS... -- len before: " + this.args.length)
         this.args.items = this.args.items.filter(arg => !arg.isReference)
         // log("REMOVED ITEMS FROM ARGS... -- len after: " + this.args.length)
       }
     }
+
+    this.args = this.args.reverse()
     // if (this.block) {
     //   log("MAKE ARGS W BLOCK! " + this.inspect());
     // } else {
@@ -88,7 +89,9 @@ export class Arguments extends Tree {
 
   get length() { return this.args.length}
 
-  reverse() { this.args = this.args.reverse(); return this }
+  reverse() {
+    return new Arguments(this.args.reverse(), this.block)
+  }
 
   inspect(): string {
     let disp = this.args.inspect();

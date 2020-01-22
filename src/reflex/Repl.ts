@@ -15,17 +15,16 @@ export class Repl {
         console.log("\n" + chalk.blue("Reflex") + chalk.cyan("Repl"));
 
         const server = repl.start({
-            prompt: chalk.gray("\n(reflex) "),
-            writer: (out: ReflexObject) => prettyObject(out),
+            prompt: chalk.gray("> "),
+            writer: prettyObject,
             eval: (input: string, _ctx: any, _filename: any, cb: any) => {
                 let out = '(nothing)';
                 try {
                     out = // prettyObject(
-                        interpreter.evaluate(input, false);
-                    if (out === undefined) {
-                        out = '(no-result)';
-                    }
-                    ;
+                        interpreter.evaluate(input.replace("\n", ""), false);
+                    // if (out === undefined) {
+                    //     out = '(no-result)';
+                    // };
                 }
                 catch (e) {
                     if (e.name === 'SyntaxError') {
@@ -42,10 +41,6 @@ export class Repl {
             help: 'Echo current program instructions',
             action: () => { console.log(prettyCode(interpreter.machine.activeProgram)); }
         });
-        // server.defineCommand('slow', {
-        //     help: 'Dump current stack elements',
-        //     action: () => { console.log('slowdown'); interpreter.machine.delaySecs=1.0; }
-        // })
         server.defineCommand('trace', {
             help: 'Activate code trace',
             action: () => {

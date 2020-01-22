@@ -1,7 +1,7 @@
 import util from 'util';
 import { Value, Reference } from './instruction/Value';
 import Machine from './Machine';
-import { Instruction, indexForLabel, Code } from './instruction/Instruction';
+import { Instruction, indexForLabel, Code, prettyValue } from './instruction/Instruction';
 import { Stone } from './instruction/Stone';
 import { log, debug } from './util/log';
 import ReflexObject from './types/ReflexObject';
@@ -22,6 +22,7 @@ import { zip } from './util/zip';
 import { makeReflexObject } from './types/makeReflexObject';
 import { Converter } from './Converter';
 import chalk from 'chalk';
+import { prettyObject } from '../prettyObject';
 
 export class Controller {
     private converter: Converter = new Converter(this);
@@ -142,6 +143,7 @@ export class Controller {
         if (top instanceof ReflexObject) {
             let localFrame: Frame = findFrameWithLocal(key, this.frames);
             localFrame.locals[key] = top;
+            debug("Set local variable '" + key + "' = " + prettyObject(top), this.frames)
             // if (top instanceof ReflexFunction && top.name?.match(/lambda/)) {
             //     top.name = top.name + ' [' + key + ']'
             // }
@@ -157,7 +159,6 @@ export class Controller {
     ) {
         let top = this.stack[this.stack.length - 1];
         this.pop();
-        debug("Call " + chalk.green(top))
         let args: Value[] = [];
         let foundBlock = false;
         let block;
@@ -180,11 +181,18 @@ export class Controller {
             args.push(this.stack[this.stack.length - 1])
             this.pop()
         }
+
+        // debug(this.frame.currentMethod?.name + ":\tCall " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","))
         if (top instanceof ReflexFunction) {
             this.invokeReflex(top, args as Value[], withBlock, ensureReturns)
         } else if (top instanceof WrappedFunction) {
+            let self = this.frame.self
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
+                self = (top.boundSelf);
+                debug("Call " + chalk.green(top) + " on " + prettyValue(self) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
+            } else {
+                debug("Invoke wrapped fn " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
             }
             if (!!top.convertArgs) {
                 args = args.map(arg =>
@@ -193,6 +201,7 @@ export class Controller {
                         : arg
                 );
             }
+
             let result = top.impl(this.machine, ...args);
             if (result !== undefined) {
                 let toPush = this.converter.castJavascriptToReflex(result);
@@ -279,7 +288,6 @@ export class Controller {
         let frame = this.frames[this.frames.length - 1];
         let top = this.stack[this.stack.length - 1]
         // this.frames.pop();
-        this.frames.pop();
         let retValue: Value = null;
         if (frame.retValue) {
             retValue = frame.retValue;
@@ -289,8 +297,10 @@ export class Controller {
             retValue = top;
         }
 
+        debug("Returning: " + prettyValue(retValue), this.frames)
+        this.frames.pop();
+
         if (retValue !== null) {
-            debug("Returning: " + chalk.blue(retValue))
             this.push(retValue);
         } else {
             throw new Error("No ret value at " + frame.currentMethod)
@@ -340,11 +350,11 @@ export class Controller {
     }
 
     private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensureReturns?: ReflexObject) {
-        log("Invoke " + fn + chalk.gray((args.length ? (" with " + chalk.yellow(args)) : " without args")))
+        // debug(this.frame.currentMethod?.name + ":\tInvoke " + chalk.green(fn) + chalk.gray((args.length ? (" with args: " + chalk.yellow(args)) : " without args")))
         // log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
         // debug("with block: " + withBlock)
         // debug("source: " + fn.source)
-        // debug("args: " + args)
+        debug("invoke " + fn + " with args: " + args, this.frames)
         // debug("looking for label: " + fn.label)
         if (!fn?.name?.match(/_setup/)) { debugger; }
         // let locals: Store = {};
@@ -357,9 +367,9 @@ export class Controller {
                 args.pop()
                 if (fn.blockParamName && block !== undefined) {
                     if (block instanceof ReflexFunction) {
-                        log("Assign BLOCK " + block.source + " to " + fn.blockParamName)
+                        debug("Assign block " + block.source + " to " + fn.blockParamName, this.frames)
                     } else if (block instanceof ReflexObject) {
-                        log("Assign OBJECT " + block + " to " + fn.blockParamName)
+                        debug("Assign OBJECT " + block + " to " + fn.blockParamName, this.frames)
                         // block = block.send('call')
                         // if (block !== undefined) {}
                     } else {
@@ -372,7 +382,7 @@ export class Controller {
                     throw new Error("Given block arg but no explicit block param")
                 }
             } else {
-                log("Method " + fn.name + " (called in " + this.frame.currentMethod?.name + ") did not get block...")
+                debug("Method (" + fn.name + ") did not get block...", this.frames)
                 // throw new Error("Method " + fn.name + " expected a block")
                 // fnArgs['block_given'] = false;
             }
@@ -384,7 +394,15 @@ export class Controller {
         }
         // debug("args: " + (fnArgs));
         let self = fn.frame.self ? fn.frame.self.within(this.frame.self) : this.frame.self;
-        // debug("self: " + self);
+        // if (fn.frame.self)
+        debug(//this.frame.currentMethod?.name +
+            "Invoke " + chalk.green(fn) + " on " + prettyValue(self) +
+            chalk.gray(args.length
+                ? (" with args: " + args.map(arg => prettyValue(arg)).join(","))
+                : " without args"),
+            this.frames
+        )
+        // debug("self: " + prettyValue(self));
         // this.frames.push(fn.frame);
         this.frames.push({
             ip: indexForLabel(this.code, fn.label),

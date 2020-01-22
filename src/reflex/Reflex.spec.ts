@@ -29,10 +29,16 @@ describe('Reflex', () => {
     describe("syntax", () => {
         describe('core', () => {
             describe("calls", () => {
-                it('multiple args', () => {
+                it('multiple args passed in expected order', () => {
                     evaluate('s=(a,b)=>puts "a="+a+",b="+b')
                     evaluate("s 100, 250")
                     expect(out()).toEqual("a=100,b=250")
+                })
+
+                xit('default args assigned nil', () => {
+                    evaluate('f=(a,b,c)=>puts "a="+a+",b="+b+",c="+c')
+                    evaluate("f 100, 250")
+                    expect(out()).toEqual("a=100,b=250,c=nil")
                 })
             })
             describe("blocks", () => {

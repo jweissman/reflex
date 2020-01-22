@@ -3,6 +3,9 @@ import ReflexObject from "../types/ReflexObject"
 import Tree from "../../lang/ast/Tree"
 import { Value } from './Value';
 import { log, debug } from '../util/log';
+import { prettyObject } from '../../prettyObject';
+import { trace } from './trace';
+import { Stone } from './Stone';
 export type Op
   = 'push'
   | 'pop'
@@ -28,25 +31,40 @@ export type Op
   | 'compile' 
   | 'mark'
   | 'sweep'
+
 export const prettyValue = (v: Value) => {
   if (v === null) { return ''; }
   else if (typeof v === 'string') { return v; }
   else if (typeof v === 'number') { return String(v); }
-  else if (v instanceof ReflexObject) { return v.inspect(); }
+  else if (Array.isArray(v)) { return '['+v+']'; }
+  else if (v instanceof ReflexObject) { return prettyObject(v); } //.inspect(); }
   else if (v instanceof Tree) { return v.inspect(); }
+  else if (v instanceof Stone) { return v.name; }
   else {
     // return 'undefined!!'
+    console.trace("pretty value failure: " + v)
     throw new Error("Called pretty value on unknown: " + v)
     // return v.toString();
   }
 }
+// function prettyValue(it: Value) {
+//     if (it instanceof ReflexObject) {
+//         return prettyObject(it)
+//     } else if (it instanceof Tree) {
+//         return chalk.blue(it.inspect())
+//     } else if (it === null) {
+//         return chalk.red("null")
+//     } else {
+//         return it.toString() //chalk.black(it.toString())
+//     }
+
 export type Instruction = [ Op, Value ]
 export const prettyInstruct = (inst: Instruction) => {
   let [op, value] = inst
   if (op === 'label') {
-    return chalk.white(prettyValue(value)) + ":"
+    return chalk.gray(value) + ":"
   } else {
-    return [chalk.green(op), chalk.cyan(prettyValue(value))].join(' ')
+    return [chalk.gray(op), chalk.gray(value)].join(' ')
   }
 }
 export type Code = Instruction[]
@@ -58,7 +76,7 @@ export const indexForLabel = (code: Code, label: string) => {
     let step = labelStep(code, label) 
     if (step) {
         let lineNumber = code.indexOf(step)
-        debug("FOUND " + label + " AT " + lineNumber)
+        // debug("FOUND " + label + " AT " + lineNumber)
         return lineNumber
     } else {
         throw new Error("no such label found: " + label)

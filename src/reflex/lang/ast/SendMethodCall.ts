@@ -8,14 +8,15 @@ export class SendMethodCall extends Tree {
     }
     get code(): Code {
         let op: 'invoke_block' | 'invoke' = (!!this.args.block ? 'invoke_block' : 'invoke');
-        let block: Code = []
-        if (this.args.block) {
-            block = this.args.block.code;
-        }
+        // let block: Code = []
+        // if (this.args.block) {
+        //     block = this.args.block.code;
+        // }
 
         return [
-            ...block,
-            ...this.args.args.reverse().code,
+            // ...block,
+            ...this.args.code, //args.reverse().code,
+            // ...this.args.args.reverse().code,
             ...this.receiver.code,
             ...this.message.code,
             ['call', null],

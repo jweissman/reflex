@@ -881,3 +881,33 @@ difference for xml lit could be tree diff!!
 
 i was thinking that multiply is replicate, that should work for arrays/strings
 but maybe it works for hashes, in that it gives you a graph with a number of connections (the number of connections could be an analogue for 'weight' maybe??) -- you could get a doubly-connected graph with `(hash * hash.transpose)`
+
+
+##
+
+increasingly feeling like ruby had something with the 'send the message' == call the method sort of approach
+(thinking through some complicated logic with setting custom getters but just realizing the asymmetry between omitting parens everywhere
+but a simple/niladic function call seems weird -- it does raise the question of how to get access to the member itself, but maybe that's
+a separate problem, something like a mirror could do??)
+
+i do like being able to get at and manipulate directly the member value --
+
+what is the distinction between externally visible attributes, internal members and functions you can call?
+
+okay, there's several spheres 
+
+    ( object )      environment
+
+The object itself has properties that the environment can't see; these are only visible from within the object.
+(When the caller is also self.)
+These are private instance variables, that can get get or set only by being self and calling instance_var_get/set.
+
+When the environment calls one of these, it's an error. It's the same as if the object didn't exist. 
+(Maybe some objects are 'helpful' and will point out you're poking into internal implementations)
+
+Alternatively, the object exposes members that can be accessed by calling it.
+
+The object is called by a caller in the environment or that is itself. (If the caller is itself, private member variables are visible/accessible.)
+
+When the object is called, the message is dispatched -- as a reified message object, even if just a (message, ...args, &block) tuple --
+to the object's `send` method...

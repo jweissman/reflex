@@ -4,6 +4,24 @@
 
 This document describes the structure of the Reflex programming language. 
 (Note the "official spec" for now is just the reference implementation contained in this repository.)
+## Introduction
+
+Reflection is a powerful property, relating inherently to both symmetry and language or "representation".
+
+Reflex tries to explore some of the questions about the expressive power of reflexivity that have been posed
+for instance by languages like Ruby, Eiffel, Smalltalk, Self and Simula. ("Zuse" could be a name for this language!)
+
+A central aim is providing structured, fine-grained mechanisms for reflection.
+
+In particular the reflecting instruments as we conceive them:
+  - 'mirrors' for creating images (lightweight proxies/decorators/views) and illusions (structured pseudo-objects like super);
+  - 'wands' for mapping between the JS environment and back (wands "cast" between reflex and JS); some of the 'permanent' structures wands can create 'portals' and 'wormholes' for transporting things across the language barrier...
+  - 'crystals' for creating, in conjunction with mirrored objects, 'holograms' or structured systems of images/proxies;
+
+Some of the more mechanical elements...
+  - 'archetypes', a reflective approach to structural types, for creating new kinds in the system (i.e., something like a type but modelled objectively -- classes themselves could be an archetype)
+  - 'aspects' or traits, mixins -- only different from mixing in anonymous module in that they can be reflected on directly
+  
 
 ## Guiding Principles
 
@@ -44,26 +62,6 @@ With that in mind, here are the principles that will guide us.
    Focus on the expression of problems rather than solution-specification.
    A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.
 
-## Introduction
-
-Reflection is a powerful property, relating inherently to both symmetry and language or "representation".
-
-Reflex tries to answer some of the questions that have been asked (and answered to some degree)
-in languages like Ruby, Eiffel, Smalltalk, Self and Simula. ("Zuse" could be a name for this language.)
-
-We don't necessarily have a lot of new answers, but these are some of the most important ideas we are exploring.
-
-1. Providing structured, fine-grained mechanisms for reflection
-
-In particular the reflecting instruments as we conceive them:
-  - 'mirrors' for creating images (lightweight proxies/decorators/views) and illusions (structured pseudo-objects like super);
-  - 'wands' for mapping between the JS environment and back (wands "cast" between reflex and JS); some of the 'permanent' structures wands can create 'portals' and 'wormholes' for transporting things across the language barrier...
-  - 'crystals' for creating, in conjunction with mirrored objects, 'holograms' or structured systems of images/proxies;
-
-Some of the more mechanical elements...
-  - 'archetypes', a reflective approach to structural types, for creating new kinds in the system (i.e., something like a type but modelled objectively -- classes themselves could be an archetype)
-  - 'aspects' or traits, mixins -- only different from mixing in anonymous module in that they can be reflected on directly
-  
 
 ## Core Types
 ### Object
@@ -116,7 +114,19 @@ There are two members, `true` and `false`.
 Booleans respond to methods `true()`, `false()` and `negate()`.
 
 ### Number
-`Number` is the class of numeric values.
+`Number` is the class of numeric values. Numeric literals are instances of `Number` (usually a subclass `Integer` or `Float`).
+There are some special numeric values like `Indeterminate` (our not-a-number representation), and (+/-) `Infinity`.
+
+### String
+`String` is the class of words. Unicode literals are permitted in double-quoted string literals.
+
+### Array
+`Array` is the class of object-valued arrays (index spaces).
+
+### Range
+`Range` is the class of bounded intervals. Range literals are of the form `0..100`.
+
+### 
 
 ## Syntax
 ### self and super
@@ -124,12 +134,10 @@ A bare `self` is a references to the current context's object.
 `super` as a member on a class object is a reference to the superclass.
 In instance methods, `super` refers to a facade that permits calling superclass methods 'as written' on the current object.
 
-### Blocks/Yielding
+### Blocks
 A block is marked off by braces and can optionally have piped values passed to it.
-Blocks may be given to functions, which can interact structurally with the block.
-Functions can invoke their block and return by `yield`ing (recalling their 'place' if invoked again);
-functions can also bind their block as a parameter with `&`
-(e.g., `gen(&b) {b()}` is a function that calls its block with no args.)
+Blocks may be provided to functions, which can interact structurally with the block.
+Functions can bind a provided block as an explicit parameter with `&` (e.g., `gen(&b) {b()}` is a function that calls its block with no args.)
 
 # Concepts
 

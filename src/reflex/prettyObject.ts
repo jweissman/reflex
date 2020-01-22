@@ -1,3 +1,4 @@
+import util from 'util';
 import chalk from 'chalk';
 import ReflexObject from "./vm/types/ReflexObject";
 import { ReflexString } from "./vm/types/ReflexString";
@@ -28,7 +29,7 @@ export function prettyObject(object: ReflexObject): string {
         return chalk.gray('nil')
     }
     else if (object instanceof ReflexArray) {
-        return chalk.gray('[') + object.items.flatMap(item => prettyObject(item)).join(chalk.gray(', ')) + chalk.gray(']');
+        return chalk.white('[') + object.items.flatMap(item => prettyObject(item)).join(chalk.white(', ')) + chalk.white(']');
     }
     else if (object instanceof ReflexFunction) {
         if (object.source) {
@@ -40,9 +41,13 @@ export function prettyObject(object: ReflexObject): string {
     }
     else {
         if (object.inspect) {
-            return chalk.white(object.inspect());
+            return chalk.yellow(object.inspect());
         }
         else {
+            // throw new Error("Called pretty obj on not an object: " + object + " / " + util.inspect(object));
+            if (object.className) {
+                return chalk.red(object + "("+ object.className +"??");
+            }
             return chalk.red(object + "??");
         }
     }

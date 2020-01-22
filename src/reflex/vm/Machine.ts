@@ -92,7 +92,7 @@ export default class Machine {
         if (step) {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
-            debug(prettyCode(code.slice(this.frame.ip+1,code.length-1)))
+            debug(prettyCode(code.slice(this.frame.ip+1,code.length-1)), this.frames)
             this.executeLoop();
         } else {
             fail("Could not find label " + label)

@@ -51,9 +51,9 @@ objectMethods.set("eq", new WrappedFunction(`Object.eq`,
 ));
 objectMethods.set("send", new WrappedFunction(`Object.send`,
  (machine: Machine, message: string, ...args: ReflexObject[]) => {
-   log("MANUAL OBJECT SEND: " + message + " TO " + machine.boundSelf!.inspect())
+  //  log("MANUAL OBJECT SEND: " + message + " TO " + machine.boundSelf!.inspect()) //, machine.activeFrames)
    let fn = (machine.boundSelf!.send(message));
-   log("MANUAL OBJECT SEND: " + message + " -> sent: " + fn)
+  //  log("MANUAL OBJECT SEND: " + message + " -> sent: " + fn) //, machine.activeFrames)
     if (fn instanceof ReflexFunction) { //} || fn instanceof WrappedFunction) {
       return machine.doInvoke(
         undefined,
@@ -123,13 +123,20 @@ kernelMethods.set("import", new WrappedFunction(
 )
 kernelMethods.set("print", new WrappedFunction(`Kernel.print`, (machine: Machine, ...args: any[]) => {
   machine.tracedOutput.push(args.join(""))
+  // args.forEach(arg => {
+  // process.stdout.write(arg)
+  // })
+  // process.stdout.write("\n")
   console.log(...args)
   return null
 }))
 
-type ArithOp = 'add' | 'subtract' | 'multiply' | 'divide' | 'mod' | 'neg' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'to_s'
+type ArithOp = 'add' | 'subtract' | 'multiply' | 'divide' | 'mod' | 'neg' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'to_s' | 'to_i'
 let arithmetic: { [key in ArithOp]: Function} = {
-  add: (left: number, right: number) => left + right,
+  add: (left: number, right: number) => {
+    // console.log("Arithmetic ADD -- " + left + " + " + right)
+    return left + right
+  },
   subtract: (left: number, right: number) => left - right,
   multiply: (left: number, right: number) => left * right,
   divide: (left: number, right: number) => left / right,
@@ -137,7 +144,7 @@ let arithmetic: { [key in ArithOp]: Function} = {
   neg: (val: number) => -val,
   eq: (left: number, right: number) => {
     let equal = left === right
-    log("EQ? " + left + " / " + right + " => " + equal)
+    // log("EQ? " + left + " / " + right + " => " + equal)
     return equal
   },
   gt: (left: number, right: number) => left > right,
@@ -145,6 +152,7 @@ let arithmetic: { [key in ArithOp]: Function} = {
   lt: (left: number, right: number) => left < right,
   lte: (left: number, right: number) => left <= right,
   to_s: (num: number) => num.toString(),
+  to_i: (num: number) => Math.round(num),
 }
 let numberMethods = RNumber.get("instance_methods");
 
@@ -165,7 +173,8 @@ defineArithmetic('gt');
 defineArithmetic('gte');
 defineArithmetic('lt');
 defineArithmetic('lte');
-// defineArithmetic('to_s', 'toString');
+defineArithmetic('to_s', 'toString'); //, 'toString');
+defineArithmetic('to_i', 'toInteger'); //, 'toString');
 
 let arrayMethods = RArray.get("instance_methods");
 arrayMethods.set("get", new WrappedFunction("Array#get", (machine: Machine, index: number) =>
@@ -184,9 +193,12 @@ arrayMethods.set("concat", new WrappedFunction("Array#concat", (machine: Machine
 ))
 
 let stringMethods = RString.get("instance_methods");
-stringMethods.set("concat", new WrappedFunction("String.concat", (machine: Machine, other: string) =>
-  (machine.boundSelf! as ReflexString).value + (other)
-))
+stringMethods.set("concat", new WrappedFunction("String.concat", (machine: Machine, other: string) => {
+  let self = (machine.boundSelf! as ReflexString).value;
+  let concatenated = `${self}${(other)}`
+  // console.log("STRING CONCAT: '" + self + "'(self) + '" + other + "'(other) => '" + concatenated +"'")
+  return concatenated
+}))
 stringMethods.set("length", new WrappedFunction("String.length", (machine: Machine) =>
   (machine.boundSelf! as ReflexString).value.length
 ))

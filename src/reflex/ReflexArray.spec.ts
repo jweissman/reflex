@@ -45,6 +45,18 @@ describe('Array', () => {
             })
         })
 
+        describe('push', () => {
+            it('adds to end of array', () => {
+                evaluate("arr = []")
+                evaluate("arr.push(10)")
+                expect(evaluate("arr")).toEqual([10])
+                evaluate("arr.push(20)")
+                expect(evaluate("arr")).toEqual([10,20])
+                evaluate("arr.push(30)")
+                expect(evaluate("arr")).toEqual([10,20,30])
+            })
+        })
+
         describe('concat', () => {
            it('welds arrays', () => {
                 evaluate('a=[1,2];b=[3,4,5]')
@@ -115,6 +127,22 @@ describe('Array', () => {
             })
             it('decomposes an array with a block', () => {
                 expect(evaluate("[1,2,3,4,5].split { |x| x%2==0 }")).toEqual([[1],[3],[5]])
+            })
+        })
+
+        describe('join', () => {
+            it('injects composition', () => {
+                expect(evaluate("'hello'.toArray().join()")).toEqual("hello")
+                expect(evaluate("'hello'.toArray().join()")).toEqual("hello")
+            })
+
+            it('is inverse to split on empty string', () => {
+                expect(evaluate("'hello'.split('').join()")).toEqual("hello")
+                expect(evaluate("'hello'.split('').join()")).toEqual("hello")
+            })
+
+            xit('inserts delim', () => {
+                expect(evaluate("['hi', 'there'].join(' ')")).toEqual("hi there")
             })
         })
     })

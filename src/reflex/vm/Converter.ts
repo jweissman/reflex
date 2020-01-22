@@ -1,5 +1,5 @@
 import util from 'util'
-import { log } from './util/log';
+import { log, debug } from './util/log';
 import ReflexObject from './types/ReflexObject';
 import { getLocal } from './instruction/getLocal';
 import { ReflexNumber } from './types/ReflexNumber';
@@ -45,11 +45,17 @@ export class Converter {
     }
     public castJavascriptToReflex(object: any): ReflexObject {
         if (object instanceof ReflexObject) {
+            // log("")
             return object;
         }
-        else if (Array.isArray(object)) {
+        // debug("---> Cast JS to reflex: " + object, this.ctrl.frames)
+        if (Array.isArray(object)) {
             let arr: ReflexObject[] = object as unknown as ReflexObject[];
-            return (this.ctrl.makeObject(getLocal("Array", this.ctrl.frames) as ReflexClass, arr));
+            return (this.ctrl.makeObject(
+                getLocal("Array", this.ctrl.frames) as ReflexClass,
+                // arr
+                arr.map(e=>e instanceof ReflexObject ? e : this.castJavascriptToReflex(e))
+            ));
         }
         else if (typeof object === "string") {
             // this.ctrl.makeObject(RString.klass)
@@ -57,7 +63,7 @@ export class Converter {
         }
         else if (typeof object === "number") {
             if (isNaN(object)) {
-                log("WOULD CAST NaN to..." + Indeterminate);
+                // log("WOULD CAST NaN to..." + Indeterminate);
                 return (this.ctrl.makeObject(Indeterminate.klass, []));
             }
             if (object === Infinity) {

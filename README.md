@@ -2,13 +2,13 @@
 
 🤖 Explore a new GENERAL-PURPOSE language
 
-💎 Write code with CRYSTALLINE ELEGANCE 
+💎 Write clear code with CRYSTALLINE ELEGANCE 
 
-🕵🏻‍ Employ reification and REFLECTION
+🕵🏻‍ Use reification and REFLECTION
 
-🎉 Use XML LITERALS
+🎉 Write XML LITERALS natively
 
-🥂 Interoperate with JAVASCRIPT 
+🥂 Interoperate with JAVASCRIPT
 
 🥳 Enjoy METAPROGRAMMING
 
@@ -24,7 +24,31 @@ Implemented in Typescript.
 
 # Getting Started
 
-Still a bit too early for hello world, but [the specs](src/reflex/Reflex.spec.ts) have lots of Reflex code examples.
+```
+3.times { puts "hello world!" }
+```
+
+Some basic examples should be working now, but there's still a lot in active development.
+
+```
+using 'paint'
+paint = Paint.new()
+
+class Greeter {
+    init() {
+        self.greeting = 'Hello, '
+    }
+
+    greet(subject) {
+        self.greeting + paint.blue(subject)
+    }
+}
+
+greeter = Greeter.new()
+greeter.greet("world")
+```
+
+For now consider referring to [the specs](src/reflex/Reflex.spec.ts) which have lots of Reflex code examples.
 A [fledgling language reference](LANGUAGE.md) is also available.
 
 # Status

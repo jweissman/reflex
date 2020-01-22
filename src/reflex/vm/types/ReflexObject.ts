@@ -33,7 +33,7 @@ export default class ReflexObject {
     inspect(): string { return this.displayName }
     toString() { return this.displayName; }
     isEqual(other: ReflexObject): boolean {
-        debug("IS EQ: " + other + " / " + this)
+        // debug("IS EQ: " + other + " / " + this)
         return this.id === other.id
     }
 
