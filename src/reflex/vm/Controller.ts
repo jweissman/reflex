@@ -159,7 +159,7 @@ export class Controller {
     ) {
         let top = this.stack[this.stack.length - 1];
         this.pop();
-        log("INVOKE " + top + " WITH ARITY " + arity + " (stack len is " + this.stack.length + ")");
+        // log("INVOKE " + top + " WITH ARITY " + arity + " (stack len is " + this.stack.length + ")");
         let args: Value[] = [];
         let foundBlock = false;
         let block;
@@ -190,6 +190,11 @@ export class Controller {
 
         // debug(this.frame.currentMethod?.name + ":\tCall " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","))
         if (top instanceof ReflexFunction) {
+            if (top.arity > arity && !withBlock) {
+                for (let i = arity; i < top.arity; i++) {
+                    args.push(getLocal('nil', this.frames))
+                }
+            }
             this.invokeReflex(top, args as Value[], withBlock, ensureReturns)
         } else if (top instanceof WrappedFunction) {
             let self = this.frame.self

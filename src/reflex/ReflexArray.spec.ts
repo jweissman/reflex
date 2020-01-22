@@ -98,8 +98,8 @@ describe('Array', () => {
 
         describe('map', () => {
             it('applies fn to each element', () => {
-                expect(evaluate("[1,2,3,4,5].map{|v|v*2}")).toEqual([2,4,6,8,10])
-                expect(evaluate("[1,2,4,8,16].map(&(v=>v*2))")).toEqual([2,4,8,16,32])
+                expect(evaluate("[1,2,3,4,5].map{|v|v*2}.collect()")).toEqual([2,4,6,8,10])
+                expect(evaluate("[1,2,4,8,16].map(&(v=>v*2)).collect()")).toEqual([2,4,8,16,32])
             })
         })
 
@@ -141,7 +141,7 @@ describe('Array', () => {
                 expect(evaluate("'hello'.split('').join()")).toEqual("hello")
             })
 
-            xit('inserts delim', () => {
+            it('inserts delim', () => {
                 expect(evaluate("['hi', 'there'].join(' ')")).toEqual("hi there")
             })
         })

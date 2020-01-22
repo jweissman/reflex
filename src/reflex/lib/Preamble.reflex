@@ -8,6 +8,7 @@ class Object {
     nil() { false }
     true() { true }
     false() { Boolean.negate(self.true()) }
+    toString() { self.inspect() }
 }
 
 /*
@@ -18,7 +19,7 @@ class Object {
 class Class {
     isDescendantOf(other) { other.isAncestorOf(self) }
     isKindOf(other) { other == self || other.isAncestorOf(self) }
-    auto(&blk) { meta.instanceEval(&blk) }
+    auto(&b) { meta.instanceEval(b) }
 }
 
 /**
@@ -118,6 +119,66 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
+class Module {
+}
+
+
+
+class Enumerator {
+    init(enumerable) {
+        self.enumerable = enumerable;
+        self.index = 0;
+        self.indicate = false;
+        self.exhausted = false;
+        self.mapFn = i=>i
+    }
+    map(&fn) {
+        self.mapFn = fn;
+        self
+    }
+    withIndex() {
+        self.indicate = true;
+        self
+    }
+    advance() {
+        self.index = self.index + 1;
+        if (self.index >= self.enumerable.length()) {
+            self.exhausted = true;
+        }
+    }
+    next() {
+        if (!self.exhausted) {
+            val=self.mapFn(self.enumerable.get(self.index))
+            self.advance()
+            val
+        } else {
+        //   nil
+            fail 'stop iteration'
+        }
+    }
+    call(&b) {
+        self.tilExhausted(&b)
+    }
+    collect() {
+        arr=[]
+        self.tilExhausted { |v| arr.push v }
+        arr
+    }
+    tilExhausted(&block) {
+        until (self.exhausted) {
+            if (self.indicate) {
+                block(self.next(), self.index)
+            } else {
+                block(self.next())
+            }
+        }
+    }
+}
+
+module Enumerable {
+    map(&mapFn) { self.each().map(&mapFn) }
+}
+
 /**
  * Array
  *
@@ -133,21 +194,28 @@ class Array {
         self.concat(other)
     }
 
-    each(&eachBlock) {
-        i = 0;
-        while (i <= self.length()-1) {
-            val = self.get(i)
-           eachBlock(val); //self.get(i));
-           i = i + 1
+    eq(other) { 
+        isEq = self.length() == other.length()
+        if (isEq) {
+            self.eachWithIndex { |x, i|
+                if (x != other.get(i)) {
+                    isEq = false 
+                }
+            }
         }
+        isEq
+    }
+
+    each(&b) {
+        it = Enumerator.new(self)
+        if (block_given) { it(&b) }
+        it
     }
     
-    eachWithIndex(&eachBlock) {
-        i = 0;
-        while (i <= self.length()-1) {
-           eachBlock(self.get(i), i);
-           i = i + 1
-        }
+    eachWithIndex(&b) {
+        it = self.each().withIndex()
+        if (block_given) { it(&b) }
+        it
     }
 
     split(sep, &blk) {
@@ -175,14 +243,15 @@ class Array {
     }
 
     map(&mapFn) {
-        res = Array.new()
-        index=0
-        self.each { |e|
-            mapped = mapFn(e)
-            res.set(index, mapped);
-            index=index+1
-        }
-        res
+        self.each().map(&mapFn)
+        //res = Array.new()
+        //index=0
+        //self.each { |e|
+        //    mapped = mapFn(e)
+        //    res.set(index, mapped);
+        //    index=index+1
+        //}
+        //res
     }
 
     first() { self.get(0) }
@@ -210,11 +279,13 @@ class Array {
     }
 
     join(delim) {
-        // d=delim||''
-        sum = (a,b) => { a+b }
+        d=delim||''
+        sum = (a,b) => { a+d+b }
         self.inject &sum
     }
 }
+
+
 
 
 /**
@@ -232,6 +303,8 @@ class String {
             groups.map { |letters| letters.join() }
         }
     }
+
+    toString() { self }
 
     get(i) { self.toArray().get(i) }
 
@@ -279,11 +352,12 @@ NegativeInfinity = NegativeApeiron.new()
 using = Kernel.import
 prints = Kernel.println
 fail = Kernel.throw
+include = Kernel.include
 noop = ->{}
 
 // old ways die hard
 require = Kernel.import
-puts = Kernel.println
+puts = o=>Kernel.println(o.toString())
 
 // wire up main so it can define instance methods on itself...
 self.defineMethod = meta.defineMethod

@@ -48,7 +48,8 @@ greeter = Greeter.new()
 greeter.greet("world")
 ```
 
-For now consider referring to [the specs](src/reflex/Reflex.spec.ts) which have lots of Reflex code examples.
+For more examples take a look at the [preamble](src/reflex/lib/Preamble.reflex) which defines the standard library in a few hundred lines of Reflex.
+Consider referring also to [the specs](src/reflex/Reflex.spec.ts) which have lots of Reflex code examples with their expected outputs.
 A [fledgling language reference](LANGUAGE.md) is also available.
 
 # Status

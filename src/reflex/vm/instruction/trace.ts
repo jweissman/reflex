@@ -28,7 +28,7 @@ export function trace(message: string, instruction: Instruction, frames: Frame[]
         //     ? [(chalk.gray("current method: ") + method)]
         //     : []
         // ),
-        prettyInstruct(instruction),
+        // prettyInstruct(instruction),
         // chalk.gray("self: ") + frame.self.inspect(),
     ]//.join("\n");
     lastStack = [...stack];

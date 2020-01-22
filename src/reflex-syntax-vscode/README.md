@@ -1,6 +1,6 @@
-# reflex-syntax-vscode README
+# reflex-syntax-vscode
 
-This is the README for your extension "reflex-syntax-vscode". After writing up a brief description, we recommend including the following sections.
+A tiny vscode syntax for highlighting Reflex. Still in flux as Reflex grammar is in flux. 
 
 ## Features
 

@@ -35,9 +35,9 @@ describe('Reflex', () => {
                     expect(out()).toEqual("a=100,b=250")
                 })
 
-                xit('default args assigned nil', () => {
-                    evaluate('f=(a,b,c)=>puts "a="+a+",b="+b+",c="+c')
-                    evaluate("f 100, 250")
+                it('default args assigned nil', () => {
+                    evaluate('fn=(a,b,c)=>puts "a="+a+",b="+b+",c="+c')
+                    evaluate("fn 100, 250")
                     expect(out()).toEqual("a=100,b=250,c=null")
                 })
             })
