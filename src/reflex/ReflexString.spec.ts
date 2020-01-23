@@ -19,6 +19,13 @@ describe('String', () => {
             expect(evaluate("'world'.eq('world')")).toEqual(true)
         })
 
+        it('reverse', () => {
+            expect(evaluate("'hello'.reverse().eq('olleh')")).toEqual(true)
+            expect(evaluate("'hello'.eq('olleh'.reverse())")).toEqual(true)
+            expect(evaluate("'hello'.reverse().reverse().eq('hello')")).toEqual(true)
+            expect(evaluate("'hello'.eq('hello'.reverse().reverse())")).toEqual(true)
+        })
+
         xit('call', () => {
             expect(evaluate("'add'.call(1,2)")).toEqual(3)
         })

@@ -1,14 +1,15 @@
 using 'paint'
 paint = Paint.new()
-class Greeter {
-    init() {
-        self.greeting = 'Hello, '
-    }
 
-    greet(subject) {
-        self.greeting + paint.blue(subject) if subject
-    }
-}
+class Greeter
+    def init()
+        self.greeting = 'Hello, '
+    end
+
+    def greet subject
+        self.greeting + subject
+    end
+end
 
 greeter = Greeter.new()
-greeter.greet("world")
+puts greeter.greet paint.green("world")+"!"

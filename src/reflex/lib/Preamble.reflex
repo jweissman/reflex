@@ -102,11 +102,16 @@ class Number {
     }
 
     times(&timesBlock) {
-        counter = self;
-        until (counter.zero()) {
-            counter = counter - 1;
-            timesBlock()
+        it = RangeIterator.new(0.upto(self-1))
+        if (block_given) {
+            it(&timesBlock)
         }
+        it
+        //counter = self;
+        //until (counter.zero()) {
+        //    counter = counter - 1;
+        //    timesBlock()
+        //}
     }
 
     upto(stop,&block) {
@@ -128,11 +133,56 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
+/// enumerability /////
+
+class Module {
+    inject(target) { Kernel.include(self, target) }
+}
+
+module Enumerable {
+    map(&mapFn) { self.each().map(&mapFn) }
+    collect() { self.each().collect() }
+    first() { self.collect().first() }
+    last() { self.collect().last() }
+    rest() { self.collect().rest() }
+
+    // 'hard eval' def which falls back to toArray...
+    // with yield semantics this could be more efficient!
+    each(&b) {
+        if (block_given) { self.toArray().each(&b) }
+        else { self.toArray().each() }
+    }
+
+    eachWithIndex(&b) {
+        it = self.each().withIndex()
+        if (block_given) { it(&b) }
+        it
+    }
+
+    all() { self.collect()}
+    size() { self.all().length() }
+    sample() { self.all().get(Kernel.rand(self.size()-1))}
+    reverse() { self.all().reverse() }
+
+    join(delim) { self.collect().join(delim) }
+}
+
 class Iterator {
+    include Enumerable
     init() {
         self.index = 0;
+        self.indicate = false;
         self.exhausted = false;
     }
+
+    withIndex(&b) {
+        self.indicate = true;
+        if (block_given) {
+            self.call(&b)
+        }
+        self
+    }
+
     next() {
         if (!self.exhausted) {
             val=self.curr()
@@ -144,13 +194,29 @@ class Iterator {
     }
 
     curr() { fail "Implement Iterator#curr in " + self.class }
+    isExhausted() { self.exhausted }
+    call(&block) {
+        until (self.isExhausted()) {
+            if (self.indicate) {
+                block(self.next(), self.index)
+            } else {
+                block(self.next())
+            }
+        }
+    }
+    toArray() {
+        arr=[]
+        self { |i| arr.push(i) }
+        arr
+    }
 }
 
 class ArrayIterator < Iterator {
     init(arr) {
         self.array = arr
-        self.index = 0;
-        self.exhausted = false;
+        // self.index = 0;
+        // self.exhausted = false;
+        super.init()
     }
 
     advance() {
@@ -165,9 +231,10 @@ class ArrayIterator < Iterator {
 
 class RangeIterator < Iterator {
     init(range) {
+        super.init()
         self.range = range;
         self.index = range.start;
-        self.exhausted = false;
+        // self.exhausted = false;
     }
 
     advance() {
@@ -243,36 +310,6 @@ class MappedEnumerator < Enumerator {
     inspect() { "MappedEnum["+mapFn+" over " +underlyingEnum.inspect() +"]"}
 }
 
-class Module {
-    inject(target) { Kernel.include(self, target) }
-}
-
-module Enumerable {
-    map(&mapFn) { self.each().map(&mapFn) }
-    collect() { self.each().collect() }
-    first() { self.collect().first() }
-    last() { self.collect().last() }
-    rest() { self.collect().rest() }
-
-    // 'hard eval' def which falls back to toArray...
-    // with yield semantics this could be more efficient!
-    each(&b) {
-        if (block_given) { self.toArray().each(&b) }
-        else { self.toArray().each() }
-    }
-
-    eachWithIndex(&b) {
-        it = self.each().withIndex()
-        if (block_given) { it(&b) }
-        it
-    }
-
-    all() { self.collect()}
-    size() { self.all().length() }
-    sample() { self.all().get(Kernel.rand(self.size()-1))}
-
-    join(delim) { self.collect().join(delim) }
-}
 
 /**
  * Array
@@ -345,10 +382,14 @@ class Array {
     }
 
     reverse() {
-        if (self.length().zero()) { [] }
-        else {
-            self.rest().reverse() + [self.first()]
-        }
+        len = self.length()
+        rev=[]
+        1.upto(len) { |i| rev.push(self.get(len-i)) }
+        rev
+        //if (self.length().zero()) { [] }
+        //else {
+        //    self.rest().reverse() + [self.first()]
+        //}
     }
 
     inject(&fn) {
@@ -389,16 +430,10 @@ class String {
     }
 
     toString() { self }
-    //each(&b) {
-    //    if (block_given) { self.toArray().each(&b) }
-    //    else { self.toArray().each() }
-    //}
-
-    // reverse() { self.toArray().reverse().join() }
-
     get(i) { self.split('').get(i) }
 
     add(other) { self.concat(other) }
+    reverse() { self.all().reverse().join() }
     multiply(other) {
         if (other.isInstanceOf(Number)) {
             res = ''

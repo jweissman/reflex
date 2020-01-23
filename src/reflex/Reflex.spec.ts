@@ -637,6 +637,11 @@ describe('Reflex', () => {
         expect(out()).toEqual("hello world")
     })
 
+    it('hello world', () => {
+        evaluate("using 'examples/hello'")
+        expect(evaluate("Greeter.new().greet('world')")).toEqual("Hello, world")
+    })
+
     it('paints', () => {
         evaluate("using 'paint'; paint=Paint.new()")
         expect(evaluate("puts paint.yellow('hi there!')")).toEqual(null)
@@ -645,7 +650,7 @@ describe('Reflex', () => {
         expect(out()).toEqual("\u001b[31mtown\u001b[0m")
     })
 
-    it('poetry', () => {
+    xit('poetry', () => {
         expect(()=>evaluate("using 'examples/poem'")).not.toThrow()
     })
 
