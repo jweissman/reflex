@@ -262,6 +262,8 @@ module Enumerable {
     }
 
     all() { self.collect()}
+    size() { self.all().length() }
+    sample() { self.all().get(Kernel.rand(self.size()-1))}
 
     join(delim) { self.collect().join(delim) }
 }

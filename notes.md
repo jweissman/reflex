@@ -911,3 +911,30 @@ The object is called by a caller in the environment or that is itself. (If the c
 
 When the object is called, the message is dispatched -- as a reified message object, even if just a (message, ...args, &block) tuple --
 to the object's `send` method...
+
+---------------------
+
+thinking about exceptions. what if objects can capture all exceptions
+
+and what if exceptions aren't different than 'events' which objects can also handle as a concept
+
+a generalization of try-catch -- 
+
+a generalized `handle(event)` method that an object can implement
+
+`throw` is a specialization of a more general `emit`
+
+maybe meta is interesting here? i.e. `on_error` and `on_receive`
+
+object `send` for messages -- `handle` for events
+
+```
+class Printer
+  write(msg) {
+    if (!device.ready) { throw Error }
+    emit :warning, msg
+  }
+  on_exception(e) { puts "ERROR: " + e.message }
+  on_warning(msg) { puts "WARN: " + msg }
+end
+```

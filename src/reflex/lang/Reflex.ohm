@@ -1,7 +1,9 @@
 Reflex {
     Program
-      = delim* ListOf<Stmt, delim> delim*
-
+      = StmtList
+      | EmptyProgram
+    StmtList = delim* ListOf<Stmt, delim> delim*
+    EmptyProgram = delim*
     Stmt = delim* Expr
       
     Expr =
@@ -102,6 +104,10 @@ Reflex {
        
     Block 
       = "{" Program "}"
+      | Do Program End
+    
+    Do = "do"
+    End = "end"
       
     PipedBlock
       = "{" PipeVars? Program "}"

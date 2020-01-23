@@ -59,8 +59,10 @@ class RangeLiteral extends Tree {
 }
 
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
-  Program: (_pre: Node, list: Node, _post: Node) =>
-    new Program(list.tree),
+  Program: (prog: Node) => 
+    new Program(prog.tree),
+  StmtList: (_pre: Node, list: Node, _post: Node) => list.tree,
+  EmptyProgram: (_mt: Node) => new Sequence([]),
   Stmt: (_pre: Node, expr: Node) => expr.tree,
   Defclass_plain: (_class: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree),

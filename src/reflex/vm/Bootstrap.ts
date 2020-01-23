@@ -122,6 +122,10 @@ kernelMethods.set("import", new WrappedFunction(
   `Kernel.import`,
   (machine: Machine, filename: string) => machine.import(filename))
 )
+kernelMethods.set("rand", new WrappedFunction(
+  `Kernel.rand`,
+  (_machine: Machine, max: number) => Math.round(Math.random()*max)
+));
 kernelMethods.set("include", new WrappedFunction(
   `Kernel.include`,
   (_machine: Machine, theModule: ReflexObject, theSelf: ReflexObject) => {
