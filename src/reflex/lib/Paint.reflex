@@ -1,11 +1,11 @@
 class Color {}
-class Paint {
-    meta.instanceEval {
+class Paint
+    meta.instanceEval do
         code(value) { "\u001b[" + value + "m" }
         apply(color, msg) {
             code(color) + msg  + code('0')
         }
-    }
+    end
 
     red(msg) { Paint.apply('31', msg) }
     green(msg) { Paint.apply('32', msg) }
@@ -19,4 +19,4 @@ class Paint {
         colors = ['31','32','33','34']
         msg.split(' ').map { |word| Paint.apply(colors.sample(), word)}.join(' ')
     }
-}
+end

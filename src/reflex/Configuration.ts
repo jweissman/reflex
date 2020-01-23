@@ -1,5 +1,6 @@
 let doTrace = false;
 export class Configuration {
     trace: boolean = !!process.env.trace || doTrace;  // per-instruction debug logging
+    traceDepth: number = 4;                           // how deep to trace...
     // delay: number = -1;                            // pause between instructions in seconds 
 }

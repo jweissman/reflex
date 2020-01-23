@@ -19,14 +19,17 @@ end
  *
  * The class of classes.
  */
-class Class {
-    isDescendantOf(other) { other.isAncestorOf(self) }
+class Class
+    def isDescendantOf(other)
+      other.isAncestorOf(self)
+    end
+
     isKindOf(other) { other == self || other.isAncestorOf(self) }
     auto(&b) { meta.instanceEval(b) }
     include(mod) { mod.inject(self) }
     // call(...args) { new(args)
     // meta.instanceEval { call}
-}
+end
 
 /**
  * Function

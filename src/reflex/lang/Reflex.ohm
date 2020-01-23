@@ -113,6 +113,7 @@ Reflex {
       
     PipedBlock
       = "{" PipeVars? Program "}"
+      | Do PipeVars? Program End
 
     PipeVars
       = "|" ListOf<Param,","> "|"

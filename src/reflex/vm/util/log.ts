@@ -8,8 +8,9 @@ export function log(message: string) {
     }
 }
 
+// let traceDepth = 2
 export function debug(message: string, frames: Frame[]) {
-    if (Reflex && Reflex.trace) {
+    if (Reflex && Reflex.trace && frames.length < Reflex.config.traceDepth) {
         let msg = chalk.white(message);
         if (frames) {
             msg = chalk.black(

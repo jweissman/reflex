@@ -4,9 +4,9 @@ import { log, debug } from '../util/log';
 import { Frame } from '../Frame';
 import { Stack } from '../Stack';
 import { dump } from '../util/dump';
+import Reflex from '../../Reflex';
 let lastStack: Stack = [];
 // let lastMethod: string | undefined = '[none]';
-const traceDepth = 3
 
 export function trace(message: string, instruction: Instruction, frames: Frame[]) {//}, stack: Stack) {
     let frame = frames[frames.length - 1]
@@ -34,5 +34,5 @@ export function trace(message: string, instruction: Instruction, frames: Frame[]
     ]//.join("\n");
     lastStack = [...stack];
     // lastMethod = method;
-    if (msg.length && frames.length < traceDepth) debug(msg.join("\n"), frames);
+    if (msg.length && frames.length < Reflex.config.traceDepth) debug(msg.join("\n"), frames);
 }
