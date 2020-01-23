@@ -2,14 +2,17 @@
  * class Object
  * The class of everything!
  */
-class Object {
-    neq(other) { self.eq(other).negate() }
+class Object
+    def neq other
+      self.eq(other).negate()
+    end
+
     isA(klass) { self.isInstanceOf(klass) }
     nil() { false }
     true() { true }
     false() { Boolean.negate(self.true()) }
     toString() { self.inspect() }
-}
+end
 
 /*
  * Class

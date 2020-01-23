@@ -1,9 +1,9 @@
 Reflex {
     Program
       = StmtList
-      | EmptyProgram
+      // | EmptyProgram
     StmtList = delim* ListOf<Stmt, delim> delim*
-    EmptyProgram = delim*
+    // EmptyProgram = delim*
     Stmt = delim* Expr
       
     Expr =
@@ -105,6 +105,8 @@ Reflex {
     Block 
       = "{" Program "}"
       | Do Program End
+      
+    PartBlock = Program End
     
     Do = "do"
     End = "end"
@@ -168,10 +170,22 @@ Reflex {
       | CmpExpr
 
     Defclass
-      = Class ClassName ExtendsClass Block -- extends
-      | Arch ClassName ExtendsClass Block -- arch_extends
-      | Class ClassName Block -- plain
-      | Arch ClassName Block -- arch_plain
+      = ClassDefinition
+      | SubclassDefinition
+      
+    SubclassDefinition
+      = Class ClassName ExtendsClass Block //-- extends
+	    | Arch ClassName ExtendsClass Block //-- arch_extends
+      // = Class ClassName ExtendsClass PartBlock //-- partExtends
+      
+      ClassDefinition
+      = PlainClass //
+      | Arch ClassName Block -- arch
+      // = 
+    
+    PlainClass
+      = Class ClassName Block //-- plain
+      | Class ClassName PartBlock //-- partPlain
     
     Arch
       = ~("A".."Z") ident
@@ -187,9 +201,12 @@ Reflex {
 
     Extends
       = "<"
-
+    
     Defun
-      = FunctionName FormalParams Block
+      = FunctionName FormalParams Block -- formal
+      | Def FunctionName (BareParams | FormalParams) PartBlock -- doEnd
+      
+    Def = "def"
 
     FunctionName
       = ident
@@ -197,7 +214,7 @@ Reflex {
     Message
       = ~Keyword ident
       
-    Keyword = If | Else | Unless | Then | While | Until
+    Keyword = Do | End | If | Else | Unless | Then | While | Until
 
     Bareword
       = Message

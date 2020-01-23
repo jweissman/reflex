@@ -62,19 +62,23 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Program: (prog: Node) => 
     new Program(prog.tree),
   StmtList: (_pre: Node, list: Node, _post: Node) => list.tree,
-  EmptyProgram: (_mt: Node) => new Sequence([]),
+  // EmptyProgram: (_mt: Node) => new Sequence([]),
   Stmt: (_pre: Node, expr: Node) => expr.tree,
-  Defclass_plain: (_class: Node, name: Node, block: Node) =>
+  PlainClass: (_class: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree),
-  Defclass_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
-    new Defclass(name.tree, block.tree, superclass.tree),
-  Defclass_arch_plain: (arch: Node, name: Node, block: Node) =>
+  ClassDefinition_arch: (arch: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree, new Bareword(capitalize(arch.sourceString))),
-  Defclass_arch_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
+  SubclassDefinition: (_class: Node, name: Node, superclass: Node, block: Node) =>
     new Defclass(name.tree, block.tree, superclass.tree),
+  // Defclass_arch_plain: (arch: Node, name: Node, block: Node) =>
+  //   new Defclass(name.tree, block.tree, new Bareword(capitalize(arch.sourceString))),
+  // Defclass_arch_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
+  //   new Defclass(name.tree, block.tree, superclass.tree),
   ClassName: (id: Node) => new Message(id.sourceString),
   ExtendsClass: (_extends: Node, name: Node) => name.tree,
-  Defun: (name: Node, params: Node, block: Node) =>
+  Defun_formal: (name: Node, params: Node, block: Node) =>
+    new Defun(name.tree, params.tree, block.tree),
+  Defun_doEnd: (_def: Node, name: Node, params: Node, block: Node) =>
     new Defun(name.tree, params.tree, block.tree),
   FunctionName: (id: Node) => new Message(id.sourceString),
   PipedBlock: (_lb: Node, pipeVars: Node, block: Node, _rb: Node) => {
@@ -91,6 +95,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Arg_ref: (_amp: Node, expr: Node) => new Argument(expr.tree, true),
   Arg: (expr: Node) => expr.tree instanceof Argument ? expr.tree : new Argument(expr.tree, false),
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
+  PartBlock: (body: Node, _rb: Node) => body.tree,
   ObjectDot_dot: (receiver: Node, _dot: Node, message: Node, _andDot: Node) => new SendMessage(receiver.tree, message.tree),
   EqExpr_send_eq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) => new SendMessageEq(receiver.tree, message.tree, expr.tree),
   CoreExpr_funcall: (fn: Node, args: Node) => new Barecall(new Bareword(fn.tree.key), args.tree),
