@@ -365,7 +365,7 @@ export class Controller {
         // log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
         // debug("with block: " + withBlock)
         // debug("source: " + fn.source)
-        debug("Call reflex " + fn + " with args: " + args, this.frames)
+        // debug("Call reflex " + fn + " with args: " + args, this.frames)
         // debug("looking for label: " + fn.label)
         if (!fn?.name?.match(/_setup/)) { debugger; }
         // let locals: Store = {};

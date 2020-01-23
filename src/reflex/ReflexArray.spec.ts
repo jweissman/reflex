@@ -103,7 +103,12 @@ describe('Array', () => {
             })
             it('chains', () => {
                 expect(evaluate("[1,2,3,4,5].map{|v|v*2}.map{|v|v-1}.collect()")).toEqual([1,3,5,7,9])
-
+            })
+            xit('reverse map is map reverse', () => {
+                evaluate('sq=x=>x*x')
+                expect(
+                    evaluate("[1,2,3,4,5].map(&sq).reverse().eq([1,2,3,4,5].reverse().map(&sq))")
+                ).toEqual(true)
             })
         })
 
@@ -147,6 +152,28 @@ describe('Array', () => {
 
             it('inserts delim', () => {
                 expect(evaluate("['hi', 'there'].join(' ')")).toEqual("hi there")
+            })
+        })
+
+        describe('select', () => {
+            it('finds elements matching predicate', () => {
+                expect(evaluate("[1,2,3].select { |x| x%2==0 }")).toEqual([2])
+            })
+        })
+
+        describe('includes', () => {
+            it('returns true if any element matches', () => {
+                expect(evaluate("[1,2,3].includes(1)")).toEqual(true)
+                expect(evaluate("[1,2,3].includes(2)")).toEqual(true)
+                expect(evaluate("[1,2,3].includes(3)")).toEqual(true)
+                expect(evaluate("[1,2,3].includes(4)")).toEqual(false)
+            })
+        })
+
+        describe('subtract', () => {
+            xit('removes all elements matching any element in other array', () => {
+                expect(evaluate("[1,2,3]-[2]")).toEqual([1,3])
+                expect(evaluate("[1,2,3,4,5]-[1,5]")).toEqual([2,3,4])
             })
         })
     })

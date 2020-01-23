@@ -112,6 +112,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Param_ref: (_amp: Node, word: Node) => new Parameter((word.tree as Bareword).word, true),
   EqExpr_local_eq: (message: Node, _eq: Node, expr: Node) => new LocalVarSet(message.tree, expr.tree),
   Message: (contents: Node) => new Message(contents.sourceString),
+  Name: (contents: Node) => new Message(contents.sourceString),
   Bareword: (word: Node) => new Bareword((word.tree as Message).key),
   CasualCall_obj: (objDot: Node, _dot: Node, msg: Node, args: Node) => new SendMethodCall(objDot.tree, msg.tree, Arguments.from(args.tree)),
   CasualCall_msg: (message: Node, args: Node) => new Barecall(message.tree, args.tree),

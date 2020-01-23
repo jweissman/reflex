@@ -231,6 +231,12 @@ stringMethods.set("toArray", new WrappedFunction("String.toArray", (machine: Mac
 stringMethods.set("eq", new WrappedFunction("String.eq", (machine: Machine, other: string) =>
   (machine.boundSelf! as ReflexString).value === other
 ))
+stringMethods.set("upcase", new WrappedFunction("String.upcase", (machine: Machine, other: string) =>
+  (machine.boundSelf! as ReflexString).value.toUpperCase()
+))
+stringMethods.set("downcase", new WrappedFunction("String.downcase", (machine: Machine, other: string) =>
+  (machine.boundSelf! as ReflexString).value.toLowerCase()
+))
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>

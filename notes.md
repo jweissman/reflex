@@ -938,3 +938,11 @@ class Printer
   on_warning(msg) { puts "WARN: " + msg }
 end
 ```
+
+
+------------
+
+somewhat perilously, we have altered the grammar to be more flexible and support ruby-style do/end blocks
+this will hopefully aid readability/clarity but -- i think the official position is that it's a matter of taste, and do what you like, but maybe keep within a single style in a single codebase etc
+
+---

@@ -63,8 +63,8 @@ Reflex {
         | ObjectExpr
       
      ObjectExpr
-       = ObjectDot "." Message CarefulArguments -- call
-       | ObjectDot "." Message -- dot
+       = ObjectDot "." Name CarefulArguments -- call
+       | ObjectDot "." Name -- dot
        | CoreExpr
        
      CoreExpr =
@@ -77,10 +77,10 @@ Reflex {
        | Bareword
 
     CarefulCall
-      = ObjectDot "." Message CarefulArguments
+      = ObjectDot "." Name CarefulArguments
       
     CasualCall
-      = ObjectDot "." Message CasualArguments -- obj
+      = ObjectDot "." Name CasualArguments -- obj
       | PriExpr CasualArguments -- msg
       
     CarefulArguments
@@ -210,10 +210,13 @@ Reflex {
     Def = "def"
 
     FunctionName
-      = ident
+      = Name
 
     Message
       = ~Keyword ident
+    
+    Name
+      = ident
       
     Keyword = Do | End | If | Else | Unless | Then | While | Until
 
