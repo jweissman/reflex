@@ -101,6 +101,10 @@ describe('Array', () => {
                 expect(evaluate("[1,2,3,4,5].map{|v|v*2}.collect()")).toEqual([2,4,6,8,10])
                 expect(evaluate("[1,2,4,8,16].map(&(v=>v*2)).collect()")).toEqual([2,4,8,16,32])
             })
+            it('chains', () => {
+                expect(evaluate("[1,2,3,4,5].map{|v|v*2}.map{|v|v-1}.collect()")).toEqual([1,3,5,7,9])
+
+            })
         })
 
         describe('reduce', () => {

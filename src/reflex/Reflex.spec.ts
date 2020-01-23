@@ -23,6 +23,9 @@ describe('Reflex', () => {
            it('enumerates', () => { 
                expect(evaluate("(1..20).step(3).map { |x| x*x + 2*x + 1 }.collect()")).toEqual([4,25,64,121,196,289,400])
            })
+           it('enumerates in reverse', () => { 
+               expect(evaluate("(20..1).step(4).collect()")).toEqual([20,16,12,8,4])
+           })
        })
 
        test.todo("hash") 
@@ -78,11 +81,11 @@ describe('Reflex', () => {
 
                 it('eachlike', () => {
                     evaluate('a=[1,2,3]')
-                    evaluate(`each(&eachBlock) {
+                    evaluate(`eachlike(&eachBlock) {
                         0.upto(a.length() - 1) { |i| element = a.get(i); eachBlock(element) }
                     }`)
                     evaluate('x=0')
-                    evaluate('each { |i| x=x+i }')
+                    evaluate('eachlike { |i| x=x+i }')
                     expect(evaluate('x')).toEqual(6)
                 })
 
@@ -642,7 +645,7 @@ describe('Reflex', () => {
         expect(out()).toEqual("\u001b[31mtown\u001b[0m")
     })
 
-    xit('poetry', () => {
+    it('poetry', () => {
         expect(()=>evaluate("using 'examples/poem'")).not.toThrow()
     })
 

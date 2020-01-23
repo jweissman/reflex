@@ -122,15 +122,29 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
-class Iterator {}
+class Iterator {
+    init() {
+        self.index = 0;
+        self.exhausted = false;
+    }
+    next() {
+        if (!self.exhausted) {
+            val=self.curr()
+            self.advance()
+            val
+        } else {
+            fail 'stop iteration'
+        }
+    }
+
+    curr() { fail "Implement Iterator#curr in " + self.class }
+}
 
 class ArrayIterator < Iterator {
     init(arr) {
         self.array = arr
         self.index = 0;
-        self.indicate = false;
         self.exhausted = false;
-        // self.mapFn = i=>i
     }
 
     advance() {
@@ -140,39 +154,43 @@ class ArrayIterator < Iterator {
         }
     }
 
-    next() {
-        if (!self.exhausted) {
-            val=self.array.get(self.index)
-            self.advance()
-            val
-        } else {
-        //   nil
-            fail 'stop iteration'
+    curr() { self.array.get(self.index) }
+}
+
+class RangeIterator < Iterator {
+    init(range) {
+        self.range = range;
+        self.index = range.start;
+        self.exhausted = false;
+    }
+
+    advance() {
+        step = range.inc * range.dir
+        self.index = self.index + step;
+        if (range.dir == 1 && self.index > range.stop) {
+            self.exhausted = true;
+        }
+        if (range.dir == -1 && self.index < range.stop) {
+            self.exhausted = true;
         }
     }
+
+    curr() { self.index }
 }
 
 id = z=>z
 class Enumerator {
-    init(enumerable) {
-        self.it = ArrayIterator.new(enumerable)
-        // if (source.isA(Enumerable)) {
-        // }
-        //self.enumerable = enumerable;
-        //self.index = 0;
+    init(it) {
+        self.it = it
         self.indicate = false;
-        //self.exhausted = false;
-        self.mapFn = id
+        // self.mapFn = id
     }
+
     map(&fn) {
-       if (self.mapFn == id) {
-          self.mapFn = fn
-       } else {
-           oldFn = self.mapFn
-           self.mapFn = arg => fn(oldFn(arg))
-       }
-       self
+    //    mapSelf = EnumIterator.new(self,mapFn)
+       MappedEnumerator.new(self, fn)
     }
+
     withIndex(&b) {
         self.indicate = true;
         if (block_given) {
@@ -183,7 +201,7 @@ class Enumerator {
 
     each(&b) { if (block_given) { self.call(&b) } else { self } }
     next() {
-        self.mapFn(self.it.next())
+        self.it.next()
     }
     call(&b) {
         self.tilExhausted(&b)
@@ -194,8 +212,9 @@ class Enumerator {
         arr
     }
     toArray() { self.collect() }
+    isExhausted() { self.it.exhausted }
     tilExhausted(&block) {
-        until (self.it.exhausted) {
+        until (self.isExhausted()) {
             if (self.indicate) {
                 block(self.next(), self.it.index)
             } else {
@@ -203,6 +222,19 @@ class Enumerator {
             }
         }
     }
+}
+
+class MappedEnumerator < Enumerator {
+    init(underylingEnum, mapFn) {
+        self.underlyingEnum = underylingEnum
+        self.mapFn = mapFn
+        super.init(underylingEnum.it)
+    }
+    isExhausted() { self.underlyingEnum.isExhausted() }
+    next() {
+        self.mapFn(self.underlyingEnum.next())
+    }
+    inspect() { "MappedEnum["+mapFn+" over " +underlyingEnum.inspect() +"]"}
 }
 
 class Module {
@@ -213,9 +245,11 @@ module Enumerable {
     map(&mapFn) { self.each().map(&mapFn) }
     collect() { self.each().collect() }
     first() { self.collect().first() }
+    last() { self.collect().last() }
     rest() { self.collect().rest() }
 
-    // 'hard eval' def which falls back to toArray
+    // 'hard eval' def which falls back to toArray...
+    // with yield semantics this could be more efficient!
     each(&b) {
         if (block_given) { self.toArray().each(&b) }
         else { self.toArray().each() }
@@ -264,9 +298,10 @@ class Array {
     toArray() { self }
 
     each(&b) {
-        it = Enumerator.new(self)
-        if (block_given) { it(&b) }
-        it
+        it = ArrayIterator.new(self)
+        enum = Enumerator.new(it)
+        if (block_given) { enum(&b) }
+        enum
     }
     
     split(sep, &blk) {
@@ -294,6 +329,7 @@ class Array {
     }
 
     first() { self.get(0) }
+    last() { self.get(self.length()-1) }
     rest() {
         rst=[]
         1.upto(self.length()-1) { |i| rst.push(self.get(i)) }
@@ -350,9 +386,9 @@ class String {
     //    else { self.toArray().each() }
     //}
 
-    reverse() { self.toArray().reverse().join() }
+    // reverse() { self.toArray().reverse().join() }
 
-    get(i) { self.toArray().get(i) }
+    get(i) { self.split('').get(i) }
 
     add(other) { self.concat(other) }
     multiply(other) {
@@ -372,18 +408,22 @@ class String {
  */
 class Range {
     include Enumerable
-    init(start,stop) { self.start=start; self.stop=stop; self.inc=1 }
+    init(start,stop) {
+        self.start=start;
+        self.stop=stop;
+        self.inc=1;
+        self.dir=self.start<self.stop?1:-1;
+    }
     inspect() { start + ".." + stop }
     step(i) { self.inc=i; self }
-    toArray() {
-        arr = []
-        i = self.start;
-        while (i <= self.stop) {
-           arr.push(i)
-           i = i + self.inc
-        }
-        arr
+    each(&b) {
+        it = RangeIterator.new(self)
+        enum = Enumerator.new(it)
+        if (block_given) { enum(&b) }
+        enum
     }
+    
+    toArray() { self.collect() }
     call(&block) { self.each(&block) }
 }
 

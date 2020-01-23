@@ -444,10 +444,11 @@ export class Controller {
         // this.pop();
         if (obj instanceof ReflexObject) {
             if (recv instanceof ReflexObject) {
-                if (this.frames[this.frames.length - 1].self === recv) {
+                let frameSelf = this.frame.self
+                if (frameSelf.self === recv.self) {
                     recv.set(k, obj)
                 } else {
-                    throw new Error("can't set attrs on nonself")
+                    throw new Error("frame self (" + frameSelf + ") can't set attrs on nonself (" + recv.self + ")")
                 }
             } else {
                 fail("send_eq expects top to be receiver (got: " + recv + ")")
