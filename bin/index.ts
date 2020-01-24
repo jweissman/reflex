@@ -1,7 +1,6 @@
 #!/usr/bin/env ts-node --project tsconfig.production.json
 
 import reflex from '../src/reflex';
-// let refl = new Refl();
 
 const args = process.argv.slice(2);
 if (args.length === 0) {

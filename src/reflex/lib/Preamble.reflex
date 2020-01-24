@@ -105,11 +105,6 @@ class Number {
             it(&timesBlock)
         }
         it
-        //counter = self;
-        //until (counter.zero()) {
-        //    counter = counter - 1;
-        //    timesBlock()
-        //}
     }
 
     upto(stop,&block) {
@@ -117,6 +112,8 @@ class Number {
         r.each(&block) if block_given
         r
     }
+    // really just alias
+    downto(stop,&block) { self.upto(stop,&block) if block_given else self.upto(stop) }
 }
 
 class Integer < Number {}
@@ -151,38 +148,45 @@ module Enumerable {
         else { self.toArray().each() }
     }
 
-    eachWithIndex(&b) {
-        it = self.each().withIndex()
-        if (block_given) { it(&b) }
-        it
-    }
-
-    // all() { self.collect()}
     size() { self.collect().length() }
     sample() { self.collect().get(Kernel.rand(self.size()-1))}
     reverse() { self.collect().reverse() }
     includes(v) { self.collect().includes(v) }
     select(&b) { self.collect().select(&b) }
-    detect(&b) { self.collect().detect(&b) }
-    any(&b) { self.collect().any(&b) }
+    detect(&b) { self.each().detect(&b) }
+    any(&b) { self.each().any(&b) }
+    zip(&b) { self.each().zip(&b) }
 
     join(delim) { self.collect().join(delim) }
+    withIndex(&b) {
+        puts "Enumerable.withIndex"
+        indexed = self.each().withIndex()
+        if (block_given) { indexed(&b) }
+        indexed
+    }
+    eachWithIndex(&b) {
+       puts "Enumerable.eachWithIndex"
+       indexed = self.each().withIndex()
+       if (block_given) { indexed(&b) }
+       indexed
+    }
 }
 
 class Iterator {
-    // include Enumerable
-    init() {
+    include Enumerable
+    init(indexed) {
         self.index = 0;
-        self.indicate = false;
         self.exhausted = false;
     }
 
     withIndex(&b) {
-        self.indicate = true;
-        if (block_given) {
-            self.call(&b)
-        }
-        self
+       puts "Iterator.withIndex"
+       enum = Enumerator.new(self).withIndex()
+       if (block_given) {
+           puts "Iterator.withIndex --- got block! running..."
+          enum(&b)
+       }
+       enum
     }
 
     next() {
@@ -198,13 +202,20 @@ class Iterator {
     curr() { fail "Implement Iterator#curr in " + self.class }
     isExhausted() { self.exhausted }
     call(&block) {
-        until (self.isExhausted()) {
-            if (self.indicate) {
-                block(self.next(), self.index)
-            } else {
-                block(self.next())
+        puts "--- call enumerator: " + self.inspect()
+        if (block_given) {
+            until (self.isExhausted()) {
+            // if (self.indicate) {
+            //     block(self.next(), self.index)
+            // } else {
+            block(self.next())
+            // }
             }
+            // self
+        } else {
+            self
         }
+        
     }
     toArray() {
         arr=[]
@@ -257,19 +268,30 @@ class Enumerator {
     include Enumerable
     init(it) {
         self.it = it
-        self.indicate = false;
+        // self.indicate = false;
     }
 
     map(&fn) {
        MappedEnumerator.new(self, fn)
     }
 
+    // zip(other) {
+    //    space = other.each()
+    //    enum = MappedEnumerator.new(self, e=>[e,space.next()])
+    //    if (block_given) { enum(&block) }
+    //    enum
+    // }
+
     withIndex(&b) {
-        self.indicate = true;
-        if (block_given) {
-            self.call(&b)
-        }
-        self
+    //    if (block_given) {
+    //      self.zip(1..Infinity, &b)
+    //    } else {
+    //      self.zip(1..Infinity)
+    //    }
+       space = (1..Infinity).each()
+       enum = MappedEnumerator.new(self, (e) => [e,space.next()])
+       if (block_given) { enum(&block) }
+       enum
     }
 
     each(&b) { if (block_given) { self.call(&b) }; self } // else { self } }
@@ -317,11 +339,11 @@ class Enumerator {
     isExhausted() { self.it.exhausted }
     tilExhausted(&block) {
         until (self.isExhausted()) {
-            if (self.indicate) {
-                block(self.next(), self.it.index)
-            } else {
-                block(self.next())
-            }
+            // if (self.indicate) {
+                block(self.next()) //, self.it.index)
+            // } else {
+            //     block(self.next())
+            // }
         }
     }
     // tilConditionOrExhausted(cond,&block) {
@@ -370,7 +392,6 @@ class Array {
 
     includes(item) {
         self.any { |e|
-            // puts "Array.includes: test e " + e.inspect() + " == " + item.inspect()
             e == item
         }
     }
@@ -513,6 +534,7 @@ class Range {
         self.inc=1;
         self.dir=self.start<self.stop?1:-1;
     }
+    length() { stop - start }
     inspect() { start + ".." + stop }
     step(i) { self.inc=i; self }
     each(&b) {

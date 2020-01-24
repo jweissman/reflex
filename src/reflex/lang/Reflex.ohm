@@ -16,12 +16,12 @@ Reflex {
       | AlgExpr
 
      EqExpr =
-       | ObjectDot "." Message "=" Expr -- send_eq
+       | ObjectDot "." Name "=" Expr -- send_eq
        | Message "=" Expr -- local_eq
        
      ObjectDot
-       = ObjectDot "." Message CarefulArguments &"." -- call 
-       | ObjectDot "." Message &"." -- dot
+       = ObjectDot "." Name CarefulArguments &"." -- call 
+       | ObjectDot "." Name &"." -- dot
        | CoreExpr
     
     AlgExpr =

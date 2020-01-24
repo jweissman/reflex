@@ -946,3 +946,37 @@ somewhat perilously, we have altered the grammar to be more flexible and support
 this will hopefully aid readability/clarity but -- i think the official position is that it's a matter of taste, and do what you like, but maybe keep within a single style in a single codebase etc
 
 ---
+
+```
+archetype Props = { name: String }
+component HelloApp<Props>
+  def show props
+    <div className='hello'>
+      <p>Hi there, {props.name}</p>
+    </div>
+  end
+end
+```
+
+```
+archetype Model = Integer
+archetype Increment = 'inc'
+archetype Decrement = 'dec'
+archetype Message = Increment | Decrement
+def update(model, message)
+  case message
+    when Increment then model+1
+    when Decrement then model-1
+  end
+end
+
+def render(model)
+  <div className='counter'>
+    {model}
+    <button onClick={Increment}>+</button>
+    <button onClick={Decrement}>-</button>
+  </div>
+end
+
+App.start 0, render, update
+```

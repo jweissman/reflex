@@ -11,5 +11,5 @@ class Greeter
     end
 end
 
-greeter = Greeter.new()
+greeter = Greeter.new();
 puts greeter.greet paint.green("world")+"!"
