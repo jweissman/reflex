@@ -47,6 +47,7 @@ export class Controller {
             case 'pop': this.pop(); break;
             case 'mark': this.mark(value as string); break;
             case 'sweep': this.sweep(value); break;
+            case 'gather': this.gather(value); break;
             case 'call': this.call(); break;
             case 'ret': this.ret(); break;
             case 'compile': this.compile(value as Tree); break;
@@ -159,33 +160,46 @@ export class Controller {
     ) {
         let top = this.stack[this.stack.length - 1];
         this.pop();
-        // log("INVOKE " + top + " WITH ARITY " + arity + " (stack len is " + this.stack.length + ")");
+        debug("INVOKE " + top + " WITH ARITY " + arity, this.frames);
+        log("stack is " + dump(this.stack))
+
         let args: Value[] = [];
         let foundBlock = false;
         let block;
-        for (let i = 0; i < arity; i++) {
-            if (this.stack.length===0) { //newTop === undefined) {
-                log("NO ARG FOR PARAM " + i + ", passing nil...")
-                args.push(getLocal('nil', this.frames))
-            } else {
-                let newTop = this.stack[this.stack.length - 1];
-                if (newTop instanceof Reference) {
-                    if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top) }
-                    foundBlock = true;
-                    block = newTop;
+        let argStack: Value[] = []
+        if (!Array.isArray(this.stack[this.stack.length - 1])) {
+            debug("Args wasn't array: " + this.stack[this.stack.length - 1], this.frames);
+        } else {
+            argStack = [...this.stack[this.stack.length - 1] as Value[]];
+            this.pop();
+        }
+
+        if (arity > 0 || withBlock) {
+            log(top + "GOT ARG STACK: " + argStack)
+            for (let i = 0; i < arity; i++) {
+                if (argStack.length === 0) { //newTop === undefined) {
+                    log("NO ARG FOR PARAM " + i + ", passing nil...")
+                    args.push(getLocal('nil', this.frames))
                 } else {
-                    args.push(newTop);
+                    let newTop = argStack[argStack.length - 1];
+                    if (newTop instanceof Reference) {
+                        if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top) }
+                        foundBlock = true;
+                        block = newTop;
+                    } else {
+                        args.push(newTop);
+                    }
+                    argStack.pop();
                 }
-                this.pop();
             }
-        }
-        if (foundBlock) {
-            args.push((block as Reference))
-            withBlock = true;
-        }
-        if (withBlock && !foundBlock) {
-            args.push(this.stack[this.stack.length - 1])
-            this.pop()
+            if (foundBlock) {
+                args.push((block as Reference))
+                withBlock = true;
+            }
+            if (withBlock && !foundBlock) {
+                args.push(argStack[argStack.length - 1]); //this.stack[this.stack.length - 1])
+                argStack.pop()
+            }
         }
 
         // debug(this.frame.currentMethod?.name + ":\tCall " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","))
@@ -213,6 +227,7 @@ export class Controller {
                 );
             }
 
+            log("INVOKE JS METHOD " + top + " WITH ARGS " + args)
             let result = top.impl(this.machine, ...args);
             if (result !== undefined) {
                 let toPush = this.converter.castJavascriptToReflex(result);
@@ -223,7 +238,8 @@ export class Controller {
             }
         } else if (top instanceof ReflexObject) {
             let call = top.send('call');
-            args.reverse().forEach(arg => this.push(arg))
+            // args.reverse().forEach(arg => this.push(arg))
+            this.push(args)
             if (call instanceof WrappedFunction) { call.bind(top) }
             if (call instanceof ReflexFunction) { call.frame.self = top }
             this.push(call);
@@ -253,17 +269,11 @@ export class Controller {
         }
     }
 
-    private enableMarkSweep: boolean = true
     protected mark(value: string) {
-        // log("WOULD MARK FOR " + value)
-        if (this.enableMarkSweep) {
-            this.push(new Stone(value));
-        }
+        this.push(new Stone(value));
     }
 
     protected sweep(value: Value) {
-        // log("WOULD SWEEP FOR " + value)
-        if (this.enableMarkSweep) {
             while (!this.stackIsEmpty()) {
                 let top = this.stack[this.stack.length - 1];
                 this.pop();
@@ -273,7 +283,22 @@ export class Controller {
                     }
                 }
             }
+    }
+
+    protected gather(value: Value) {
+        let gathered = []
+        while (!this.stackIsEmpty()) {
+            let top = this.stack[this.stack.length - 1];
+            this.pop();
+            if (top instanceof Stone) {
+                if (top.name === value) {
+                    break;
+                }
+            } else {
+                gathered.push(top)
+            }
         }
+        this.push(gathered.reverse())
     }
 
     protected call() {
@@ -459,6 +484,7 @@ export class Controller {
     }
 
     dispatch(message: string, object: ReflexObject) { //}, doRet?: boolean) {
+        this.push([]);
         this.push(object);
         this.push(message);
         this.call();

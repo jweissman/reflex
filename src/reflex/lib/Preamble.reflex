@@ -529,10 +529,13 @@ class String {
 class Range {
     include Enumerable
     init(start,stop) {
+        // puts "NEW RANGE FROM " + start + " to " + stop
         self.start=start;
         self.stop=stop;
         self.inc=1;
+        // puts "INC: " + self.inc
         self.dir=self.start<self.stop?1:-1;
+        // puts "DIR: " + self.dir
     }
     length() { stop - start }
     inspect() { start + ".." + stop }

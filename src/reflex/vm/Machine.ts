@@ -7,7 +7,7 @@ import { fail } from './util/fail';
 import { trace } from './instruction/trace';
 import Reflex from '../Reflex';
 import { State } from './State';
-import { debug } from "./util/log";
+import { debug, log } from "./util/log";
 import Controller from "./Controller";
 import { Loader } from "./Loader";
 
@@ -116,8 +116,10 @@ export default class Machine {
     }
 
     doInvoke(ret: ReflexObject | undefined, fn: ReflexFunction, ...args: ReflexObject[]) {
-        args.forEach(arg => this.stack.push(arg))
+        // args.forEach(arg => this.stack.push(arg))
+        this.stack.push(args)
         this.stack.push(fn)
+        debug("DO INVOKE " + fn + " WITH ARGS " + args, this.frames)
         this.controller.invoke(fn.arity, false, ret);
     }
 

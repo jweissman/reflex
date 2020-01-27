@@ -1,19 +1,24 @@
 import Tree from "./Tree";
 import { Code } from "../../vm/instruction/Instruction";
 export class NumberLiteral extends Tree {
-  constructor(public value: number, public float: boolean = false) { super(); }
-  inspect(): string {
-    return this.value.toString();
-  }
-  get code(): Code {
-    return [
-      ['push', this.value],
+  code: Code;
+  constructor(public literalValue: number, public float: boolean = false) {
+    super();
+    // console.log("GEN CODE FOR NUM LIT: " + this.literalValue)
+    if (typeof this.literalValue !== 'number') {
+      throw new Error("Number literal must be a number, got: " + this.literalValue)
+    }
+    this.code = [
+      ['push', [this.literalValue]],
       ['bare', this.float ? 'Float' : 'Integer'],
       ['push', 'new'],
       ['call', null],
       ['invoke', 1],
-    //   ['dispatch', 'new'],
     ];
-    // throw new Error("NumberLiteral.code -- Method not implemented.");
+    // console.log
+  }
+
+  inspect(): string {
+    return this.literalValue.toString();
   }
 }

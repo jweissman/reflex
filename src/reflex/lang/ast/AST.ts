@@ -34,7 +34,9 @@ class ArrayLiteral extends Tree {
   inspect(): string { return "[" + this.seq.inspect() + "]"; }
   get code(): Code {
     return [
+      ['mark', 'arr-args'],
       ...this.seq.items.reverse().flatMap(it => it.code),
+      ['gather', 'arr-args'],
       ['bare', 'Array'],
       ['push', 'new'],
       ['call', null],
@@ -48,8 +50,10 @@ class RangeLiteral extends Tree {
   inspect(): string { return this.start + ".." + this.stop; }
   get code(): Code {
     return [
+      ['mark', 'rng-args'],
       ...this.stop.code,
       ...this.start.code,
+      ['gather', 'rng-args'],
       ['bare', 'Range'],
       ['push', 'new'],
       ['call', null],

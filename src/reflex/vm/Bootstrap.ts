@@ -62,10 +62,16 @@ objectMethods.set("send", new WrappedFunction(`Object.send`,
         ...args
       );
     } else if (fn instanceof WrappedFunction) { //} || fn instanceof WrappedFunction) {
+      return machine.doInvoke(
+        undefined,
+        fn as unknown as ReflexFunction,
+        ...args
+      );
       // throw new Error("send wrapped fn not impl -- " + message)
-      args.forEach(arg => machine.stack.push(arg))
-      machine.stack.push(fn)
-      machine.controller.invoke(args.length, false);
+      // args.forEach(arg => machine.stack.push(arg))
+      // machine.stack.push(args)
+      // machine.stack.push(fn)
+      // machine.controller.invoke(args.length) //, false);
 
     } else {
       throw new Error("Not a function -- " + message)

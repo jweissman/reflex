@@ -17,7 +17,9 @@ export class Binary extends Tree {
       '%': 'modulo',
     };
     return [
+      ['mark', 'bin'],
       ...this.right.code,
+      ['gather', 'bin'],
       ...this.left.code,
       ['push', opMap[this.op]],
       ['call', null],

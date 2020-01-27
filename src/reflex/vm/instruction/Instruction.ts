@@ -31,6 +31,7 @@ export type Op
   | 'compile' 
   | 'mark'
   | 'sweep'
+  | 'gather'
 
 export const prettyValue = (v: Value) => {
   if (v === undefined) { return chalk.bgRed('<undef>');}
@@ -67,7 +68,7 @@ export const prettyInstruct = (inst: Instruction) => {
   if (op === 'label') {
     return chalk.gray(value) + ":"
   } else {
-    return [chalk.gray(op), chalk.gray(value)].join(' ')
+    return [chalk.gray(op), prettyValue(value)].join(' ')
   }
 }
 export type Code = Instruction[]

@@ -18,7 +18,9 @@ export class Compare extends Tree {
       '<=': 'lte',
      };
     return [
+      ['mark', 'cmp-arg'],
       ...this.right.code,
+      ['gather', 'cmp-arg'],
       ...this.left.code,
       ['push', ops[this.op]],
       ['call', null],

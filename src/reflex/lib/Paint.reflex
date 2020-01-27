@@ -7,6 +7,7 @@ class Paint
         }
     end
 
+    black(msg) { Paint.apply('30', msg) }
     red(msg) { Paint.apply('31', msg) }
     green(msg) { Paint.apply('32', msg) }
     yellow(msg) { Paint.apply('33', msg) }
