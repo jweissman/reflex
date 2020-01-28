@@ -55,7 +55,10 @@ export default class ReflexObject {
                 let response = responder.get(message)
                 if (response.wrapped) {
                     let src = response as WrappedFunction
-                    return src.bind(this as unknown as ReflexClass)
+                    if (!src.bound) {
+                      return src.bind(this as unknown as ReflexClass)
+                    }
+                    return src
                 }
                 return response
             } else {

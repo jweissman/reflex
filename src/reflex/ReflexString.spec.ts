@@ -26,6 +26,10 @@ describe('String', () => {
             expect(evaluate("'hello'.eq('hello'.reverse().reverse())")).toEqual(true)
         })
 
+        it('multiply', () => {
+            expect(evaluate("'hi'.multiply(5)")).toEqual('hihihihihi')
+        })
+
         xit('call', () => {
             expect(evaluate("'add'.call(1,2)")).toEqual(3)
         })

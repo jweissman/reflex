@@ -100,9 +100,10 @@ Reflex {
      
     Arg
       = "&" Expr -- ref
+      // | "..." Expr -- ellipsis
       | Expr
        
-    Block 
+    Block
       = "{" Program "}"
       | Do Program End
       

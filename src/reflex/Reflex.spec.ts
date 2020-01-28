@@ -25,6 +25,12 @@ describe('Reflex', () => {
            })
            it('enumerates in reverse', () => { 
                expect(evaluate("(20..1).step(4).collect()")).toEqual([20,16,12,8,4])
+               expect(evaluate("(20..1).step(4).collect()")).toEqual([20,16,12,8,4])
+           })
+           xit('enumerates with index + map stably', () => {
+               evaluate('poly=x=>x*x+2*x+1')
+               expect(evaluate("1..3.map(&poly).withIndex().collect()")).toEqual([[1,4],[2,9],[3,16]])
+               expect(evaluate("1..3.map(&poly).withIndex().collect()")).toEqual([[1,4],[2,9],[3,16]])
            })
        })
 

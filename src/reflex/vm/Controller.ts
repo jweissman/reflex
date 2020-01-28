@@ -160,8 +160,8 @@ export class Controller {
     ) {
         let top = this.stack[this.stack.length - 1];
         this.pop();
-        debug("INVOKE " + top + " WITH ARITY " + arity, this.frames);
-        log("stack is " + dump(this.stack))
+        // debug("INVOKE " + top + " WITH ARITY " + arity, this.frames);
+        // log("stack is " + dump(this.stack))
 
         let args: Value[] = [];
         let foundBlock = false;
@@ -175,10 +175,10 @@ export class Controller {
         }
 
         if (arity > 0 || withBlock) {
-            log(top + "GOT ARG STACK: " + argStack)
+            // log(top + "GOT ARG STACK: " + argStack)
             for (let i = 0; i < arity; i++) {
                 if (argStack.length === 0) { //newTop === undefined) {
-                    log("NO ARG FOR PARAM " + i + ", passing nil...")
+                    // log("NO ARG FOR PARAM " + i + ", passing nil...")
                     args.push(getLocal('nil', this.frames))
                 } else {
                     let newTop = argStack[argStack.length - 1];
@@ -227,7 +227,7 @@ export class Controller {
                 );
             }
 
-            log("INVOKE JS METHOD " + top + " WITH ARGS " + args)
+            // log("INVOKE JS METHOD " + top + " WITH ARGS " + args)
             let result = top.impl(this.machine, ...args);
             if (result !== undefined) {
                 let toPush = this.converter.castJavascriptToReflex(result);

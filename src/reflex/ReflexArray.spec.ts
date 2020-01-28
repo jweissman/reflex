@@ -171,7 +171,7 @@ describe('Array', () => {
         })
 
         describe('subtract', () => {
-            xit('removes all elements matching any element in other array', () => {
+            it('removes all elements matching any element in other array', () => {
                 expect(evaluate("[1,2,3]-[2]")).toEqual([1,3])
                 expect(evaluate("[1,2,3,4,5]-[1,5]")).toEqual([2,3,4])
             })

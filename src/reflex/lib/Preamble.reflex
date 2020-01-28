@@ -102,7 +102,7 @@ class Number {
     times(&timesBlock) {
         it = RangeIterator.new(0.upto(self-1))
         if (block_given) {
-            it(&timesBlock)
+            it = it.map(&timesBlock).collect()
         }
         it
     }
@@ -202,14 +202,10 @@ class Iterator {
     curr() { fail "Implement Iterator#curr in " + self.class }
     isExhausted() { self.exhausted }
     call(&block) {
-        puts "--- call enumerator: " + self.inspect()
+        // puts "--- call enumerator: " + self.inspect()
         if (block_given) {
             until (self.isExhausted()) {
-            // if (self.indicate) {
-            //     block(self.next(), self.index)
-            // } else {
-            block(self.next())
-            // }
+                block(self.next())
             }
             // self
         } else {
@@ -268,33 +264,20 @@ class Enumerator {
     include Enumerable
     init(it) {
         self.it = it
-        // self.indicate = false;
     }
 
     map(&fn) {
        MappedEnumerator.new(self, fn)
     }
 
-    // zip(other) {
-    //    space = other.each()
-    //    enum = MappedEnumerator.new(self, e=>[e,space.next()])
-    //    if (block_given) { enum(&block) }
-    //    enum
-    // }
-
     withIndex(&b) {
-    //    if (block_given) {
-    //      self.zip(1..Infinity, &b)
-    //    } else {
-    //      self.zip(1..Infinity)
-    //    }
-       space = (1..Infinity).each()
-       enum = MappedEnumerator.new(self, (e) => [e,space.next()])
+       index_space = (1..Infinity).each()
+       enum = MappedEnumerator.new(self, (e) => [e,index_space.next()], true)
        if (block_given) { enum(&block) }
        enum
     }
 
-    each(&b) { if (block_given) { self.call(&b) }; self } // else { self } }
+    each(&b) { if (block_given) { self.call(&b) }; self }
     next() {
         self.it.next()
     }
@@ -312,26 +295,20 @@ class Enumerator {
         arr
     }
     any(&pred) {
-        // puts "---> ANY MATCH " + pred
         matched = false
-        // self.tilConditionOrExhausted(->matched) { |elem|
         until (self.isExhausted() || matched) {
             elem = self.next()
             matched = pred(elem)
-            // puts "---> ELEM " + elem + " MATCH " + matched
         }
         matched
     }
     detect(&pred) {
-        // puts "---> DETECT MATCH " + pred
         matched = false
         detected = nil
-        // self.tilConditionOrExhausted(->matched) { |elem|
         until (self.isExhausted() || matched) {
             elem = self.next()
             matched = pred(elem)
             detected = elem
-            // puts "---> ELEM " + elem + " MATCH " + matched
         }
         detected
     }
@@ -339,30 +316,16 @@ class Enumerator {
     isExhausted() { self.it.exhausted }
     tilExhausted(&block) {
         until (self.isExhausted()) {
-            // if (self.indicate) {
-                block(self.next()) //, self.it.index)
-            // } else {
-            //     block(self.next())
-            // }
+            block(self.next())
         }
     }
-    // tilConditionOrExhausted(cond,&block) {
-    //     val = self.next()
-    //     until (cond() || self.isExhausted()) {
-    //         val = self.next()
-    //         if (self.indicate) {
-    //             block(val, self.it.index)
-    //         } else {
-    //             block(val)
-    //         }
-    //     }
-    // }
 }
 
 class MappedEnumerator < Enumerator {
-    init(underylingEnum, mapFn) {
+    init(underylingEnum, mapFn, destructure) {
         self.underlyingEnum = underylingEnum
         self.mapFn = mapFn
+        self.destructure = destructure || false
         super.init(underylingEnum.it)
     }
     isExhausted() { self.underlyingEnum.isExhausted() }
@@ -396,10 +359,19 @@ class Array {
         }
     }
 
-    // subtract(other) {
-    //     self.select { |e| other.includes(e) }
-    //     // self.subtract(other)
-    // }
+    subtract(other) {
+        self.select { |e| !other.includes(e) }
+    }
+
+    multiply(num) {
+        if (num.isA(Number)) {
+            n = num.toInteger()
+            i = self
+            n.times { i }.collect()
+        } else {
+            fail "won't multiply array by non-numeric"
+        }
+    }
 
     eq(other) { 
         isEq = self.length() == other.length()
@@ -513,9 +485,8 @@ class String {
     reverse() { self.collect().reverse().join() }
     multiply(other) {
         if (other.isInstanceOf(Number)) {
-            res = ''
-            other.times { res = res + self }
-            res
+            str = self
+            other.times { str }.collect().join('')
         } else {
             fail "won't multiply string with non-numeric"
         }

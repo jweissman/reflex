@@ -24,49 +24,15 @@ import { Negate } from "./Negate";
 import { Binary } from "./Binary";
 import { Loop } from "./Loop";
 import { LogicalNot } from './LogicalNot';
-import { Code } from '../../vm/instruction/Instruction';
-import { log } from '../../vm/util/log';
+import { ArrayLiteral } from './ArrayLiteral';
+import { RangeLiteral } from './RangeLiteral';
 
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
-
-class ArrayLiteral extends Tree {
-  constructor(public seq: Sequence<Tree>) { super();}
-  inspect(): string { return "[" + this.seq.inspect() + "]"; }
-  get code(): Code {
-    return [
-      ['mark', 'arr-args'],
-      ...this.seq.items.reverse().flatMap(it => it.code),
-      ['gather', 'arr-args'],
-      ['bare', 'Array'],
-      ['push', 'new'],
-      ['call', null],
-      ['invoke', this.seq.items.length],
-    ]
-  }
-}
-
-class RangeLiteral extends Tree {
-  constructor(public start: Tree, public stop: Tree) { super();}
-  inspect(): string { return this.start + ".." + this.stop; }
-  get code(): Code {
-    return [
-      ['mark', 'rng-args'],
-      ...this.stop.code,
-      ...this.start.code,
-      ['gather', 'rng-args'],
-      ['bare', 'Range'],
-      ['push', 'new'],
-      ['call', null],
-      ['invoke', 2 ], //this.seq.items.length],
-    ]
-  }
-}
 
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Program: (prog: Node) => 
     new Program(prog.tree),
   StmtList: (_pre: Node, list: Node, _post: Node) => list.tree,
-  // EmptyProgram: (_mt: Node) => new Sequence([]),
   Stmt: (_pre: Node, expr: Node) => expr.tree,
   PlainClass: (_class: Node, name: Node, block: Node) =>
     new Defclass(name.tree, block.tree),
@@ -74,10 +40,6 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
     new Defclass(name.tree, block.tree, new Bareword(capitalize(arch.sourceString))),
   SubclassDefinition: (_class: Node, name: Node, superclass: Node, block: Node) =>
     new Defclass(name.tree, block.tree, superclass.tree),
-  // Defclass_arch_plain: (arch: Node, name: Node, block: Node) =>
-  //   new Defclass(name.tree, block.tree, new Bareword(capitalize(arch.sourceString))),
-  // Defclass_arch_extends: (_class: Node, name: Node, superclass: Node, block: Node) =>
-  //   new Defclass(name.tree, block.tree, superclass.tree),
   ClassName: (id: Node) => new Message(id.sourceString),
   ExtendsClass: (_extends: Node, name: Node) => name.tree,
   Defun_formal: (name: Node, params: Node, block: Node) =>
@@ -190,12 +152,10 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   },
   
   sourceCharacter: (char: Node) => char.sourceString,
-
   RangeLit: (start: Node, _dots: Node, stop: Node) => new RangeLiteral(start.tree, stop.tree),
   NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(
     Number(`${whole.sourceString}.${fraction.sourceString}`), true),
-
   ArrayLit: (_lq: Node, seq: Node, _rq: Node) => new ArrayLiteral(seq.tree),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),
   EmptyListOf: () => new Sequence([]),
