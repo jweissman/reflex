@@ -160,20 +160,19 @@ kernelMethods.set("println", new WrappedFunction(`Kernel.println`, (machine: Mac
   return null
 }))
 
-type ArithOp = 'add' | 'subtract' | 'multiply' | 'divide' | 'mod' | 'neg' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'to_s' | 'to_i'
+type ArithOp = 'add' | 'subtract' | 'multiply' | 'divide' | 'mod' | 'exponentiate' | 'neg' | 'eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'to_s' | 'to_i'
 let arithmetic: { [key in ArithOp]: Function} = {
   add: (left: number, right: number) => {
-    // console.log("Arithmetic ADD -- " + left + " + " + right)
     return left + right
   },
   subtract: (left: number, right: number) => left - right,
   multiply: (left: number, right: number) => left * right,
   divide: (left: number, right: number) => left / right,
   mod: (left: number, right: number) => left % right,
+  exponentiate: (left: number, right: number) => Math.pow(left, right),
   neg: (val: number) => -val,
   eq: (left: number, right: number) => {
     let equal = left === right
-    // log("EQ? " + left + " / " + right + " => " + equal)
     return equal
   },
   gt: (left: number, right: number) => left > right,
@@ -194,6 +193,7 @@ const defineArithmetic = (methodName: ArithOp, customName?: string) => {
 defineArithmetic('add');
 defineArithmetic('subtract');
 defineArithmetic('multiply');
+defineArithmetic('exponentiate');
 defineArithmetic('divide', 'rawDiv');
 defineArithmetic('mod', 'modulo');
 defineArithmetic('eq');

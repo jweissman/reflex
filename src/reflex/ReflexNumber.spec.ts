@@ -139,6 +139,15 @@ describe('Number', () => {
                     expect(evaluate("1/0")).toEqual(Infinity)
                     expect(evaluate("0/0")).toEqual(NaN)
                 })
+                it('exponent', () => {
+                    expect(evaluate("2^2")).toEqual(4)
+                    expect(evaluate("2^8")).toEqual(256)
+                    expect(evaluate("8^2")).toEqual(64)
+                    expect(evaluate("3^2")).toEqual(9)
+                    expect(evaluate("4^2")).toEqual(16)
+                    expect(evaluate("11^2")).toEqual(121)
+                    expect(evaluate("121^2")).toEqual(14641)
+                })
             })
 
             it('precedence', () => {

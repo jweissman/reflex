@@ -15,6 +15,7 @@ export class Binary extends Tree {
       '*': 'multiply',
       '/': 'divide',
       '%': 'modulo',
+      '^': 'exponentiate',
     };
     return [
       ['mark', 'bin'],

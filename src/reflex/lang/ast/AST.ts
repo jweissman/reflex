@@ -133,6 +133,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
     new Binary('/', left.tree, right.tree),
   MulExpr_modulo: (left: Node, _sum: Node, right: Node) =>
     new Binary('%', left.tree, right.tree),
+  PowExpr_exponent: (left: Node, _sum: Node, right: Node) =>
+    new Binary('^', left.tree, right.tree),
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.tree.join("")),

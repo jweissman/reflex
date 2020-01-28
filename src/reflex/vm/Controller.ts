@@ -215,9 +215,9 @@ export class Controller {
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
                 self = (top.boundSelf);
-                debug("Call " + chalk.green(top) + " on " + prettyValue(self) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
+                // debug("Call " + chalk.green(top) + " on " + prettyValue(self) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
             } else {
-                debug("Call " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
+                // debug("Call " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
             }
             if (!!top.convertArgs) {
                 args = args.map(arg =>
@@ -333,7 +333,7 @@ export class Controller {
             retValue = top;
         }
 
-        debug("Returning: " + prettyValue(retValue), this.frames)
+        // debug("Returning: " + prettyValue(retValue), this.frames)
         this.frames.pop();
 
         if (retValue !== null) {
@@ -386,14 +386,6 @@ export class Controller {
     }
 
     private invokeReflex(fn: ReflexFunction, args: Value[], withBlock: boolean, ensureReturns?: ReflexObject) {
-        // debug(this.frame.currentMethod?.name + ":\tInvoke " + chalk.green(fn) + chalk.gray((args.length ? (" with args: " + chalk.yellow(args)) : " without args")))
-        // log("Invoking Reflex function " + fn.inspect() + " (called in " + this.frame.currentMethod?.name + ")");
-        // debug("with block: " + withBlock)
-        // debug("source: " + fn.source)
-        // debug("Call reflex " + fn + " with args: " + args, this.frames)
-        // debug("looking for label: " + fn.label)
-        if (!fn?.name?.match(/_setup/)) { debugger; }
-        // let locals: Store = {};
         let fnArgs: Store = {}
         let foundBlock = false;
         if (withBlock) {
@@ -402,13 +394,7 @@ export class Controller {
                 let block = args[args.length - 1] //as ReflexFunction
                 args.pop()
                 if (fn.blockParamName && block !== undefined) {
-                    if (block instanceof ReflexFunction) {
-                        debug("Assign block " + block.source + " to " + fn.blockParamName, this.frames)
-                    } else if (block instanceof ReflexObject) {
-                        debug("Assign OBJECT " + block + " to " + fn.blockParamName, this.frames)
-                        // block = block.send('call')
-                        // if (block !== undefined) {}
-                    } else {
+                    if (!(block instanceof ReflexFunction || block instanceof ReflexObject)) {
                         throw new Error("Expected block or object, got " + block)
                     }
                     fnArgs[fn.blockParamName] = block;
@@ -418,35 +404,22 @@ export class Controller {
                     throw new Error("Given block arg but no explicit block param")
                 }
             } else {
-                debug("Method (" + fn.name + ") did not get block...", this.frames)
-                // throw new Error("Method " + fn.name + " expected a block")
-                // fnArgs['block_given'] = false;
+                // debug("Method (" + fn.name + ") did not get block...", this.frames)
             }
         }
-
-        // fill in nils...
-        // if (fn.params.length > args.length) {
-        //     for (let i = args.length; i < fn.params.length; i++) {
-        //         args.push(getLocal('nil', this.frames))
-        //     }
-        // }
 
         fnArgs = {...fnArgs, ...Object.fromEntries(zip(fn.params, args))} //.reverse()))
         if (!foundBlock && hasLocal('false', this.frames)) {
             fnArgs['block_given'] = getLocal('false', this.frames);
         }
-        // debug("args: " + (fnArgs));
         let self = fn.frame.self ? fn.frame.self.within(this.frame.self) : this.frame.self;
-        // if (fn.frame.self)
-        debug(//this.frame.currentMethod?.name +
+        debug(
             "Invoke " + chalk.green(fn) + " on " + prettyValue(self) +
             chalk.gray(args.length
                 ? (" with args: " + args.map(arg => prettyValue(arg)).join(","))
                 : " without args"),
             this.frames
         )
-        // debug("self: " + prettyValue(self));
-        // this.frames.push(fn.frame);
         this.frames.push({
             ip: indexForLabel(this.code, fn.label),
             locals: fnArgs,
@@ -456,9 +429,6 @@ export class Controller {
             stack: [],
             backingFrame: fn.frame,
         });
-
-        // log("Invoke done!")
-        if (!fn?.name?.match(/_setup/)) { debugger; }
     }
 
     protected sendEq(value: string) {

@@ -272,7 +272,15 @@ class Enumerator {
 
     withIndex(&b) {
        index_space = (1..Infinity).each()
-       enum = MappedEnumerator.new(self, (e) => [e,index_space.next()], true)
+       point = e => { 
+           puts "POINT TO " + e
+           i = index_space.next()
+           puts "INDEX IS " + i
+           res = [e, i]
+           puts "RESULT IS " + res
+           res
+       }
+       enum = MappedEnumerator.new(self, point, true)
        if (block_given) { enum(&block) }
        enum
     }
@@ -285,14 +293,18 @@ class Enumerator {
         self.tilExhausted(&b)
     }
     collect() {
-        arr=[]
-        self.tilExhausted { |v| arr.push v }
-        arr
+        collected=[]
+        self.tilExhausted { |v| collected.push v }
+        collected
     }
-    select(&b) {
-        arr=[]
-        self.tilExhausted { |v| arr.push(v) if b(v) }
-        arr
+    select(&selectBlock) {
+        selected=[]
+        self.tilExhausted do |v|
+            if (selectBlock(v)) {
+                selected.push(v)
+            }
+        end
+        selected
     }
     any(&pred) {
         matched = false
@@ -308,7 +320,9 @@ class Enumerator {
         until (self.isExhausted() || matched) {
             elem = self.next()
             matched = pred(elem)
-            detected = elem
+            if (matched) {
+                detected = elem
+            }
         }
         detected
     }
@@ -483,6 +497,7 @@ class String {
 
     add(other) { self.concat(other) }
     reverse() { self.collect().reverse().join() }
+    isPalindrome() { self.reverse() == self }
     multiply(other) {
         if (other.isInstanceOf(Number)) {
             str = self

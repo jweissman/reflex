@@ -50,9 +50,14 @@ Reflex {
       | MulExpr
     
     MulExpr
-      = MulExpr "*" PriExpr -- product
-      | MulExpr "/" PriExpr -- quotient
-      | MulExpr "%" PriExpr -- modulo
+      = MulExpr "*" PowExpr -- product
+      | MulExpr "/" PowExpr -- quotient
+      | MulExpr "%" PowExpr -- modulo
+      | PowExpr
+
+    PowExpr
+      = PowExpr "^" PriExpr -- exponent
+      // | PowExpr "^^" PriExpr -- root
       | PriExpr
 
     PriExpr
