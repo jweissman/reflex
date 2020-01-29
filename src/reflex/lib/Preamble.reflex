@@ -160,15 +160,24 @@ module Enumerable {
     join(delim) { self.collect().join(delim) }
     withIndex(&b) {
         puts "Enumerable.withIndex"
-        indexed = self.each().withIndex()
-        if (block_given) { indexed(&b) }
-        indexed
+        //if (block_given) {// indexed.each(&b) }
+        //self.each().withIndex(&b)
+        //indexed = self.each().withIndex()
+        //if (block_given) { indexed.each(&b) }
+        //else { indexed }
+        if (block_given) {// indexed.each(&b) }
+         self.each().withIndex(&b)
+        } else {
+         self.each().withIndex()
+        }
     }
     eachWithIndex(&b) {
        puts "Enumerable.eachWithIndex"
-       indexed = self.each().withIndex()
-       if (block_given) { indexed(&b) }
-       indexed
+       if (block_given) {// indexed.each(&b) }
+         self.each().withIndex(&b)
+       } else {
+         self.each().withIndex()
+       }
     }
 }
 
@@ -202,12 +211,15 @@ class Iterator {
     curr() { fail "Implement Iterator#curr in " + self.class }
     isExhausted() { self.exhausted }
     call(&block) {
-        // puts "--- call enumerator: " + self.inspect()
         if (block_given) {
             until (self.isExhausted()) {
-                block(self.next())
+                n = self.next()
+                if (n.isA(Unpack)) {
+                    block(...n.val)
+                } else {
+                    block(n)
+                }
             }
-            // self
         } else {
             self
         }
@@ -223,8 +235,6 @@ class Iterator {
 class ArrayIterator < Iterator {
     init(arr) {
         self.array = arr
-        // self.index = 0;
-        // self.exhausted = false;
         super.init()
     }
 
@@ -243,7 +253,6 @@ class RangeIterator < Iterator {
         super.init()
         self.range = range;
         self.index = range.start;
-        // self.exhausted = false;
     }
 
     advance() {
@@ -260,6 +269,8 @@ class RangeIterator < Iterator {
     curr() { self.index }
 }
 
+// tiny wrapper so we can identify with index?
+class Unpack { init(val) { self.val = val } }
 class Enumerator {
     include Enumerable
     init(it) {
@@ -270,19 +281,24 @@ class Enumerator {
        MappedEnumerator.new(self, fn)
     }
 
-    withIndex(&b) {
+    withIndex(&pointBlock) {
+        puts "Enumerator.withIndex"
        index_space = (1..Infinity).each()
        point = e => { 
-           puts "POINT TO " + e
            i = index_space.next()
-           puts "INDEX IS " + i
-           res = [e, i]
-           puts "RESULT IS " + res
+        //    if (e.isA(Unpack)) {
+        //       res = Unpack.new([e.val, i])
+        //    } else {
+              res = Unpack.new([e, i])
+        //    }
            res
        }
-       enum = MappedEnumerator.new(self, point, true)
-       if (block_given) { enum(&block) }
-       enum
+       mappedEnum = MappedEnumerator.new(self, point, true)
+       if (block_given) {
+         mappedEnum.each(&pointBlock)
+       } else {
+         mappedEnum.collect()
+       }
     }
 
     each(&b) { if (block_given) { self.call(&b) }; self }
@@ -294,23 +310,44 @@ class Enumerator {
     }
     collect() {
         collected=[]
-        self.tilExhausted { |v| collected.push v }
+        // self.tilExhausted { |v|
+        until (self.isExhausted()) {
+            v = self.next()
+            if (v.isA(Unpack)) {
+                collected.push v.val // = collected + v.val
+            } else {
+                collected.push v
+            }
+        }
         collected
     }
     select(&selectBlock) {
         selected=[]
-        self.tilExhausted do |v|
-            if (selectBlock(v)) {
-                selected.push(v)
+        // self.tilExhausted do |v|
+        until (self.isExhausted()) {
+            v = self.next()
+            if (v.isA(Unpack)) {
+              if (selectBlock(...v.val)) {
+                  selected.push(v.val)
+              }
+            } else {
+              if (selectBlock(v)) {
+                  selected.push(v)
+              }
             }
-        end
+        }
         selected
     }
+
     any(&pred) {
         matched = false
         until (self.isExhausted() || matched) {
             elem = self.next()
-            matched = pred(elem)
+            if (elem.isA(Unpack)) {
+                matched = pred(...elem.val)
+            } else {
+                matched = pred(elem)
+            }
         }
         matched
     }
@@ -319,9 +356,16 @@ class Enumerator {
         detected = nil
         until (self.isExhausted() || matched) {
             elem = self.next()
-            matched = pred(elem)
-            if (matched) {
-                detected = elem
+            if (elem.isA(Unpack)) {
+              matched = pred(...elem.val)
+              if (matched) {
+                  detected = elem.val
+              }
+            } else {
+              matched = pred(elem)
+              if (matched) {
+                  detected = elem
+              }
             }
         }
         detected
@@ -330,7 +374,12 @@ class Enumerator {
     isExhausted() { self.it.exhausted }
     tilExhausted(&block) {
         until (self.isExhausted()) {
-            block(self.next())
+            n = self.next()
+            if (n.isA(Unpack)) {
+                block(...n.val)
+            } else {
+                block(n)
+            }
         }
     }
 }
@@ -344,7 +393,12 @@ class MappedEnumerator < Enumerator {
     }
     isExhausted() { self.underlyingEnum.isExhausted() }
     next() {
-        self.mapFn(self.underlyingEnum.next())
+        n = self.underlyingEnum.next()
+        if (n.isA(Unpack)) {
+            Unpack.new(self.mapFn(...n.val)) //self.underlyingEnum.next())
+        } else {
+            self.mapFn(n)
+        }
     }
     inspect() { "MappedEnum["+mapFn+" over " +underlyingEnum.inspect() +"]"}
 }
@@ -515,13 +569,10 @@ class String {
 class Range {
     include Enumerable
     init(start,stop) {
-        // puts "NEW RANGE FROM " + start + " to " + stop
         self.start=start;
         self.stop=stop;
         self.inc=1;
-        // puts "INC: " + self.inc
         self.dir=self.start<self.stop?1:-1;
-        // puts "DIR: " + self.dir
     }
     length() { stop - start }
     inspect() { start + ".." + stop }
@@ -532,6 +583,7 @@ class Range {
         if (block_given) { enum(&b) }
         enum
     }
+    reverse() { Range.new(self.stop,self.start) }
     
     toArray() { self.collect() }
     call(&block) { self.each(&block) }

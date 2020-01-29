@@ -59,6 +59,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   CarefulArguments_args_block: (args: Node, block: Node) => Arguments.from(args.tree, block.tree),
   FormalArguments: (_lp: Node, args: Node, _rp: Node) => args.tree,
   Arg_ref: (_amp: Node, expr: Node) => new Argument(expr.tree, true),
+  Arg_ellipsis: (_amp: Node, expr: Node) => new Argument(expr.tree, false, true),
   Arg: (expr: Node) => expr.tree instanceof Argument ? expr.tree : new Argument(expr.tree, false),
   Block: (_lb: Node, body: Node, _rb: Node) => body.tree,
   PartBlock: (body: Node, _rb: Node) => body.tree,

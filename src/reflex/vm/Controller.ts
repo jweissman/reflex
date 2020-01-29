@@ -23,6 +23,7 @@ import { makeReflexObject } from './types/makeReflexObject';
 import { Converter } from './Converter';
 import chalk from 'chalk';
 import { prettyObject } from '../prettyObject';
+import { ReflexArray } from './types/ReflexArray';
 
 export class Controller {
     private converter: Converter = new Converter(this);
@@ -53,6 +54,18 @@ export class Controller {
             case 'compile': this.compile(value as Tree); break;
             case 'invoke_block': this.invoke(value as number, true); break;
             case 'invoke': this.invoke(value as number, false); break;
+            case 'deconstruct': 
+                let list = this.stack[this.stack.length - 1];
+                if (list instanceof ReflexArray) {
+                    // console.log("DECONSTRUCT " + list.inspect());
+                    [...list.items].reverse().forEach(it =>{
+                    // console.log("DECONSTRUCTED " + it.inspect());
+                        this.push(it)
+                    });
+                } else {
+                    throw new Error("won't deconstruct non array: " + list);
+                }
+                break;
             case 'send_eq':
                 this.sendEq(value as string);
                 break;
@@ -175,34 +188,23 @@ export class Controller {
         }
 
         if (arity > 0 || withBlock) {
-            // log(top + "GOT ARG STACK: " + argStack)
-            for (let i = 0; i < arity; i++) {
-                if (argStack.length === 0) { //newTop === undefined) {
-                    // log("NO ARG FOR PARAM " + i + ", passing nil...")
-                    args.push(getLocal('nil', this.frames))
-                } else {
-                    let newTop = argStack[argStack.length - 1];
-                    if (newTop instanceof Reference) {
-                        if (foundBlock) { throw new Error("found multiple block refs passed as args to " + top) }
-                        foundBlock = true;
-                        block = newTop;
-                    } else {
-                        args.push(newTop);
-                    }
-                    argStack.pop();
-                }
+            let blockArg = argStack[argStack.length - 1]
+            if (blockArg instanceof Reference) {
+                foundBlock = true;
+                block = blockArg;
+                argStack = argStack.filter(arg => !(arg instanceof Reference))
+            }
+            args = argStack.reverse();
+            for (let i = argStack.length; i < arity; i++) {
+                args.push(getLocal('nil', this.frames))
             }
             if (foundBlock) {
                 args.push((block as Reference))
                 withBlock = true;
             }
-            if (withBlock && !foundBlock) {
-                args.push(argStack[argStack.length - 1]); //this.stack[this.stack.length - 1])
-                argStack.pop()
-            }
         }
 
-        // debug(this.frame.currentMethod?.name + ":\tCall " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","))
+        debug("Call " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
         if (top instanceof ReflexFunction) {
             if (top.arity > arity && !withBlock) {
                 for (let i = arity; i < top.arity; i++) {
@@ -211,13 +213,8 @@ export class Controller {
             }
             this.invokeReflex(top, args as Value[], withBlock, ensureReturns)
         } else if (top instanceof WrappedFunction) {
-            let self = this.frame.self
             if (top.boundSelf) {
                 this.machine.bindSelf(top.boundSelf)
-                self = (top.boundSelf);
-                // debug("Call " + chalk.green(top) + " on " + prettyValue(self) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
-            } else {
-                // debug("Call " + chalk.green(top) + " with args: " + args.map(arg => prettyValue(arg)).join(","), this.frames)
             }
             if (!!top.convertArgs) {
                 args = args.map(arg =>
@@ -226,8 +223,6 @@ export class Controller {
                         : arg
                 );
             }
-
-            // log("INVOKE JS METHOD " + top + " WITH ARGS " + args)
             let result = top.impl(this.machine, ...args);
             if (result !== undefined) {
                 let toPush = this.converter.castJavascriptToReflex(result);
@@ -238,7 +233,6 @@ export class Controller {
             }
         } else if (top instanceof ReflexObject) {
             let call = top.send('call');
-            // args.reverse().forEach(arg => this.push(arg))
             this.push(args)
             if (call instanceof WrappedFunction) { call.bind(top) }
             if (call instanceof ReflexFunction) { call.frame.self = top }

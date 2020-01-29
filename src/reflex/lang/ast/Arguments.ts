@@ -5,16 +5,25 @@ import { Code } from "../../vm/instruction/Instruction";
 import { PipedBlock } from "./PipedBlock";
 
 export class Argument extends Tree {
-  constructor(public value: Tree, public isReference: boolean = false) { super();}
+  constructor(public value: Tree, public isReference: boolean = false, public isDestructured: boolean = false) { super();}
   inspect(): string {
     if (this.isReference) {
       return "&" + this.value.inspect();
+    } else if (this.isDestructured) {
+      return "..." + this.value.inspect();
     } else {
       return this.value.inspect();
     }
   }
   get code(): Code {
-    return this.value.code;
+    if (this.isDestructured) {
+      return [
+        ...this.value.code,
+        ['deconstruct', null],
+      ]
+    } else {
+      return this.value.code;
+    }
   }
 }
 

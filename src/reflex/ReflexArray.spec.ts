@@ -86,13 +86,13 @@ describe('Array', () => {
             it('runs on one element', () => {
                 expect(()=>evaluate("[1].eachWithIndex{}")).not.toThrow()
             })
-            xit('iterates over list items', () => {
+            it('iterates over list items', () => {
                 evaluate('a=Array.new(10,20,30,40)')
                 evaluate('x=0')
                 evaluate('y=0')
-                evaluate("a.eachWithIndex { |v,i| x = x + v; y = y + i }")
+                evaluate("a.withIndex { |v,i| x = x + v; y = y + i }")
                 expect(evaluate('x')).toEqual(10+20+30+40)
-                expect(evaluate('y')).toEqual(0+1+2+3)
+                expect(evaluate('y')).toEqual(1+2+3+4)
             })
         })
 

@@ -243,6 +243,9 @@ stringMethods.set("upcase", new WrappedFunction("String.upcase", (machine: Machi
 stringMethods.set("downcase", new WrappedFunction("String.downcase", (machine: Machine, other: string) =>
   (machine.boundSelf! as ReflexString).value.toLowerCase()
 ))
+// stringMethods.set("reverse", new WrappedFunction("String.reverse", (machine: Machine) =>
+//   (machine.boundSelf! as ReflexString).value.split("").reverse().join("")
+// ))
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>

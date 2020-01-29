@@ -31,7 +31,8 @@ export type Op
   | 'compile' 
   | 'mark'
   | 'sweep'
-  | 'gather'
+  | 'gather' // sweep until mark but gather
+  | 'deconstruct' // 'splat' an array at top into its items
 
 export const prettyValue = (v: Value) => {
   if (v === undefined) { return chalk.bgRed('<undef>');}
