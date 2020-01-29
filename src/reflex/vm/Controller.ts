@@ -412,7 +412,7 @@ export class Controller {
         if (!foundBlock && hasLocal('false', this.frames)) {
             fnArgs['block_given'] = getLocal('false', this.frames);
         }
-        let self = fn.frame.self ? fn.frame.self.within(this.frame.self) : this.frame.self;
+        let self = fn.frame.self ? fn.frame.self : this.frame.self;
         debug(
             "Invoke " + chalk.green(fn) + " on " + prettyValue(self) +
             chalk.gray(args.length

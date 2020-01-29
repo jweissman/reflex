@@ -12,15 +12,14 @@ export default class ReflexObject {
     isFacade: boolean = false;
     wrapped: boolean = false;
     id: number = ReflexObject.count++;
-    // name: string;
     members: Store = {}
 
     has(k: string) { return Object.keys(this.members).includes(k) }
     set(k: string,v: ReflexObject) { this.members[k] = v }
     get(k: string): ReflexObject { return this.members[k] }
 
-    private surroundingObject: ReflexObject | null = null;
-    within(obj: ReflexObject) { this.surroundingObject = obj; return this; }
+    // private surroundingObject: ReflexObject | null = null;
+    // within(obj: ReflexObject) { this.surroundingObject = obj; return this; }
 
     get self(): ReflexObject { return this; }
     get klass(): ReflexClass { return this.get('class') as ReflexClass }
@@ -33,7 +32,6 @@ export default class ReflexObject {
     inspect(): string { return this.displayName }
     toString() { return this.displayName; }
     isEqual(other: ReflexObject): boolean {
-        // debug("IS EQ: " + other + " / " + this)
         return this.id === other.id
     }
 
@@ -45,10 +43,8 @@ export default class ReflexObject {
     }
 
     send(message: string): ReflexObject {
-        // debug("send -- " + message + "-- to " + this.inspect()); // + " class: " + this.klass + " super: " + this.superclass);
         if (message === 'self') { return this.self }
         else if (this.isClass === false && message === 'super') { return this.super }
-        else if (this.has(message)) { return this.get(message) }
         else {
             let responder = [this, ...this.messageSources].find(source => source && source.has(message))
             if (responder) {
@@ -61,17 +57,9 @@ export default class ReflexObject {
                     return src
                 }
                 return response
-            } else {
-                if (this.surroundingObject && this.surroundingObject !== this) { // why are we embedded in ourselves?
-                    if (this.surroundingObject.surroundingObject && this.surroundingObject.surroundingObject === this) {
-                        log('not recursing on surrounding obj?')
-                    } else {
-                        return this.surroundingObject.send(message);
-                    }
-                } 
             }
-            return this.methodMissing(message);
         }
+        return this.methodMissing(message);
     }
 
     methodMissing(message: string): ReflexObject {
@@ -81,19 +69,13 @@ export default class ReflexObject {
     respondsTo(message: string): boolean {
         if (message === 'self') { return true }
         else if (this.isClass === false && message === 'super') { return true }
-        else if (this.has(message)) { return true }
         else {
             let responder = [this, ...this.messageSources].find(source => source.has(message))
             if (responder) {
                 return true;
-            } else {
-                if (this.surroundingObject && this.surroundingObject !== this) {
-                    return this.surroundingObject.respondsTo(message);
-                } else {
-                    return false;
-                }
             }
         }
+        return false;
     }
 }
 

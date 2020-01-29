@@ -6,7 +6,7 @@ export class ReflexArray extends ReflexObject {
     items: ReflexObject[] = []
     constructor(...list: ReflexObject[]) {
         super();
-        this.items = list;
+        this.items = [...list]; //.reverse();
     }
 
     at(index: number) {

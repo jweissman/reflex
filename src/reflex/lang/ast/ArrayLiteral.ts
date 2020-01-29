@@ -2,10 +2,15 @@ import Tree from "./Tree";
 import { Sequence } from "./Sequence";
 import { Code } from '../../vm/instruction/Instruction';
 export class ArrayLiteral extends Tree {
-  constructor(public seq: Sequence<Tree>) { super(); }
+  seq: Sequence<Tree>;
+  code: Code;
   inspect(): string { return "[" + this.seq.inspect() + "]"; }
-  get code(): Code {
-    return [
+  constructor(sequence: Sequence<Tree>) {
+    super();
+    this.seq = sequence; //.reverse();
+  // }
+  // get code(): Code {
+    this.code = [
       ['mark', 'arr-args'],
       ...this.seq.items.reverse().flatMap(it => it.code),
       ['gather', 'arr-args'],
