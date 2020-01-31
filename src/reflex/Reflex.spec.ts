@@ -657,7 +657,7 @@ describe('Reflex', () => {
         expect(out()).toEqual("\u001b[31mtown\u001b[0m")
     })
 
-    xit('poetry', () => {
+    it('poetry', () => {
         expect(()=>evaluate("using 'examples/poem'")).not.toThrow()
     })
 

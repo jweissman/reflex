@@ -116,7 +116,7 @@ describe('Array', () => {
             it('chains', () => {
                 expect(evaluate("[1,2,3,4,5].map{|v|v*2}.map{|v|v-1}.collect()")).toEqual([1,3,5,7,9])
             })
-            xit('reverse map is map reverse', () => {
+            it('reverse map is map reverse', () => {
                 evaluate('sq=x=>x*x')
                 expect(
                     evaluate("[1,2,3,4,5].map(&sq).reverse().eq([1,2,3,4,5].reverse().map(&sq))")

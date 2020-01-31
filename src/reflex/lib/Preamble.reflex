@@ -100,16 +100,24 @@ class Number {
     }
 
     times(&timesBlock) {
-        it = RangeIterator.new(0.upto(self-1))
-        if (block_given) {
-            it = it.map(&timesBlock).collect()
+        puts self + ".times"
+        if (self<=0) { [] }
+        else {
+          r = 0.upto(self-1)
+          it = RangeIterator.new(r)
+          if (block_given) {
+              puts self + ".times -- block given, enumerating"
+              it = it.map(&timesBlock)
+          }
+          it.collect()
         }
-        it
     }
 
     upto(stop,&block) {
         r=Range.new(self, stop)
-        r.each(&block) if block_given
+        if (block_given) {
+            r.each(&block) 
+        }
         r
     }
     // really just alias
@@ -135,25 +143,25 @@ class Module {
 }
 
 module Enumerable {
-    map(&mapFn) { self.each().map(&mapFn) }
+
+    // 'hard eval' def which falls back to toArray...
+    // with yield semantics this could be more efficient!
+    each(&eachBlock) {
+        if (block_given) { self.toArray().each(&eachBlock) }
+        else { self.toArray().each() }
+    }
+
+    map(&mapFn) { self.each().map(&mapFn).collect() }
     collect() { self.each().collect() }
     first() { self.collect().first() }
     last() { self.collect().last() }
     rest() { self.collect().rest() }
-
-    // 'hard eval' def which falls back to toArray...
-    // with yield semantics this could be more efficient!
-    each(&b) {
-        if (block_given) { self.toArray().each(&b) }
-        else { self.toArray().each() }
-    }
-
     size() { self.collect().length() }
-    // length() { self.size() }
-    sample() { self.collect().get(Kernel.rand(self.size()-1))}
+    // sample() { self.collect().sample()}
     reverse() { self.collect().reverse() }
     includes(v) { self.collect().includes(v) }
     select(&b) { self.collect().select(&b) }
+
     detect(&b) { self.each().detect(&b) }
     any(&b) { self.each().any(&b) }
     zip(&b) { self.each().zip(&b) }
@@ -161,12 +169,7 @@ module Enumerable {
     join(delim) { self.collect().join(delim) }
     withIndex(&b) {
         puts "Enumerable.withIndex"
-        //if (block_given) {// indexed.each(&b) }
-        //self.each().withIndex(&b)
-        //indexed = self.each().withIndex()
-        //if (block_given) { indexed.each(&b) }
-        //else { indexed }
-        if (block_given) {// indexed.each(&b) }
+        if (block_given) {
          self.each().withIndex(&b)
         } else {
          self.each().withIndex()
@@ -174,11 +177,15 @@ module Enumerable {
     }
     eachWithIndex(&b) {
        puts "Enumerable.eachWithIndex"
-       if (block_given) {// indexed.each(&b) }
+       if (block_given) {
          self.each().withIndex(&b)
        } else {
          self.each().withIndex()
        }
+    }
+
+    sample() {
+        self.collect().get(Kernel.rand(self.size()-1))
     }
 }
 
@@ -213,14 +220,17 @@ class Iterator {
     isExhausted() { self.exhausted }
     call(&block) {
         if (block_given) {
+            // self.map(&block).collect()
+            iteratee = []
             until (self.isExhausted()) {
                 n = self.next()
                 if (n.isA(Unpack)) {
-                    block(...n.val)
+                    iteratee.push block(...n.val)
                 } else {
-                    block(n)
+                    iteratee.push block(n)
                 }
             }
+            iteratee
         } else {
             self
         }
@@ -328,23 +338,7 @@ class Enumerator {
         }
         collected
     }
-    select(&selectBlock) {
-        selected=[]
-        // self.tilExhausted do |v|
-        until (self.isExhausted()) {
-            v = self.next()
-            if (v.isA(Unpack)) {
-              if (selectBlock(...v.val)) {
-                  selected.push(v.val)
-              }
-            } else {
-              if (selectBlock(v)) {
-                  selected.push(v)
-              }
-            }
-        }
-        selected
-    }
+    
 
     any(&pred) {
         matched = false
@@ -421,24 +415,10 @@ class MappedEnumerator < Enumerator {
 class Array {
     include Enumerable
 
-    push(item) {
-        self.set(self.length(), item)
-        self
-    }
-
-    add(other) {
-        self.concat(other)
-    }
-
-    includes(item) {
-        self.any { |e|
-            e == item
-        }
-    }
-
-    subtract(other) {
-        self.select { |e| !other.includes(e) }
-    }
+    push(item) { self.set(self.length(), item); self }
+    add(other) { self.concat(other) }
+    includes(item) { self.any { |e| e == item } }
+    subtract(other) { self.select { |e| !other.includes(e) } }
 
     multiply(num) {
         if (num.isA(Number)) {
@@ -503,19 +483,33 @@ class Array {
         rst
     }
 
-    select(&b) { self.each().select(&b) }
+    // select(&b) { self.each().select(&b) }
     detect(&b) { self.each().detect(&b) }
     any(&b) { self.each().any(&b) }
+    sample() {
+        self.get(Kernel.rand(self.length()-1))
+    }
+
+    select(&selectBlock) {
+        selected=[]
+        // self.tilExhausted do |v|
+        //until (self.isExhausted()) {
+        self.each { |v|
+            // v = self.next()
+            // if (v.isA(Unpack)) {
+              if (selectBlock(v)) {
+                  selected.push(v)
+              }
+            
+        }
+        selected
+    }
 
     reverse() {
         len = self.length()
         rev=[]
         1.upto(len) { |i| rev.push(self.get(len-i)) }
         rev
-        //if (self.length().zero()) { [] }
-        //else {
-        //    self.rest().reverse() + [self.first()]
-        //}
     }
 
     inject(&fn) {
@@ -535,6 +529,8 @@ class Array {
           self.inject &sum
         } else { self.get(0) }
     }
+
+    
 }
 
 
@@ -590,15 +586,20 @@ class Range {
         it = RangeIterator.new(self)
         enum = Enumerator.new(it)
         if (block_given) { enum(&b) }
-        enum
+        else { enum }
     }
     reverse() { Range.new(self.stop,self.start) }
-    
     toArray() { self.collect() }
-    call(&block) { self.each(&block) }
-
+    call(&block) { self.map(&block) }
     detect(&b) { self.each().detect(&b) }
     any(&b) { self.each().any(&b) }
+    sample() {
+        if (self.inc == 1) {
+          self.start + Kernel.rand(self.stop-self.start)
+        } else {
+            self.toArray().sample()
+        }
+    }
 }
 
 /////

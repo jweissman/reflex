@@ -165,7 +165,7 @@ describe('Number', () => {
 
     describe('times', () => {
         it('iterates', () => {
-            expect(evaluate('1.times().isA(Iterator)')).toEqual(true)
+            expect(evaluate('1.times()')).toEqual([0])
         })
     })
 })

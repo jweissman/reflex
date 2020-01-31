@@ -18,6 +18,7 @@ class Paint
 
     rainbow(msg) {
         colors = ['31','32','33','34']
-        msg.split(' ').map { |word| Paint.apply(colors.sample(), word)}.collect().join(' ')
+        paintRandomly = w => Paint.apply(colors.sample(), w)
+        msg.split(' ').map(&paintRandomly).join(' ')
     }
 end
