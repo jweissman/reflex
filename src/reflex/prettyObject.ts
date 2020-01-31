@@ -6,7 +6,8 @@ import { ReflexNumber } from "./vm/types/ReflexNumber";
 import { ReflexArray } from "./vm/types/ReflexArray";
 import ReflexClass from "./vm/types/ReflexClass";
 import { ReflexFunction } from "./vm/types/ReflexFunction";
-export function prettyObject(object: ReflexObject): string {
+export function prettyObject(object: ReflexObject, depth: number = 0): string {
+    if (depth > 24) { return '...'}
     if (object instanceof ReflexString) {
         return chalk.green('"') + chalk.green(object.value) + chalk.green('"');
     }
@@ -29,7 +30,7 @@ export function prettyObject(object: ReflexObject): string {
         return chalk.gray('nil')
     }
     else if (object instanceof ReflexArray) {
-        return chalk.white('[') + object.items.flatMap(item => prettyObject(item)).join(chalk.white(', ')) + chalk.white(']');
+        return chalk.white('[') + object.items.flatMap(item => prettyObject(item, depth+1)).join(chalk.white(', ')) + chalk.white(']');
     }
     else if (object instanceof ReflexFunction) {
         if (object.source) {

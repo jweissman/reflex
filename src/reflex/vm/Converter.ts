@@ -11,7 +11,8 @@ import { ReflexArray } from './types/ReflexArray';
 // do conversions/casting?
 export class Converter {
     constructor(private ctrl: Controller) { }
-    static castReflexToJavascript(object: ReflexObject): any {
+    static castReflexToJavascript(object: ReflexObject, depth: number = 0): any {
+        if (depth > 32) { console.log("warning, truncating reflex obj: " + object); return null; }
         // if (object === undefined) { return undefined }
         if (object.className === 'Truth') {
             return true;
@@ -38,7 +39,7 @@ export class Converter {
             return object.value;
         }
         else if (object instanceof ReflexArray) {
-            return object.items.map(it => Converter.castReflexToJavascript(it));
+            return object.items.map(it => Converter.castReflexToJavascript(it, depth+1));
         } else {
             return object; //.toString()
         }

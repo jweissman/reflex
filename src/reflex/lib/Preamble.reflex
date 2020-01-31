@@ -103,22 +103,22 @@ class Number {
         puts self + ".times"
         if (self<=0) { [] }
         else {
-          r = 0.upto(self-1)
-          it = RangeIterator.new(r)
+          it = RangeIterator.new(Range.new(0, self-1))
           if (block_given) {
               puts self + ".times -- block given, enumerating"
               it = it.map(&timesBlock)
           }
-          it.collect()
+          it
         }
     }
 
     upto(stop,&block) {
         r=Range.new(self, stop)
         if (block_given) {
-            r.each(&block) 
+            r.map(&block) //.collect()
+        } else {
+            r
         }
-        r
     }
     // really just alias
     downto(stop,&block) { self.upto(stop,&block) if block_given else self.upto(stop) }
@@ -477,40 +477,23 @@ class Array {
 
     first() { self.get(0) }
     last() { self.get(self.length()-1) }
-    rest() {
-        rst=[]
-        1.upto(self.length()-1) { |i| rst.push(self.get(i)) }
-        rst
-    }
+    rest() { self.restInternal() }
 
-    // select(&b) { self.each().select(&b) }
     detect(&b) { self.each().detect(&b) }
     any(&b) { self.each().any(&b) }
-    sample() {
-        self.get(Kernel.rand(self.length()-1))
-    }
+    sample() { self.get(Kernel.rand(self.length()-1)) }
 
     select(&selectBlock) {
         selected=[]
-        // self.tilExhausted do |v|
-        //until (self.isExhausted()) {
         self.each { |v|
-            // v = self.next()
-            // if (v.isA(Unpack)) {
-              if (selectBlock(v)) {
-                  selected.push(v)
-              }
-            
+            if (selectBlock(v)) {
+                selected.push(v)
+            }
         }
         selected
     }
 
-    reverse() {
-        len = self.length()
-        rev=[]
-        1.upto(len) { |i| rev.push(self.get(len-i)) }
-        rev
-    }
+    reverse() { self.rev() }
 
     inject(&fn) {
         res = self.first()
@@ -529,8 +512,6 @@ class Array {
           self.inject &sum
         } else { self.get(0) }
     }
-
-    
 }
 
 
@@ -553,7 +534,6 @@ class String {
 
     toString() { self }
     get(i) { self.split('').get(i) }
-
     add(other) { self.concat(other) }
     reverse() { self.collect().reverse().join() }
     isPalindrome() { self.reverse() == self }
@@ -615,7 +595,6 @@ NegativeInfinity = NegativeApeiron.new()
 using = Kernel.import
 prints = Kernel.println
 fail = Kernel.throw
-//include = Kernel.include
 noop = ->{}
 
 // old ways die hard

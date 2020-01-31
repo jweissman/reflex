@@ -165,7 +165,10 @@ describe('Number', () => {
 
     describe('times', () => {
         it('iterates', () => {
-            expect(evaluate('1.times()')).toEqual([0])
+            expect(evaluate('1.times { 0 }')).toEqual([0])
+        })
+        xit('recurse', () => {
+            expect(evaluate('1.times { 1.times { 0 } }')).toEqual([[0]])
         })
     })
 })

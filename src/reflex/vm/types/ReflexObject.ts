@@ -29,7 +29,7 @@ export default class ReflexObject {
     get super() { return new SuperFacade(this) }
     get className(): string {return this.klass ? (this.klass as ReflexObject & {name: string}).name : 'Unknown'}
     get displayName(): string { return this.className }
-    inspect(): string { return this.displayName }
+    inspect(depth: number = 0): string { return this.displayName }
     toString() { return this.displayName; }
     isEqual(other: ReflexObject): boolean {
         return this.id === other.id

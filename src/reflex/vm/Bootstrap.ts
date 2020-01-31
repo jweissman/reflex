@@ -216,6 +216,12 @@ arrayMethods.set("set", new WrappedFunction("Array#set", (machine: Machine, inde
 arrayMethods.set("length", new WrappedFunction("Array#length", (machine: Machine) =>
   (machine.boundSelf! as ReflexArray).items.length
 ))
+arrayMethods.set("rev", new WrappedFunction("Array#rev", (machine: Machine) =>
+  (machine.boundSelf! as ReflexArray).items.reverse()
+))
+arrayMethods.set("restInternal", new WrappedFunction("Array#restInternal", (machine: Machine) =>
+  (machine.boundSelf! as ReflexArray).items.slice(1)
+))
 arrayMethods.set("concat", new WrappedFunction("Array#concat", (machine: Machine, other: ReflexObject[]) =>
   [...(machine.boundSelf! as ReflexArray).items, ...other],
   // false

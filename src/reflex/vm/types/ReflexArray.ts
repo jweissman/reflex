@@ -18,6 +18,9 @@ export class ReflexArray extends ReflexObject {
         this.items[index.value] = value
         return value
     }
-    inspect() { return '[' + this.items.map(it => it.toString()) + ']' }
+    inspect(depth: number=0) { 
+        if (depth > 24) { return '[...]'}
+        return '[' + this.items.map(it => it.inspect(depth+1)) + ']'
+    }
     toString() { return this.inspect() }
 }
