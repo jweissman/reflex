@@ -21,6 +21,18 @@ describe('Array', () => {
                 expect(evaluate("Array.new(1,2,3,4,5).length()")).toEqual(5)
             })
         })
+        describe('eq', () => {
+            it('compare elems', () => {
+                expect(evaluate("[]==[]")).toEqual(true)
+                expect(evaluate("[]==[1]")).toEqual(false)
+                expect(evaluate("[1]==[1]")).toEqual(true)
+                expect(evaluate("[2]==[1]")).toEqual(false)
+                expect(evaluate("[1,2]==[1,2]")).toEqual(true)
+                expect(evaluate("[1,2]==[2,1]")).toEqual(false)
+                expect(evaluate("[1,2,3]==[1,2,3]")).toEqual(true)
+                expect(evaluate("[1,2,3]==[1,3,2]")).toEqual(false)
+            })
+        })
         describe('get', () => {
             it('indexes into list items', () => {
                 evaluate('a=Array.new(1,2,3)')
@@ -92,7 +104,7 @@ describe('Array', () => {
                 evaluate('y=0')
                 evaluate("a.withIndex { |v,i| x = x + v; y = y + i }")
                 expect(evaluate('x')).toEqual(10+20+30+40)
-                expect(evaluate('y')).toEqual(1+2+3+4)
+                expect(evaluate('y')).toEqual(0+1+2+3)
             })
         })
 
@@ -158,6 +170,7 @@ describe('Array', () => {
         describe('select', () => {
             it('finds elements matching predicate', () => {
                 expect(evaluate("[1,2,3].select { |x| x%2==0 }")).toEqual([2])
+                // expect(evaluate("[1,2,3]==[1,2,3]")).toEqual(false)
             })
         })
 

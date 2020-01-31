@@ -4,65 +4,12 @@
 
 This document describes the structure of the Reflex programming language. 
 (Note the "official spec" for now is just the reference implementation contained in this repository.)
-## Introduction
 
-Reflection is a powerful property, relating inherently to both symmetry and language or "representation".
+## Execution Model
 
-Reflex tries to explore some of the questions about the expressive power of reflexivity that have been posed
-for instance by languages like Ruby, Eiffel, Smalltalk, Self and Simula. ("Zuse" could be a name for this language!)
-
-A central aim is providing structured, fine-grained mechanisms for reflection.
-
-In particular the reflecting instruments as we conceive them:
-  - 'mirrors' for creating images (lightweight proxies/decorators/views) and illusions (structured pseudo-objects like super);
-  - 'wands' for mapping between the JS environment and back (wands "cast" between reflex and JS); some of the 'permanent' structures wands can create 'portals' and 'wormholes' for transporting things across the language barrier...
-  - 'crystals' for creating, in conjunction with mirrored objects, 'holograms' or structured systems of images/proxies;
-
-Some of the more mechanical elements...
-  - 'archetypes', a reflective approach to structural types, for creating new kinds in the system (i.e., something like a type but modelled objectively -- classes themselves could be an archetype)
-  - 'aspects' or traits, mixins -- only different from mixing in anonymous module in that they can be reflected on directly
-  
-
-## Guiding Principles
-
-Programming is a human activity, a social one, even if often performed in "isolation". 
-Language design choices seem abstract yet they are profoundly aesthetic and cultural,
-but beyond even this they have ethical and social meanings.
-With that in mind, here are the principles that will guide us.
-
-0. *Humanity matters.*
-   Prefer not just DX, prioritize not only readability (although a serious concern with linguistics is part of
-   this, i.e., part of the human-centric focus), but favor also deep consistency with human values.
-   Design systems that foster kind and connected relationships between people.
-   Design human-centered systems.
-
-1. *Joy matters.*
-   Systems and processes organizing themselves around people and interactions is preferrable to the opposite.
-   Computers promise human beings an enormous liberation from drudgery.
-   So:
-   Liberate people.
-
-2. *Eloquence is brevity.*
-   You can travel further if you are carrying less.
-   Don't seek a terminal minimalism of pure concatenative expressions or convoluted algebrae.
-   Find expressive pathways through reflection and reification.
-   Embrace the power of point-free programming while retaining the harness of an object model.
-
-3. *Communicate dynamically.*
-   Message passing is a universal model of communicating dynamic processes, so: 
-   communicate dynamically.
-   Get better at writing less.
-   Think about cells.
-
-4. *Guardrails for metaprogramming.*
-   Embrace metalanguage where necessary to empower users, but keep reflective tools well isolated from object code.
-
-5. *Create languages.*
-   Capture ideas as languages.
-   Focus on the expression of problems rather than solution-specification.
-   A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.
-
-
+- Message dispatch is central to the concept. Messages are delivered to objects which respond to them.
+  From the outside, in principle there's way to know how it may respond to the message.
+  (without 'hard' reflection through the encapsulated objects' implementation.)
 ## Core Types
 ### Object
 Every entity in the system descends from `Object`.
@@ -118,13 +65,29 @@ Booleans respond to methods `true()`, `false()` and `negate()`.
 There are some special numeric values like `Indeterminate` (our not-a-number representation), and (+/-) `Infinity`.
 
 ### String
-`String` is the class of words. Unicode literals are permitted in double-quoted string literals.
+`String`s are words, or textual values. Escaped unicode is permitted in double-quoted string literals.
 
 ### Array
-`Array` is the class of object-valued arrays (index spaces).
+`Array`s are object-valued index spaces.
 
 ### Range
-`Range` is the class of bounded intervals. Range literals are of the form `0..100`.
+`Range`s are bounded intervals. Range literals are of the form `0..100`.
+
+### Iterator
+`Iterator`s are internal iterators that directly implement a `next` method that gives successive elements of the iteratee. Has subclasses like `RangeIterator`, `ArrayIterator`, etc. The return value of a `times`, `upto`, etc.
+
+### Enumerator
+`Enumerator` is an external iterator (wraps around an iterator). The return value of an `each()`, `map()`, etc.
+
+### Module
+`Module`s are special classes that are intended to be used as mixins. Instance methods defined on a module can be copied into a class definition with `include` (e.g. `include Enumerable`.)
+
+### Enumerable
+Classes declaring they are `include Enumerable` are expected to implement an `each` method which gives an enumerator.
+
+### Main
+`Main` is the class of running Reflex programs. Main is wired to define instance methods on itself, so that an instance method definition outside
+of any class definition defines the method on main.
 
 ### 
 
@@ -185,3 +148,62 @@ Support a tree literal notation which can capture most of the XHTML structure a 
 (I keep thinking this could be a literal AST structure too, permitting some meta-circular logic, but that feels
 decidedly for further on.)
 A graph literal notation (basically a hash literal with a different brace which allows for key repetition) could be interesting too. 
+
+# On Reflection
+
+Reflection is a powerful property, relating inherently to both symmetry and language or "representation".
+
+Reflex tries to explore some of the questions about the expressive power of reflexivity that have been posed
+for instance by languages like Ruby, Eiffel, Smalltalk, Self and Simula. ("Zuse" could be a name for this language!)
+
+A central aim is providing structured, fine-grained mechanisms for reflection.
+
+In particular the reflecting instruments as we conceive them:
+  - 'mirrors' for creating images (lightweight proxies/decorators/views) and illusions (structured pseudo-objects like super);
+  - 'wands' for mapping between the JS environment and back (wands "cast" between reflex and JS); some of the 'permanent' structures wands can create 'portals' and 'wormholes' for transporting things across the language barrier...
+  - 'crystals' for creating, in conjunction with mirrored objects, 'holograms' or structured systems of images/proxies;
+
+Some of the more mechanical elements...
+  - 'archetypes', a reflective approach to structural types, for creating new kinds in the system (i.e., something like a type but modelled objectively -- classes themselves could be an archetype)
+  - 'aspects' or traits, mixins -- only different from mixing in anonymous module in that they can be reflected on directly
+  
+
+# Guiding Principles
+
+Programming is a human activity, a social one, even if often performed in "isolation". 
+Language design choices seem abstract yet they are profoundly aesthetic and cultural,
+but beyond even this they have ethical and social meanings.
+With that in mind, here are the principles that will guide us.
+
+0. *Humanity matters.*
+   Prefer not just DX, prioritize not only readability (although a serious concern with linguistics is part of
+   this, i.e., part of the human-centric focus), but favor also deep consistency with human values.
+   Design systems that foster kind and connected relationships between people.
+   Design human-centered systems.
+
+1. *Joy matters.*
+   Systems and processes organizing themselves around people and interactions is preferrable to the opposite.
+   Computers promise human beings an enormous liberation from drudgery.
+   So:
+   Liberate people.
+
+2. *Eloquence is brevity.*
+   You can travel further if you are carrying less.
+   Don't seek a terminal minimalism of pure concatenative expressions or convoluted algebrae.
+   Find expressive pathways through reflection and reification.
+   Embrace the power of point-free programming while retaining the harness of an object model.
+
+3. *Communicate dynamically.*
+   Message passing is a universal model of communicating dynamic processes, so: 
+   communicate dynamically.
+   Get better at writing less.
+   Think about cells.
+
+4. *Guardrails for metaprogramming.*
+   Embrace metalanguage where necessary to empower users, but keep reflective tools well isolated from object code.
+
+5. *Create languages.*
+   Capture ideas as languages.
+   Focus on the expression of problems rather than solution-specification.
+   A good object system is a self-reflecting servomechanism: a small problem statement generates a complete and complex solution.
+

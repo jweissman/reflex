@@ -149,6 +149,7 @@ module Enumerable {
     }
 
     size() { self.collect().length() }
+    // length() { self.size() }
     sample() { self.collect().get(Kernel.rand(self.size()-1))}
     reverse() { self.collect().reverse() }
     includes(v) { self.collect().includes(v) }
@@ -199,7 +200,7 @@ class Iterator {
     }
 
     next() {
-        if (!self.exhausted) {
+        if (!self.isExhausted()) {
             val=self.curr()
             self.advance()
             val
@@ -240,12 +241,20 @@ class ArrayIterator < Iterator {
 
     advance() {
         self.index = self.index + 1;
-        if (self.index >= self.array.length()) {
+        if (self.isExhausted()) { //self.index >= self.array.length()) {
             self.exhausted = true;
         }
     }
 
-    curr() { self.array.get(self.index) }
+    isExhausted() { self.index >= self.array.length() }
+
+    curr() {
+        if (self.isExhausted()) {
+          nil
+        } else {
+          self.array.get(self.index)
+        }
+    }
 }
 
 class RangeIterator < Iterator {
@@ -269,7 +278,7 @@ class RangeIterator < Iterator {
     curr() { self.index }
 }
 
-// tiny wrapper so we can identify with index?
+// tiny wrapper so we can identify withIndex-style things that should be destructured
 class Unpack { init(val) { self.val = val } }
 class Enumerator {
     include Enumerable
@@ -283,14 +292,10 @@ class Enumerator {
 
     withIndex(&pointBlock) {
         puts "Enumerator.withIndex"
-       index_space = (1..Infinity).each()
-       point = e => { 
+        index_space = (0..Infinity).each()
+        point = e => { 
            i = index_space.next()
-        //    if (e.isA(Unpack)) {
-        //       res = Unpack.new([e.val, i])
-        //    } else {
-              res = Unpack.new([e, i])
-        //    }
+           res = Unpack.new([e, i])
            res
        }
        mappedEnum = MappedEnumerator.new(self, point, true)
@@ -303,7 +308,9 @@ class Enumerator {
 
     each(&b) { if (block_given) { self.call(&b) }; self }
     next() {
+        // if (!self.isExhausted()) {
         self.it.next()
+        // }
     }
     call(&b) {
         self.tilExhausted(&b)
@@ -371,7 +378,7 @@ class Enumerator {
         detected
     }
     toArray() { self.collect() }
-    isExhausted() { self.it.exhausted }
+    isExhausted() { self.it.isExhausted() }
     tilExhausted(&block) {
         until (self.isExhausted()) {
             n = self.next()
@@ -382,7 +389,9 @@ class Enumerator {
             }
         }
     }
+    length() { self.collect().length() }
 }
+
 
 class MappedEnumerator < Enumerator {
     init(underylingEnum, mapFn, destructure) {

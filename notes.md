@@ -980,3 +980,84 @@ end
 
 App.start 0, render, update
 ```
+
+------
+
+was trying to write something abotu the execution model, talking about archetypes, which
+basically makes the case both for and against them:
+
+- However, sometimes we want transparency. Ruby has BasicObject for this purpose but we are thinking something
+  closer to an algebraic data type, where you can exhaustively (and substructurally) pattern match against it,
+  and maybe even reflect over it to some degree (i.e., open a class definition for `String | Integer | Array`,
+  which feels very weird to be sure but strangely powerful -- this kind of thing would obviously push you so 
+  far up the reflective tower that you're checking every object every message for every possible archetype it 
+  could match so maybe this isn't the greatest idea?)
+  (In particular are thinking this may help some of goals further on, wrapping around Ohm for a grammar literal notation...)
+
+
+obviously this would be a nightmare to check every archetype everytime
+
+and what exactly is that use case anyway?
+
+i guess the intellectual curiousity question would be how to handle algebraic types
+
+```
+archetype RespondsTo<:add> {
+  multiply(n) { n.times { self.add(self) } }
+}
+```
+
+and i guess if you think of archetypes as 'beneath' the dispatch mechanisms, just before method missing would crash things
+an archetype could pick it up
+
+i'm thinking really of exception handling (i guess the thought is realyl a kind of generalized event emission and exceptino handling as a special kind of event)
+
+---------
+
+feeling like try-catch is a special case of continuations?
+
+not sure but generalized event handlers seem interesting
+
+(again could be a bridge to fn paradigm? 'wire'/signals?)
+
+```
+class Foo
+  def on_method_missing(sym,...args,&block)
+    # blah
+  end
+end
+```
+
+so meth missing would be a special case of more general exception handler logic
+the model would be something like: an implicit try catch wraps every invocation on this class
+i.e. if any exception like that would be thrown while a frame with this object is self is on the call stack...
+(invoke this)
+
+i think i'd actually prefer this in general to `try/catch` blocks but not having them entirely seems a bit weird?
+maybe they could be rebuilt along other lines
+
+i guess the other thought here is module-wide catchers... if you define `on_exception` in a module, it should work
+whenever any class in that module is in view
+
+i like the idea of a `catch` as "part" of method definition
+
+```
+def read stream
+  stream.readChunk() until stream.closed()
+catch EndOfStream => ex
+  stream.close()
+end
+```
+
+in our notation it would have to be a lot bulkier
+```
+class StreamReader
+  read(stream)
+    chunks.push(stream.readChunk()) until stream.closed()
+  end
+
+  on_end_of_stream(stream)
+    stream.close()
+  end
+end
+```

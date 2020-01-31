@@ -29,9 +29,9 @@ describe('Reflex', () => {
            })
            it('enumerates with index + map stably', () => {
                evaluate('poly=x=>x*x+2*x+1')
-               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,1],[9,2],[16,3]])
-               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,1],[9,2],[16,3]])
-               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,1],[9,2],[16,3]])
+               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,0],[9,1],[16,2]])
+               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,0],[9,1],[16,2]])
+               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,0],[9,1],[16,2]])
            })
        })
 
