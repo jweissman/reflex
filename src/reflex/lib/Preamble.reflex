@@ -365,21 +365,26 @@ class Enumerator {
         self.tilExhausted(&b)
     }
     collect() {
-        puts "Enumerator.collect for " + self.inspect()
-        collected=[]
+        // puts "Enumerator.collect for " + self.inspect()
+        // okay, so collected was getting smashed!!!
+        // how do we shadow locals??
+        // we DO want to expose to locals to like blocks in scope
+        // but functions should be able to define their own
+        self.collected=[]
         // self.tilExhausted { |v|
         until (self.isExhausted()) {
+            // when we're in here, both things are trying to write to collected..
             v = self.next()
             if (v.isA(Unpack)) {
-                puts "Collect unpacked: " + v.val + " for " + self.inspect()
-                collected.push v.val // = collected + v.val
+                // puts "Collect unpacked: " + v.val + " for " + self.inspect()
+                self.collected.push v.val // = collected + v.val
             } else {
-                puts "Collect: " + v.inspect() + " for " + self.inspect()
-                collected.push v
+                // puts "Collect: " + v.inspect() + " for " + self.inspect()
+                self.collected.push v
             }
         }
-        puts "Enumerator.collected: " + collected + " for " + self.inspect()
-        collected
+        // puts "Enumerator.collected: " + self.collected + " for " + self.inspect()
+        self.collected
     }
     
 

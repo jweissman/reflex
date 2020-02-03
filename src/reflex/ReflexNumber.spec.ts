@@ -167,7 +167,7 @@ describe('Number', () => {
         it('iterates', () => {
             expect(evaluate('1.times { 0 }')).toEqual([0])
         })
-        xit('recurse', () => {
+        it('recurse', () => {
             expect(evaluate('1.times { 1.times { 0 } }')).toEqual([[0]])
         })
     })
