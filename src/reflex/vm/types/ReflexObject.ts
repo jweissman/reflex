@@ -24,7 +24,9 @@ export default class ReflexObject {
     get eigenclass(): ReflexClass { return this.get('meta') as ReflexClass }
     get ancestors(): ReflexClass[] { return this.klass ? [ this.klass, ...this.klass.ancestors] : [] }
     get super() { return new SuperFacade(this) }
-    get className(): string {return this.klass ? (this.klass as ReflexObject & {name: string}).name : 'Unknown'}
+    get className(): string {
+        return this.klass ? (this.klass as {name: string}).name : 'Unknown'
+    }
     get displayName(): string { return this.className }
     inspect(): string { return this.displayName }
 
@@ -38,6 +40,10 @@ export default class ReflexObject {
         let shared = this.klass && this.klass.get("instance_methods")
         let supershared = this.ancestors.flatMap(a => a ? [a.get("instance_methods")] : [])
         return [ eigen, shared, ...supershared ]
+    }
+
+    listMethods(): string[] {
+        return this.messageSources.flatMap(source => Object.keys(source.members))
     }
 
     send(message: string): ReflexObject {

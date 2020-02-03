@@ -36,7 +36,8 @@ end
  */
 class Function {
     meta.instanceEval { new(fn) { fn } }
-    call() { self() }
+    call(args) { self(args) }
+    // todo call(...args) { self(...args) }
     multiply(other) { other.times(&self) }
 }
 

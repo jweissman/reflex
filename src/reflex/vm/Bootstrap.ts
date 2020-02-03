@@ -47,6 +47,9 @@ let objectMethods = RObject.get("instance_methods")
 objectMethods.set("inspect", new WrappedFunction(`Object.inspect`,
  (machine: Machine) => machine.boundSelf!.inspect()
 ));
+objectMethods.set("methods", new WrappedFunction(`Object.instanceMethods`,
+ (machine: Machine) => machine.boundSelf!.listMethods()
+));
 objectMethods.set("eq", new WrappedFunction(`Object.eq`,
  (machine: Machine, other: ReflexObject) => machine.boundSelf!.isEqual(other)
 ));

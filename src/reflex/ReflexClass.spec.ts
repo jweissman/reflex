@@ -229,12 +229,6 @@ describe('Class', () => {
             expect(evaluate("A.quartz()")).toEqual("Class(Class)")
             expect(()=>evaluate("Object.quartz()")).toThrow()
         })
-
-        xit('defines class methods with shorthand', () => {
-            evaluate("class Animal { .foo() { Object }; .bar() { Class }}}}")
-            expect(evaluate("Animal.foo()")).toEqual("Class(Object)")
-            expect(evaluate("Animal.bar()")).toEqual("Class(Class)")
-        });
         
         it('inherits class methods', () => {
             evaluate("class Animal { self.defineClassMethod('foo', () => { Object })}")
