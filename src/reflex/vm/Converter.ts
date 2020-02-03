@@ -12,8 +12,8 @@ import { ReflexArray } from './types/ReflexArray';
 export class Converter {
     constructor(private ctrl: Controller) { }
     static castReflexToJavascript(object: ReflexObject, depth: number = 0): any {
-        if (depth > 32) { console.log("warning, truncating reflex obj: " + object); return null; }
-        // if (object === undefined) { return undefined }
+        // console.log("CAST REFLEX TO JS: " + object.inspect())
+        if (depth > 8) { console.log("warning, truncating reflex obj: " + object); return null; }
         if (object.className === 'Truth') {
             return true;
         }
@@ -32,6 +32,9 @@ export class Converter {
         else if (object.className === 'NegativeApeiron') {
             return -Infinity;
         }
+        // else if (object.className === 'Unpack') {
+        //     return (object as ReflexObject).get('val');
+        // }
         else if (object instanceof ReflexNumber) {
             return object.value;
         }
@@ -39,6 +42,7 @@ export class Converter {
             return object.value;
         }
         else if (object instanceof ReflexArray) {
+            // console.log("CONVERT ARRAY: " + object.items)
             return object.items.map(it => Converter.castReflexToJavascript(it, depth+1));
         } else {
             return object; //.toString()

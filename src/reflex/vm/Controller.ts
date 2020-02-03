@@ -157,7 +157,7 @@ export class Controller {
         if (top instanceof ReflexObject) {
             let localFrame: Frame = findFrameWithLocal(key, this.frames);
             localFrame.locals[key] = top;
-            debug("Set local variable '" + key + "' = " + prettyObject(top), this.frames)
+            debug("Set local variable '" + key + "' = " + prettyObject(top) + "[raw: " + top + "]", this.frames)
             // if (top instanceof ReflexFunction && top.name?.match(/lambda/)) {
             //     top.name = top.name + ' [' + key + ']'
             // }
@@ -321,13 +321,13 @@ export class Controller {
         let retValue: Value = null;
         if (frame.retValue) {
             retValue = frame.retValue;
-        } else if (top === null || top === undefined || (top instanceof Stone && top.name === 'invoke')) {
+        } else if (top === null || top === undefined  || (top instanceof Stone && top.name === 'invoke')) {
             retValue = this.makeNil();
         } else {
             retValue = top;
         }
 
-        // debug("Returning: " + prettyValue(retValue), this.frames)
+        debug("Returning: " + prettyValue(retValue), this.frames)
         this.frames.pop();
 
         if (retValue !== null) {

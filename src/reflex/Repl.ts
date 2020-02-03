@@ -1,8 +1,6 @@
 import { prettyCode, prettyValue } from "./vm/instruction/Instruction";
 import chalk from 'chalk';
 import Reflex from "./Reflex";
-import ReflexObject from "./vm/types/ReflexObject";
-import { prettyObject } from "./prettyObject";
 export class Repl {
     interact(interpreter: Reflex) {
         const clear = require('clear');
@@ -16,21 +14,16 @@ export class Repl {
 
         const server = repl.start({
             prompt: chalk.gray("> "),
-            writer: prettyValue, //(o) => o instanceof Reflex prettyObject(o),
+            writer: prettyValue,
             eval: (input: string, _ctx: any, _filename: any, cb: any) => {
                 let out = '(nothing)';
                 try {
-                    out = // prettyObject(
-                        interpreter.evaluate(input.replace("\n", ""), false);
-                    // if (out === undefined) {
-                    //     out = '(no-result)';
-                    // };
+                    out = interpreter.evaluate(input.replace("\n", ""), false);
                 }
                 catch (e) {
                     if (e.name === 'SyntaxError') {
                         return cb(new repl.Recoverable(e));
-                    }
-                    else {
+                    } else {
                         throw e;
                     }
                 }

@@ -15,8 +15,13 @@ export class ReflexArray extends ReflexObject {
     }
 
     put(index: ReflexNumber, value: ReflexObject) {
+        if (value === this) {
+            throw new Error("array self-insertion -- probably an error?")
+        }
+        // // console.log("ARRAY PUT -- " + value.inspect() + " at " + index.value + " [self before: " + this.inspect() + "]")
         this.items[index.value] = value
-        return value
+        // console.log("ARRAY PUT -- " + value.inspect() + " at " + index.value + " [self after: " + this.inspect() + "]")
+        return true
     }
     inspect(depth: number=0) { 
         if (depth > 24) { return '[...]'}

@@ -119,7 +119,7 @@ describe('Array', () => {
             it('reverse map is map reverse', () => {
                 evaluate('sq=x=>x*x')
                 expect(
-                    evaluate("[1,2,3,4,5].map(&sq).reverse().eq([1,2,3,4,5].reverse().map(&sq))")
+                    evaluate("[1,2,3,4,5].map(&sq).reverse().eq([1,2,3,4,5].reverse().map(&sq).collect())")
                 ).toEqual(true)
             })
         })

@@ -37,6 +37,7 @@ end
 class Function {
     meta.instanceEval { new(fn) { fn } }
     call() { self() }
+    multiply(other) { other.times(&self) }
 }
 
 /* 
@@ -99,23 +100,31 @@ class Number {
         }
     }
 
-    times(&timesBlock) {
+    times(value,&timesBlock) {
         puts self + ".times"
         if (self<=0) { [] }
         else {
           it = RangeIterator.new(Range.new(0, self-1))
           if (block_given) {
               puts self + ".times -- block given, enumerating"
-              it = it.map(&timesBlock)
+              it.map(&timesBlock).collect()
+          } else if (value != nil) {
+              it.map{value}.collect()
+          } else {
+            it
           }
-          it
         }
+    }
+
+    multiply(other) {
+        if (other.isA(String)) { other * self }
+        else { self.rawMult(other) }
     }
 
     upto(stop,&block) {
         r=Range.new(self, stop)
         if (block_given) {
-            r.map(&block) //.collect()
+            r.map(&block).collect()
         } else {
             r
         }
@@ -143,25 +152,9 @@ class Module {
 }
 
 module Enumerable {
+    each(&eachBlock) { fail('implement #each in ' + self.class) }
 
-    // 'hard eval' def which falls back to toArray...
-    // with yield semantics this could be more efficient!
-    each(&eachBlock) {
-        if (block_given) { self.toArray().each(&eachBlock) }
-        else { self.toArray().each() }
-    }
-
-    map(&mapFn) { self.each().map(&mapFn).collect() }
-    collect() { self.each().collect() }
-    first() { self.collect().first() }
-    last() { self.collect().last() }
-    rest() { self.collect().rest() }
-    size() { self.collect().length() }
-    // sample() { self.collect().sample()}
-    reverse() { self.collect().reverse() }
-    includes(v) { self.collect().includes(v) }
-    select(&b) { self.collect().select(&b) }
-
+    map(&mapFn) { self.each().map(&mapFn) } //.collect() } // really collect here??
     detect(&b) { self.each().detect(&b) }
     any(&b) { self.each().any(&b) }
     zip(space, &b) {
@@ -171,6 +164,17 @@ module Enumerable {
           self.each().zip(space)
         }
     }
+    collect() { self.each().collect() }
+    first() { self.collect().first() }
+    last() { self.collect().last() }
+    rest() { self.collect().rest() }
+    size() { self.collect().length() }
+    reverse() { self.collect().reverse() }
+    subtract(other) { self.collect().subtract(other) }
+    includes(v) { self.collect().includes(v) }
+    select(&b) { self.collect().select(&b) }
+
+    
 
     join(delim) { self.collect().join(delim) }
     withIndex(&b) {
@@ -202,6 +206,12 @@ class Iterator {
         self.exhausted = false;
     }
 
+    each(&block) {
+        enum = Enumerator.new(self)
+        if (block_given) { enum(&block) }
+        else { enum }
+    }
+
     withIndex(&b) {
        puts "Iterator.withIndex"
        enum = Enumerator.new(self).withIndex()
@@ -226,7 +236,6 @@ class Iterator {
     isExhausted() { self.exhausted }
     call(&block) {
         if (block_given) {
-            // self.map(&block).collect()
             iteratee = []
             until (self.isExhausted()) {
                 n = self.next()
@@ -254,6 +263,7 @@ class ArrayIterator < Iterator {
         self.array = arr
         super.init()
     }
+    inspect() { "ArrayIterator[" + self.array.inspect() + "]" }
 
     advance() {
         self.index = self.index + 1;
@@ -279,6 +289,7 @@ class RangeIterator < Iterator {
         self.range = range;
         self.index = range.start;
     }
+    inspect() { "RangeIterator[" + self.range.inspect() + "]" }
 
     advance() {
         step = range.inc * range.dir
@@ -301,6 +312,8 @@ class Enumerator {
     init(it) {
         self.it = it
     }
+
+    inspect() { "Enumerator[" + self.it.inspect() + "]" }
 
     map(&fn) {
        MappedEnumerator.new(self, fn)
@@ -352,16 +365,20 @@ class Enumerator {
         self.tilExhausted(&b)
     }
     collect() {
+        puts "Enumerator.collect for " + self.inspect()
         collected=[]
         // self.tilExhausted { |v|
         until (self.isExhausted()) {
             v = self.next()
             if (v.isA(Unpack)) {
+                puts "Collect unpacked: " + v.val + " for " + self.inspect()
                 collected.push v.val // = collected + v.val
             } else {
+                puts "Collect: " + v.inspect() + " for " + self.inspect()
                 collected.push v
             }
         }
+        puts "Enumerator.collected: " + collected + " for " + self.inspect()
         collected
     }
     
@@ -424,7 +441,7 @@ class MappedEnumerator < Enumerator {
     next() {
         n = self.underlyingEnum.next()
         if (n.isA(Unpack)) {
-            Unpack.new(self.mapFn(...n.val)) //self.underlyingEnum.next())
+            self.mapFn(...n.val) //self.underlyingEnum.next())
         } else {
             self.mapFn(n)
         }
@@ -559,10 +576,17 @@ class String {
     }
 
     toString() { self }
+    each(&block) {
+        enum = self.toArray().each()
+        if (block_given) { enum(&block) }
+        else { enum }
+    }
     get(i) { self.split('').get(i) }
     add(other) { self.concat(other) }
+    subtract(other) { self.collect().subtract(other).join() }
     reverse() { self.collect().reverse().join() }
     isPalindrome() { self.reverse() == self }
+
     multiply(other) {
         if (other.isInstanceOf(Number)) {
             str = self

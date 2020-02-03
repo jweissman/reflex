@@ -30,6 +30,10 @@ describe('String', () => {
             expect(evaluate("'hi'.multiply(5)")).toEqual('hihihihihi')
         })
 
+        it('subtract', () => {
+            expect(evaluate("'abstract'.subtract('algebra')")).toEqual('stct')
+        })
+
         xit('call', () => {
             expect(evaluate("'add'.call(1,2)")).toEqual(3)
         })

@@ -192,7 +192,7 @@ const defineArithmetic = (methodName: ArithOp, customName?: string) => {
 }
 defineArithmetic('add');
 defineArithmetic('subtract');
-defineArithmetic('multiply');
+defineArithmetic('multiply', 'rawMult');
 defineArithmetic('exponentiate');
 defineArithmetic('divide', 'rawDiv');
 defineArithmetic('mod', 'modulo');
