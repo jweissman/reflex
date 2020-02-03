@@ -13,4 +13,5 @@ export interface Frame {
     // fake: boolean;
 
     backingFrame?: Frame;
+    opaque?: boolean;
 }

@@ -414,6 +414,7 @@ export class Controller {
                 : " without args"),
             this.frames
         )
+        // 
         this.frames.push({
             ip: indexForLabel(this.code, fn.label),
             locals: fnArgs,
@@ -422,6 +423,7 @@ export class Controller {
             currentMethod: fn,
             stack: [],
             backingFrame: fn.frame,
+            opaque: !withBlock,
         });
     }
 

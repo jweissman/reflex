@@ -18,9 +18,6 @@ export default class ReflexObject {
     set(k: string,v: ReflexObject) { this.members[k] = v }
     get(k: string): ReflexObject { return this.members[k] }
 
-    // private surroundingObject: ReflexObject | null = null;
-    // within(obj: ReflexObject) { this.surroundingObject = obj; return this; }
-
     get self(): ReflexObject { return this; }
     get klass(): ReflexClass { return this.get('class') as ReflexClass }
     get superclass(): ReflexClass { return this.klass.get('super') as ReflexClass }
@@ -29,7 +26,8 @@ export default class ReflexObject {
     get super() { return new SuperFacade(this) }
     get className(): string {return this.klass ? (this.klass as ReflexObject & {name: string}).name : 'Unknown'}
     get displayName(): string { return this.className }
-    inspect(depth: number = 0): string { return this.displayName }
+    inspect(): string { return this.displayName }
+
     toString() { return this.displayName; }
     isEqual(other: ReflexObject): boolean {
         return this.id === other.id

@@ -1061,3 +1061,49 @@ class StreamReader
   end
 end
 ```
+
+----------------------
+
+okay, that was a long journey!!
+okay, so collected was getting smashed!!!
+how do we shadow locals??
+we DO want to expose to locals to like blocks in scope
+but functions should be able to define their own locals and not get them trashed!
+(i.e., by unrelated invocations of the same function, possibly within a call from this function!)
+blocks should be able to see into parent functions, but that's it!
+the idea of seeing everything on the stack is NOT right
+when we're in here [ Enumerator.collect's isExhausted/next loop], both things are trying to write to collected..
+
+well, that was a lot. it does seem like some other weird/spooky things that had to be written
+very particularly are caused by this. 
+
+and it's one of those funny things. i sort of knew this in the back of my mind, that shadowing would
+bite us eventually! :)
+
+okay, so approaches. obviously we need to rethink how we're exposing variables to child scopes.
+in general... they only see their parent frame if they're literally in block scope within that function.
+classes also retain scope, but methods should have locals that don't trash each other.
+
+that was basically the case: a reentrant instance method (Enumerator.collect, when we setup a
+recursive structure like `1.times { 1.times { 1 }}` which should just construct `[[1]]`) that 
+ended up trashing its local variables inside a loop (so 'children' calls were trying to insert
+an array into itself!!)
+
+----------
+
+rough plan of attack
+
+- bugs (shadowing)
+- symbol
+- hash/dict structure
+- yield?
+- case?
+
+- tree lit/xml
+- web repl
+
+- stdlib (file, network, math)
+- json, web, html, javascript, css, html?
+- web component?
+- pkg mgr/hub?
+- clientserver?

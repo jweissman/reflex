@@ -23,9 +23,9 @@ export class ReflexArray extends ReflexObject {
         // console.log("ARRAY PUT -- " + value.inspect() + " at " + index.value + " [self after: " + this.inspect() + "]")
         return true
     }
-    inspect(depth: number=0) { 
-        if (depth > 24) { return '[...]'}
-        return '[' + this.items.map(it => it.inspect(depth+1)) + ']'
+    inspect() { 
+        // if (depth > 24) { return '[...]'}
+        return '[' + this.items.map(it => it.inspect()) + ']'
     }
     toString() { return this.inspect() }
 }
