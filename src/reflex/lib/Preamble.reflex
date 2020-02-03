@@ -164,7 +164,13 @@ module Enumerable {
 
     detect(&b) { self.each().detect(&b) }
     any(&b) { self.each().any(&b) }
-    zip(&b) { self.each().zip(&b) }
+    zip(space, &b) {
+        if (block_given) {
+          self.each().zip(space, &b)
+        } else {
+          self.each().zip(space)
+        }
+    }
 
     join(delim) { self.collect().join(delim) }
     withIndex(&b) {
@@ -251,7 +257,7 @@ class ArrayIterator < Iterator {
 
     advance() {
         self.index = self.index + 1;
-        if (self.isExhausted()) { //self.index >= self.array.length()) {
+        if (self.isExhausted()) {
             self.exhausted = true;
         }
     }
@@ -300,20 +306,40 @@ class Enumerator {
        MappedEnumerator.new(self, fn)
     }
 
-    withIndex(&pointBlock) {
-        puts "Enumerator.withIndex"
-        index_space = (0..Infinity).each()
+    zip(space, &block) {
+        enum = space.each()
         point = e => { 
-           i = index_space.next()
+           i = enum.next()
            res = Unpack.new([e, i])
            res
        }
        mappedEnum = MappedEnumerator.new(self, point, true)
        if (block_given) {
-         mappedEnum.each(&pointBlock)
+         mappedEnum.each(&block)
        } else {
          mappedEnum.collect()
        }
+    }
+
+    withIndex(&indexBlock) {
+        puts "Enumerator.withIndex"
+        index_space = (0..Infinity) //.each()
+        if (block_given) {
+        self.zip(index_space, &indexBlock)
+        } else {
+        self.zip(index_space)
+        }
+       // point = e => { 
+       //    i = index_space.next()
+       //    res = Unpack.new([e, i])
+       //    res
+       //}
+       //mappedEnum = MappedEnumerator.new(self, point, true)
+       //if (block_given) {
+       //  mappedEnum.each(&pointBlock)
+       //} else {
+       //  mappedEnum.collect()
+       //}
     }
 
     each(&b) { if (block_given) { self.call(&b) }; self }

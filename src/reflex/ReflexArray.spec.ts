@@ -189,6 +189,12 @@ describe('Array', () => {
                 expect(evaluate("[1,2,3,4,5]-[1,5]")).toEqual([2,3,4])
             })
         })
+
+        describe('zip', () => {
+            it('joins two arrays', () => {
+                expect(evaluate("[1,2,3].zip(['a','b','c'])")).toEqual([[1,'a'],[2,'b'],[3,'c']])
+            })
+        })
     })
 
     it('literals', () => {
