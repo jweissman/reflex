@@ -41,6 +41,14 @@ describe('Array', () => {
                 expect(evaluate("a.get(2)")).toEqual(3)
                 expect(evaluate("a.get(3)")).toEqual(null)
             })
+            it('shorthand', () => {
+                evaluate('arr=[1,2,3,4]')
+                expect(evaluate('arr[0]')).toEqual(1)
+                expect(evaluate('arr[1]')).toEqual(2)
+                expect(evaluate('arr[2]')).toEqual(3)
+                expect(evaluate('arr[3]')).toEqual(4)
+                expect(evaluate('arr[4]')).toEqual(null)
+            })
         })
 
         describe('set', () => {

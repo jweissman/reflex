@@ -79,6 +79,7 @@ Reflex {
        | RangeLit
        | NumberLit
        | Message CarefulArguments -- funcall
+       | ArrayIndex
        | Bareword
 
     CarefulCall
@@ -257,6 +258,9 @@ Reflex {
 
     ArrayLit
       = "[" ListOf<Expr, ","> "]"
+
+    ArrayIndex
+      = CoreExpr "[" Expr "]"
 
     RangeLit
       = CoreExpr ".." CoreExpr

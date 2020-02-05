@@ -26,8 +26,29 @@ import { Loop } from "./Loop";
 import { LogicalNot } from './LogicalNot';
 import { ArrayLiteral } from './ArrayLiteral';
 import { RangeLiteral } from './RangeLiteral';
+import { Code } from '../../vm/instruction/Instruction';
 
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
+
+class ArrayIndex extends Tree {
+  constructor(public array: Tree, public index: Tree) {
+    super();
+  }
+  inspect(): string {
+    return this.array.inspect() + "[" + this.index.inspect() + "]";
+  }
+  get code(): Code {
+    return [
+      ['mark', 'index'],
+      ...this.index.code,
+      ['gather', 'index'],
+      ...this.array.code,
+      ['push', 'get'],
+      ['call', null],
+      ['invoke', 1],
+    ]
+  }
+}
 
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Program: (prog: Node) => 
@@ -160,6 +181,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(
     Number(`${whole.sourceString}.${fraction.sourceString}`), true),
   ArrayLit: (_lq: Node, seq: Node, _rq: Node) => new ArrayLiteral(seq.tree),
+  ArrayIndex: (array: Node, _lb: Node, index: Node, _rb: Node) => new ArrayIndex(array.tree, index.tree),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),
   EmptyListOf: () => new Sequence([]),
 }

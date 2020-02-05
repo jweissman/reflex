@@ -146,16 +146,24 @@ class Apeiron < Number {
 class PositiveApeiron < Apeiron { negate() { NegativeApeiron.new() } }
 class NegativeApeiron < Apeiron { negate() { PositiveApeiron.new() } }
 
-/// enumerability /////
-
+/**
+ * Module
+ *
+ */
 class Module {
     inject(target) { Kernel.include(self, target) }
 }
 
+/**
+ * Enumerable
+ *
+ * Externally-iterable collections
+ */
 module Enumerable {
     each(&eachBlock) { fail('implement #each in ' + self.class) }
 
-    map(&mapFn) { self.each().map(&mapFn) } //.collect() } // really collect here??
+    map(&mapFn) { self.each().map(&mapFn) }
+
     detect(&b) { self.each().detect(&b) }
     any(&b) { self.each().any(&b) }
     zip(space, &b) {
@@ -174,12 +182,12 @@ module Enumerable {
     subtract(other) { self.collect().subtract(other) }
     includes(v) { self.collect().includes(v) }
     select(&b) { self.collect().select(&b) }
-
-    
+    sample() {
+        self.collect().get(Kernel.rand(self.size()-1))
+    }
 
     join(delim) { self.collect().join(delim) }
     withIndex(&b) {
-        puts "Enumerable.withIndex"
         if (block_given) {
          self.each().withIndex(&b)
         } else {
@@ -187,7 +195,6 @@ module Enumerable {
         }
     }
     eachWithIndex(&b) {
-       puts "Enumerable.eachWithIndex"
        if (block_given) {
          self.each().withIndex(&b)
        } else {
@@ -195,9 +202,6 @@ module Enumerable {
        }
     }
 
-    sample() {
-        self.collect().get(Kernel.rand(self.size()-1))
-    }
 }
 
 class Iterator {
@@ -214,12 +218,8 @@ class Iterator {
     }
 
     withIndex(&b) {
-       puts "Iterator.withIndex"
        enum = Enumerator.new(self).withIndex()
-       if (block_given) {
-           puts "Iterator.withIndex --- got block! running..."
-          enum(&b)
-       }
+       if (block_given) { enum(&b) }
        enum
     }
 
