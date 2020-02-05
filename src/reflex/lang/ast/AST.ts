@@ -50,6 +50,26 @@ class ArrayIndex extends Tree {
   }
 }
 
+class ArrayIndexEq extends Tree {
+  constructor(public arrayIndex: ArrayIndex, public expr: Tree) { super();}
+  inspect(): string {
+    return this.arrayIndex.inspect() + "[" + this.expr.inspect() + "]";
+  }
+
+  get code(): Code {
+    return [
+      ['mark', 'arr-eq'],
+      ...this.expr.code,
+      ...this.arrayIndex.index.code,
+      ['gather', 'arr-eq'],
+      ...this.arrayIndex.array.code,
+      ['push', 'set'],
+      ['call', null],
+      ['invoke', 2],
+    ]
+  }
+}
+
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Program: (prog: Node) => 
     new Program(prog.tree),
@@ -86,6 +106,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   PartBlock: (body: Node, _rb: Node) => body.tree,
   ObjectDot_dot: (receiver: Node, _dot: Node, message: Node, _andDot: Node) => new SendMessage(receiver.tree, message.tree),
   EqExpr_send_eq: (receiver: Node, _dot: Node, message: Node, _eq: Node, expr: Node) => new SendMessageEq(receiver.tree, message.tree, expr.tree),
+  EqExpr_arr_set_eq: (arrIndex: Node, _eq: Node, expr: Node) => new ArrayIndexEq(arrIndex.tree, expr.tree),
   CoreExpr_funcall: (fn: Node, args: Node) => new Barecall(new Bareword(fn.tree.key), args.tree),
   FormalParams: (_lp: Node, paramList: Node, _rp: Node) => paramList.tree,
   Param: (parameter: Node) => {

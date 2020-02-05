@@ -17,6 +17,7 @@ Reflex {
 
      EqExpr =
        | ObjectDot "." Name "=" Expr -- send_eq
+       | ArrayIndex "=" Expr -- arr_set_eq
        | Message "=" Expr -- local_eq
        
      ObjectDot

@@ -63,6 +63,11 @@ describe('Array', () => {
                 evaluate("a.set(3,8)")
                 expect(evaluate("a")).toEqual([5,6,7,8])
             })
+            it('shorthand', () => {
+                evaluate('a=Array.new(1,2,3)')
+                evaluate('a[0]=100')
+                expect(evaluate("a")).toEqual([100,2,3])
+            })
         })
 
         describe('push', () => {
