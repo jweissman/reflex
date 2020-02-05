@@ -247,7 +247,10 @@ stringMethods.set("downcase", new WrappedFunction("String.downcase", (machine: M
 
 let RSymbol = ReflexClass.make("Symbol");
 ReflexSymbol.klass = RSymbol;
-// let symbolMethods = RSymbol.get("instance_methods")
+let symbolMethods = RSymbol.get("instance_methods")
+symbolMethods.set("toString", new WrappedFunction("Symbol.toString", (machine: Machine) =>
+  (machine.boundSelf! as ReflexSymbol).value)
+)
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>

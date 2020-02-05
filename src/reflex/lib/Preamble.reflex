@@ -649,7 +649,6 @@ NegativeInfinity = NegativeApeiron.new()
 using = Kernel.import
 prints = Kernel.println
 fail = Kernel.throw
-// cons = Kernel.cons
 noop = ->{}
 
 // old ways die hard

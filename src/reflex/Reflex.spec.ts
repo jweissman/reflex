@@ -19,7 +19,9 @@ describe('Reflex', () => {
                expect(evaluate("[0,1,2,3].map(&Symbol.new('one')).collect()")).toEqual([false,true,false,false])
            })
 
-           test.todo("toString")
+           it("toString", () => {
+               expect(evaluate(":foo.toString()")).toEqual("foo")
+           })
            test.todo("works as arg to send")
        }) 
 
