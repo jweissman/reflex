@@ -7,9 +7,7 @@ export class ArrayLiteral extends Tree {
   inspect(): string { return "[" + this.seq.inspect() + "]"; }
   constructor(sequence: Sequence<Tree>) {
     super();
-    this.seq = sequence; //.reverse();
-  // }
-  // get code(): Code {
+    this.seq = sequence;
     this.code = [
       ['mark', 'arr-args'],
       ...this.seq.items.reverse().flatMap(it => it.code),

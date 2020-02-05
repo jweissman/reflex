@@ -1,4 +1,3 @@
-import util from 'util';
 import { Value, Reference } from './instruction/Value';
 import Machine from './Machine';
 import { Instruction, indexForLabel, Code, prettyValue } from './instruction/Instruction';
@@ -434,6 +433,7 @@ export class Controller {
         let recv = this.stack[this.stack.length - 1];
         this.pop();
         let obj = this.stack[this.stack.length - 1];
+        // console.log("SEND EQ", recv + "." + k + " = " + obj)
         // this.pop();
         if (obj instanceof ReflexObject) {
             if (recv instanceof ReflexObject) {

@@ -1,4 +1,3 @@
-import util from 'util';
 import Tree from "./Tree";
 import { Program } from "./Program";
 import { Bareword } from "./Bareword";
@@ -29,7 +28,56 @@ import { ArrayLiteral } from './ArrayLiteral';
 import { RangeLiteral } from './RangeLiteral';
 import { ArrayIndex } from './ArrayIndex';
 import { ArrayIndexEq } from './ArrayIndexEq';
+import { Code } from '../../vm/instruction/Instruction';
 
+class TupleLit extends Tree {
+  code: Code;
+ constructor(public key: string, public value: Tree) { super();
+    this.code = [
+      ['mark', 'tuple-args'],
+      ...this.value.code,
+      // ['mark', 'sym-arg'],
+      ['push', [this.key]],
+      // ['gather', 'sym-arg'],
+      ['bare', 'Symbol'],
+      ['push', 'new'],
+      ['call', null],
+      ['invoke', 1],
+      ['gather', 'tuple-args'],
+      ['bare', 'Tuple'],
+      ['push', 'new'],
+      ['call', null],
+      ['invoke', 2],
+    ];
+
+  }
+  inspect(): string { return this.key + " => " + this.value.inspect(); }
+}
+
+export class HashLiteral extends Tree {
+  seq: Sequence<Tree>;
+  code: Code;
+  inspect(): string { return "[" + this.seq.inspect() + "]"; }
+  constructor(sequence: Sequence<Tree>) {
+    super();
+    this.seq = sequence;
+    this.code = [
+      ['mark', 'hsh-args'],
+      ['mark', 'arr-args'],
+      ...this.seq.items.reverse().flatMap(it => it.code),
+      ['gather', 'arr-args'],
+      ['bare', 'Array'],
+      ['push', 'new'],
+      ['call', null],
+      ['invoke', this.seq.items.length],
+      ['gather', 'hsh-args'],
+      ['bare', 'Hash'],
+      ['push', 'new'],
+      ['call', null],
+      ['invoke', this.seq.items.length],
+    ];
+  }
+}
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
 
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
@@ -165,6 +213,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(
     Number(`${whole.sourceString}.${fraction.sourceString}`), true),
+  HashLit: (_lb: Node, tupleSeq: Node, _rb: Node) => new HashLiteral(tupleSeq.tree),
+  Tuple_kv: (key: Node, colon: Node, value: Node) => new TupleLit(key.sourceString, value.tree),
   ArrayLit: (_lq: Node, seq: Node, _rq: Node) => new ArrayLiteral(seq.tree),
   ArrayIndex: (array: Node, _lb: Node, index: Node, _rb: Node) => new ArrayIndex(array.tree, index.tree),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),

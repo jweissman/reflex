@@ -75,6 +75,7 @@ Reflex {
        
      CoreExpr =
        | ParenExpr
+      //  | HashLit
        | StringLit
        | SymbolLit
        | RangeLit
@@ -82,6 +83,7 @@ Reflex {
        | ArrayIndex
        | ArrayLit
        | Message CarefulArguments -- funcall
+       | HashLit
        | Bareword
 
     CarefulCall
@@ -257,6 +259,15 @@ Reflex {
     FormalFunctionLiteral 
       = Params "=>" Block
       | Params "=>" Expr
+
+    HashLit
+      = "{" ListOf<Tuple, ","> "}"
+    
+    Tuple
+      = HashKey ":" Expr -- kv
+      | CoreExpr "=>" Expr -- obj
+
+    HashKey = alnum+
 
     ArrayLit
       = "[" ListOf<Expr, ","> "]"

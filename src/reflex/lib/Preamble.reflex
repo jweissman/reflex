@@ -590,9 +590,8 @@ class String {
 }
 
 class Symbol {
-    call(subject) {
-        subject.send(self)
-    }
+    call(subject) { subject.send(self) }
+    add(other) { self.toString().add(other) }
 }
 
 /**
@@ -638,6 +637,7 @@ class Range {
  */
 class Tuple {
     init(key, value) {
+        puts "NEW TUPLE: " + key + " = " + value
         self.key = key
         self.value = value
     }
@@ -645,7 +645,7 @@ class Tuple {
     pair() { [self.key, self.value] }
     inspect() { self.key + ": " + self.value }
     update(&block) { self.value = block(...self.pair()); self }
-    // call(&block) { self.update(&block); }
+    eq(other) { other.key == self.key && other.value == self.value }
 }
 
 /**
@@ -654,8 +654,9 @@ class Tuple {
  * Dict-like
  */
 class Hash {
-    init() {
-        self.items = []
+    init(its) {
+        puts "NEW HASH: " + its
+        self.items = its || []
     }
     put(k,v) {
         if (self.has(k)) {
@@ -666,12 +667,14 @@ class Hash {
     }
 
     has(k) { self.items.any { |it| it.key == k }}
-    get(k) { self.items.detect { |it| it.key == k }}
+    at(k) { self.items.detect { |it| it.key == k }}
+    get(k) { self.at(k).value if self.has(k) }
     inspect() { "{" + self.items.collect(&:inspect) + "}" }
     update(&up) {
         self.items.each { |it| it.update(&up) }
         self
     }
+    eq(other) { self.items == other.items }
 }
 
 /////

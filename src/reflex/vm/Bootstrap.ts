@@ -251,6 +251,9 @@ let symbolMethods = RSymbol.get("instance_methods")
 symbolMethods.set("toString", new WrappedFunction("Symbol.toString", (machine: Machine) =>
   (machine.boundSelf! as ReflexSymbol).value)
 )
+symbolMethods.set("eq", new WrappedFunction("Symbol.eq", (machine: Machine, other: string) =>
+  (machine.boundSelf! as ReflexSymbol).value === other)
+)
 
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>

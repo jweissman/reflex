@@ -22,6 +22,11 @@ describe('Reflex', () => {
            it("toString", () => {
                expect(evaluate(":foo.toString()")).toEqual("foo")
            })
+           it('eq', () => {
+               expect(evaluate(":alpha == :alpha")).toEqual(true)
+               expect(evaluate(":alpha == :beta")).toEqual(false)
+               expect(evaluate(":gamma == :gamma")).toEqual(true)
+           })
            it("works as arg to send", () => {
                expect(evaluate("1.send :one")).toEqual(true)
                expect(evaluate("1.send :zero")).toEqual(false)
@@ -35,22 +40,51 @@ describe('Reflex', () => {
                expect(evaluate("Tuple.new('a', 1).inspect()")).toEqual("a: 1")
                expect(evaluate("Tuple.new('a', 1).update { |k,v| v + 1 }")).toEqual("a: 2")
            })
-           it('dict', () => {
-               expect(evaluate("Hash")).toEqual("Class(Hash)")
-               evaluate("h=Hash.new()")
-               expect(evaluate("h.inspect()")).toEqual("{}")
-               evaluate("h.put('a', 1)")
-               expect(evaluate("h.inspect()")).toEqual("{a: 1}")
-               evaluate("h.update { |k,v| v+1 }")
-               expect(evaluate("h.inspect()")).toEqual("{a: 2}")
-               expect(evaluate("h.has('a')")).toEqual(true)
-               expect(evaluate("h.get('a').value")).toEqual(2)
-               expect(evaluate("h.has('b')")).toEqual(false)
-               expect(evaluate("h.get('b')")).toEqual(null)
+           describe('dict', () => {
+               it('is a class', () => {
+                   expect(evaluate("Hash")).toEqual("Class(Hash)")
+               })
+               it('put', () => {
+                   evaluate("h=Hash.new()")
+                   expect(evaluate("h.inspect()")).toEqual("{}")
+                   evaluate("h.put('a', 1)")
+                   expect(evaluate("h.inspect()")).toEqual("{a: 1}")
+               });
+               it('update', () => {
+                   evaluate("h=Hash.new()")
+                   expect(evaluate("h.inspect()")).toEqual("{}")
+                   evaluate("h.put('a', 1)")
+                   expect(evaluate("h.inspect()")).toEqual("{a: 1}")
+                   evaluate("h.update { |k,v| v+1 }")
+                   expect(evaluate("h.inspect()")).toEqual("{a: 2}")
+               });
+               it('has/get', () => {
+                   evaluate("h=Hash.new(); h.put('a', 2)")
+                   expect(evaluate("h.has('a')")).toEqual(true)
+                   expect(evaluate("h.get('a')")).toEqual(2)
+                   expect(evaluate("h.has('b')")).toEqual(false)
+                   expect(evaluate("h.get('b')")).toEqual(null)
+               })
+
+               it('eq', () => {
+                   evaluate("h=Hash.new(); h.put('a', 2)")
+                   evaluate("h2=Hash.new(); h2.put('a', 2)")
+                   expect(evaluate("h.eq(h2)")).toEqual(true)
+                   evaluate("h2.put('b', 3)")
+                   expect(evaluate("h.eq(h2)")).toEqual(false)
+               })
+
+               it('shorthand', () => {
+                   expect(evaluate("Hash.new() == {}"))
+                   evaluate("h={a:1}")
+                   expect(evaluate("h.class")).toEqual("Class(Hash)")
+                   expect(evaluate("h.get('a')")).toEqual(1)
+                   expect(evaluate("h[:a]")).toEqual(1)
+               })
            })
-       }) 
-       test.todo("tree") 
-       test.todo("graph") 
+       })
+        test.todo("tree")
+        test.todo("graph")
     })
 
     describe("syntax", () => {
