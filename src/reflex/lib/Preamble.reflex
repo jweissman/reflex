@@ -1,6 +1,6 @@
 /*
  * class Object
- * The class of everything!
+ * everything!
  */
 class Object
     def neq other
@@ -17,7 +17,7 @@ end
 /*
  * Class
  *
- * The class of classes.
+ * types of things
  */
 class Class
     def isDescendantOf(other)
@@ -32,7 +32,7 @@ end
 /**
  * Function
  *
- * The class of functions.
+ * invoke-able
  */
 class Function {
     meta.instanceEval { new(fn) { fn } }
@@ -44,7 +44,7 @@ class Function {
 /* 
  * Nihil
  *
- * The class of uninhabited types.
+ * uninhabited types.
  */
 class Nihil {
     nil() { true }
@@ -54,7 +54,7 @@ class Nihil {
 /*
  * Boolean
  * 
- * The class of truth-values.
+ * truth-values.
  */
 class Boolean {
     eq(other) { self.isInstanceOf(other.class) }
@@ -78,7 +78,7 @@ class Falsity < Boolean {
 /*
  * Number
  * 
- * The class of numeric values
+ * numeric values
  */
 class Number {
     zero() { self == 0 }
@@ -174,8 +174,10 @@ module Enumerable {
           self.each().zip(space)
         }
     }
-    collect() { self.each().collect() }
-    // get(n) { self.collect().get(n) }
+    collect(&b) {
+        if (block_given) { self.each().collect(&b) }
+        else { self.each().collect() }
+    }
     first() { self.collect().first() }
     last() { self.collect().last() }
     rest() { self.collect().rest() }
@@ -340,21 +342,10 @@ class Enumerator {
     withIndex(&indexBlock) {
         index_space = (0..Infinity) //.each()
         if (block_given) {
-        self.zip(index_space, &indexBlock)
+          self.zip(index_space, &indexBlock)
         } else {
-        self.zip(index_space)
+          self.zip(index_space)
         }
-       // point = e => { 
-       //    i = index_space.next()
-       //    res = Unpack.new([e, i])
-       //    res
-       //}
-       //mappedEnum = MappedEnumerator.new(self, point, true)
-       //if (block_given) {
-       //  mappedEnum.each(&pointBlock)
-       //} else {
-       //  mappedEnum.collect()
-       //}
     }
 
     each(&b) { if (block_given) { self.call(&b) }; self }
@@ -366,17 +357,21 @@ class Enumerator {
     call(&b) {
         self.tilExhausted(&b)
     }
-    collect() {
-        collected=[]
-        until (self.isExhausted()) {
-            v = self.next()
-            if (v.isA(Unpack)) {
-                collected.push v.val // = collected + v.val
-            } else {
-                collected.push v
+    collect(&collectFn) {
+        if (block_given) {
+            self.map(&collectFn).collect()
+        } else {
+            collected=[]
+            until (self.isExhausted()) {
+                v = self.next()
+                if (v.isA(Unpack)) {
+                    collected.push v.val // = collected + v.val
+                } else {
+                    collected.push v
+                }
             }
+            collected
         }
-        collected
     }
     
 
@@ -450,7 +445,7 @@ class MappedEnumerator < Enumerator {
 /**
  * Array
  *
- * The class of object-valued index spaces.
+ * object-valued index spaces.
  */
 class Array {
     include Enumerable
@@ -558,7 +553,7 @@ class Array {
 /**
  * String
  *
- * The class of words
+ * words
  */
 class String {
     include Enumerable
@@ -602,7 +597,7 @@ class Symbol {
 
 /**
  * Range
- * The class of bounded natural intervals.
+ * bounded natural intervals.
  */
 class Range {
     include Enumerable
@@ -633,6 +628,49 @@ class Range {
         } else {
             self.toArray().sample()
         }
+    }
+}
+
+/**
+ * Tuple
+ *
+ * value pair
+ */
+class Tuple {
+    init(key, value) {
+        self.key = key
+        self.value = value
+    }
+
+    pair() { [self.key, self.value] }
+    inspect() { self.key + ": " + self.value }
+    update(&block) { self.value = block(...self.pair()); self }
+    // call(&block) { self.update(&block); }
+}
+
+/**
+ * Hash
+ *
+ * Dict-like
+ */
+class Hash {
+    init() {
+        self.items = []
+    }
+    put(k,v) {
+        if (self.has(k)) {
+            self.get(k).update { v }
+        } else {
+            self.items.push(Tuple.new(k,v))
+        }
+    }
+
+    has(k) { self.items.any { |it| it.key == k }}
+    get(k) { self.items.detect { |it| it.key == k }}
+    inspect() { "{" + self.items.collect(&:inspect) + "}" }
+    update(&up) {
+        self.items.each { |it| it.update(&up) }
+        self
     }
 }
 

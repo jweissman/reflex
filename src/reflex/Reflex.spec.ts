@@ -22,10 +22,33 @@ describe('Reflex', () => {
            it("toString", () => {
                expect(evaluate(":foo.toString()")).toEqual("foo")
            })
-           test.todo("works as arg to send")
+           it("works as arg to send", () => {
+               expect(evaluate("1.send :one")).toEqual(true)
+               expect(evaluate("1.send :zero")).toEqual(false)
+               expect(evaluate("0.send :zero")).toEqual(true)
+           })
        }) 
 
-       test.todo("hash") 
+       describe("hash", () => {
+           it('tuple', () => {
+               expect(evaluate("Tuple")).toEqual("Class(Tuple)")
+               expect(evaluate("Tuple.new('a', 1).inspect()")).toEqual("a: 1")
+               expect(evaluate("Tuple.new('a', 1).update { |k,v| v + 1 }")).toEqual("a: 2")
+           })
+           it('dict', () => {
+               expect(evaluate("Hash")).toEqual("Class(Hash)")
+               evaluate("h=Hash.new()")
+               expect(evaluate("h.inspect()")).toEqual("{}")
+               evaluate("h.put('a', 1)")
+               expect(evaluate("h.inspect()")).toEqual("{a: 1}")
+               evaluate("h.update { |k,v| v+1 }")
+               expect(evaluate("h.inspect()")).toEqual("{a: 2}")
+               expect(evaluate("h.has('a')")).toEqual(true)
+               expect(evaluate("h.get('a').value")).toEqual(2)
+               expect(evaluate("h.has('b')")).toEqual(false)
+               expect(evaluate("h.get('b')")).toEqual(null)
+           })
+       }) 
        test.todo("tree") 
        test.todo("graph") 
     })
