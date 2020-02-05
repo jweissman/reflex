@@ -406,6 +406,8 @@ export class Controller {
         if (!foundBlock && hasLocal('false', this.frames)) {
             fnArgs['block_given'] = getLocal('false', this.frames);
         }
+        debug("Current self is " + this.frame.self, this.frames)
+        debug("Function " + fn + " self " + fn.frame.self, this.frames)
         let self = fn.frame.self ? fn.frame.self : this.frame.self;
         debug(
             "Invoke " + chalk.green(fn) + " on " + prettyValue(self) +

@@ -76,6 +76,7 @@ Reflex {
      CoreExpr =
        | ParenExpr
        | StringLit
+       | SymbolLit
        | RangeLit
        | NumberLit
        | ArrayIndex
@@ -273,6 +274,14 @@ Reflex {
     StringLit
       = "'" #singleStringCharacter* "'"
       | "\"" #doubleStringCharacter* "\""
+
+    SymbolLit
+      = ":" #symbolCharacter*
+
+    symbolCharacter
+      = alnum 
+      //sourceCharacter
+      //~(":" | "(" | ")" | "." | "," | "\"" | "\'" | "\\" "\n") sourceCharacter
 
     singleStringCharacter
       = ~("\'" | "\\" | "\n") sourceCharacter -- non_escaped

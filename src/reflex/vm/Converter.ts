@@ -8,6 +8,7 @@ import { Controller } from './Controller';
 import ReflexClass from './types/ReflexClass';
 import { ReflexString } from './types/ReflexString';
 import { ReflexArray } from './types/ReflexArray';
+import { ReflexSymbol } from './types/ReflexSymbol';
 // do conversions/casting?
 export class Converter {
     constructor(private ctrl: Controller) { }
@@ -39,6 +40,9 @@ export class Converter {
             return object.value;
         }
         else if (object instanceof ReflexString) {
+            return object.value;
+        }
+        else if (object instanceof ReflexSymbol) {
             return object.value;
         }
         else if (object instanceof ReflexArray) {

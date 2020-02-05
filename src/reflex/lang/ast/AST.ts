@@ -7,7 +7,7 @@ import { Node } from 'ohm-js';
 import { SendMethodCall } from "./SendMethodCall";
 import { Message } from "./Message";
 import { SendMessage } from "./SendMessage";
-import { StringLiteral } from "./StringLit";
+import { StringLiteral, SymbolLiteral } from "./StringLit";
 import SendMessageEq from "./SendMessageEq";
 import { Defun } from "./Defun";
 import { FunctionLiteral } from "./FunctionLiteral";
@@ -26,49 +26,10 @@ import { Loop } from "./Loop";
 import { LogicalNot } from './LogicalNot';
 import { ArrayLiteral } from './ArrayLiteral';
 import { RangeLiteral } from './RangeLiteral';
-import { Code } from '../../vm/instruction/Instruction';
+import { ArrayIndex } from './ArrayIndex';
+import { ArrayIndexEq } from './ArrayIndexEq';
 
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
-
-class ArrayIndex extends Tree {
-  constructor(public array: Tree, public index: Tree) {
-    super();
-  }
-  inspect(): string {
-    return this.array.inspect() + "[" + this.index.inspect() + "]";
-  }
-  get code(): Code {
-    return [
-      ['mark', 'index'],
-      ...this.index.code,
-      ['gather', 'index'],
-      ...this.array.code,
-      ['push', 'get'],
-      ['call', null],
-      ['invoke', 1],
-    ]
-  }
-}
-
-class ArrayIndexEq extends Tree {
-  constructor(public arrayIndex: ArrayIndex, public expr: Tree) { super();}
-  inspect(): string {
-    return this.arrayIndex.inspect() + "[" + this.expr.inspect() + "]";
-  }
-
-  get code(): Code {
-    return [
-      ['mark', 'arr-eq'],
-      ...this.expr.code,
-      ...this.arrayIndex.index.code,
-      ['gather', 'arr-eq'],
-      ...this.arrayIndex.array.code,
-      ['push', 'set'],
-      ['call', null],
-      ['invoke', 2],
-    ]
-  }
-}
 
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   Program: (prog: Node) => 
@@ -181,6 +142,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   FormalFunctionLiteral: (params: Node, _arrow: Node, block: Node) => new FunctionLiteral(params.tree, block.tree),
   StabbyFunctionLiteral: (_stab: Node, block: Node) => new FunctionLiteral(new Sequence([]), block.tree),
   StringLit: (_lq: Node, lit: Node, _rq: Node) => new StringLiteral(lit.tree.join("")),
+  SymbolLit: (_col: Node, lit: Node) => new SymbolLiteral(lit.tree.join("")),
   doubleStringCharacter_escaped: (_esc: Node, lit: Node) => lit.tree,
   
   unicodeLiteral: (_u: Node, a: Node, b: Node, c: Node, d: Node) => {
@@ -197,6 +159,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   },
   
   sourceCharacter: (char: Node) => char.sourceString,
+  symbolCharacter: (char: Node) => char.sourceString,
   RangeLit: (start: Node, _dots: Node, stop: Node) => new RangeLiteral(start.tree, stop.tree),
   NumberLit_int: (digits: Node) => new NumberLiteral(Number(digits.sourceString)),
   NumberLit_float: (whole: Node, _dot: Node, fraction: Node) => new NumberLiteral(

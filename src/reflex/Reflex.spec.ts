@@ -1,39 +1,27 @@
 import { evaluate, out } from "./SpecHelper"
 describe('Reflex', () => {
     describe('structures', () => {
-       describe('range', () => {
-           it('is the class of intervals', () => {
-               expect(evaluate("Range")).toEqual('Class(Range)')
+       describe("symbol", () => {
+           it('is a class', () => {
+               expect(evaluate("Symbol")).toEqual("Class(Symbol)")
            })
 
-           it('is the class of intervals', () => {
-               expect(evaluate("Range.new(0,10)")).toEqual('0..10')
+           it('new', () => {
+               expect(evaluate("Symbol.new('hi')")).toEqual("hi")
            })
 
-           it('shorthand', () => {
-               expect(evaluate("0..100")).toEqual("0..100")
+           it('lit', () => {
+               expect(evaluate(":foo.class")).toEqual("Class(Symbol)")
            })
 
-           describe('step', () => {
-               it('sets increment', () => {
-                   expect(evaluate("0..10.step(3).toArray()")).toEqual([0,3,6,9])
-               })
+           it('call', () => {
+               expect(evaluate("[0,1,2,3].map(&Symbol.new('zero')).collect()")).toEqual([true,false,false,false])
+               expect(evaluate("[0,1,2,3].map(&Symbol.new('one')).collect()")).toEqual([false,true,false,false])
            })
 
-           it('enumerates', () => { 
-               expect(evaluate("(1..20).step(3).map { |x| x*x + 2*x + 1 }.collect()")).toEqual([4,25,64,121,196,289,400])
-           })
-           it('enumerates in reverse', () => { 
-               expect(evaluate("(20..1).step(4).collect()")).toEqual([20,16,12,8,4])
-               expect(evaluate("(20..1).step(4).collect()")).toEqual([20,16,12,8,4])
-           })
-           it('enumerates with index + map stably', () => {
-               evaluate('poly=x=>x*x+2*x+1')
-               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,0],[9,1],[16,2]])
-               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,0],[9,1],[16,2]])
-               expect(evaluate("1..3.map(&poly).withIndex()")).toEqual([[4,0],[9,1],[16,2]])
-           })
-       })
+           test.todo("toString")
+           test.todo("works as arg to send")
+       }) 
 
        test.todo("hash") 
        test.todo("tree") 

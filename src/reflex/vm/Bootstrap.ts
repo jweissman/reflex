@@ -10,8 +10,8 @@ import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } f
 import { Boots } from "./Boots";
 import { ReflexArray } from "./types/ReflexArray";
 import { ReflexString } from "./types/ReflexString";
-import { log } from "./util/log";
-import { prettyObject } from "../prettyObject";
+import { ReflexSymbol } from "./types/ReflexSymbol";
+import { debug, log } from "./util/log";
 
 let boots: Boots = new Boots();
 boots.lace();
@@ -55,27 +55,16 @@ objectMethods.set("eq", new WrappedFunction(`Object.eq`,
 ));
 objectMethods.set("send", new WrappedFunction(`Object.send`,
  (machine: Machine, message: string, ...args: ReflexObject[]) => {
-  //  log("MANUAL OBJECT SEND: " + message + " TO " + machine.boundSelf!.inspect()) //, machine.activeFrames)
-   let fn = (machine.boundSelf!.send(message));
-  //  log("MANUAL OBJECT SEND: " + message + " -> sent: " + fn) //, machine.activeFrames)
-    if (fn instanceof ReflexFunction) { //} || fn instanceof WrappedFunction) {
-      return machine.doInvoke(
-        undefined,
-        fn,
-        ...args
-      );
-    } else if (fn instanceof WrappedFunction) { //} || fn instanceof WrappedFunction) {
-      return machine.doInvoke(
-        undefined,
-        fn as unknown as ReflexFunction,
-        ...args
-      );
-      // throw new Error("send wrapped fn not impl -- " + message)
-      // args.forEach(arg => machine.stack.push(arg))
-      // machine.stack.push(args)
-      // machine.stack.push(fn)
-      // machine.controller.invoke(args.length) //, false);
-
+   let self = machine.boundSelf!
+   log("Object.send -- (bound) self="+self+", message="+message)
+   let fn = self.send(message);
+   log("Object.send -- fn="+fn)
+    if (fn instanceof ReflexFunction) {
+      fn.frame.self = machine.boundSelf!
+      return machine.doInvoke(undefined, fn, ...args);
+    } else if (fn instanceof WrappedFunction) {
+      // do we need to bind here??
+      return machine.doInvoke(undefined, fn as unknown as ReflexFunction, ...args);
     } else {
       throw new Error("Not a function -- " + message)
     }
@@ -256,6 +245,10 @@ stringMethods.set("downcase", new WrappedFunction("String.downcase", (machine: M
 //   (machine.boundSelf! as ReflexString).value.split("").reverse().join("")
 // ))
 
+let RSymbol = ReflexClass.make("Symbol");
+ReflexSymbol.klass = RSymbol;
+// let symbolMethods = RSymbol.get("instance_methods")
+
 let Main = ReflexClass.make("Main")
 const constructMain = (machine: Machine) =>
   makeReflexObject(machine, Main, [])
@@ -271,8 +264,8 @@ export const bootLocals = {
   Array: RArray,
   String: RString,
   Number: RNumber,
-  // Float: RFloat,
-  // Integer: RInt,
+  Symbol: RSymbol,
+
   Indeterminate,
   PositiveApeiron,
   NegativeApeiron,

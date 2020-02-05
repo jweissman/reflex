@@ -82,7 +82,9 @@ class Falsity < Boolean {
  */
 class Number {
     zero() { self == 0 }
-    one() { self == 1 }
+    one() {
+        self == 1
+    }
     positive() { self.gt(0) }
     true() { self.zero().negate() }
     divide(other) {
@@ -101,16 +103,14 @@ class Number {
         }
     }
 
-    times(value,&timesBlock) {
-        puts self + ".times"
+    times(&timesBlock) {
         if (self<=0) { [] }
         else {
           it = RangeIterator.new(Range.new(0, self-1))
           if (block_given) {
-              puts self + ".times -- block given, enumerating"
               it.map(&timesBlock).collect()
-          } else if (value != nil) {
-              it.map{value}.collect()
+        //   } else if (value != nil) {
+        //       it.map{value}.collect()
           } else {
             it
           }
@@ -124,10 +124,11 @@ class Number {
 
     upto(stop,&block) {
         r=Range.new(self, stop)
+        it = RangeIterator.new(r) //Range.new(0, self-1))
         if (block_given) {
-            r.map(&block).collect()
+            it.map(&block).collect()
         } else {
-            r
+            it
         }
     }
     // really just alias
@@ -337,7 +338,6 @@ class Enumerator {
     }
 
     withIndex(&indexBlock) {
-        puts "Enumerator.withIndex"
         index_space = (0..Infinity) //.each()
         if (block_given) {
         self.zip(index_space, &indexBlock)
@@ -594,6 +594,12 @@ class String {
     }
 }
 
+class Symbol {
+    call(subject) {
+        subject.send(self)
+    }
+}
+
 /**
  * Range
  * The class of bounded natural intervals.
@@ -643,6 +649,7 @@ NegativeInfinity = NegativeApeiron.new()
 using = Kernel.import
 prints = Kernel.println
 fail = Kernel.throw
+// cons = Kernel.cons
 noop = ->{}
 
 // old ways die hard

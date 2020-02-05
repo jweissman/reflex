@@ -1,21 +1,18 @@
-import util from 'util';
 import ReflexObject from "./ReflexObject";
 import { ReflexFunction } from "./ReflexFunction";
 import Machine from "../Machine";
 import { ReflexNumber, IndeterminateForm, NegativeInfinity, PositiveInfinity } from "./ReflexNumber";
 import { makeMetaclass } from "./makeMetaclass";
-import { log } from "../util/log";
 import { ReflexArray } from './ReflexArray';
-import { makeReflexObject } from './makeReflexObject';
 import { ReflexString } from './ReflexString';
+import { ReflexSymbol } from "./ReflexSymbol";
 
 export const NATIVE_CLASSES: { [key: string]: any } = {
     "Function": ReflexFunction,
     "Number": ReflexNumber,
     "String": ReflexString,
+    "Symbol": ReflexSymbol,
     "Array": ReflexArray,
-    // "Integer": ReflexInteger,
-    // "Float": ReflexFloat,
     "Indeterminate": IndeterminateForm,
     "NegativeApeiron": NegativeInfinity,
     "PositiveApeiron": PositiveInfinity,
@@ -23,18 +20,10 @@ export const NATIVE_CLASSES: { [key: string]: any } = {
 
 export const classRegistry: { [key: string]: ReflexClass } = {}
 
-// class FlatStore {
-//     private items: { [key: string]: any } = {}
-//     get(key: string) { return this.items[key] }
-//     set(key: string, value: any) { this.items[key] = value }
-//     has(key: string) { return Object.keys(this.items).includes(key) }
-// }
-
 export default class ReflexClass extends ReflexObject {
     isClass: boolean = true;
 
     static make = (name: string, superclass: ReflexClass = ReflexObject.klass) => {
-        // log("MAKE CLASS " + name + " SUBCLASS OF " + superclass)
         let klass = new ReflexClass(name);
         classRegistry[name] = klass;
         klass.set("super", superclass);
@@ -61,10 +50,8 @@ export default class ReflexClass extends ReflexObject {
     private constructor(public name: string) { super(); } 
 
     assembleMeta() {
-        if (this.get("meta")) {
-            // log("asked to assembleMeta but meta already present")
-        } else {
-            let meta = makeMetaclass(this)
+        if (!this.get("meta")) {
+           let meta = makeMetaclass(this)
            this.set("meta", meta);
         }
     }
@@ -99,7 +86,6 @@ export default class ReflexClass extends ReflexObject {
         let supershared = this.ancestors.map(a => a.get("instance_methods"))
         let supermeta = this.metaChain.flatMap(a => a ? [a.get("instance_methods")] : [])
         let sources = [  eigen, ...supermeta, shared, ...supershared ]
-        // log(this.inspect() + " MSG SOURCES: " + util.inspect(sources))
         return sources;
     }
 }

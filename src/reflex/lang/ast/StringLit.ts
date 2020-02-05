@@ -5,7 +5,6 @@ export class StringLiteral extends Tree {
     code: Code;
     constructor(public literal: string) {
         super();
-
         this.code = [
             ['push', [this.literal]],
             ['bare', 'String'],
@@ -15,5 +14,20 @@ export class StringLiteral extends Tree {
         ]
     }
     inspect() { return '"' + this.literal + '"'; }
+
+}
+export class SymbolLiteral extends Tree {
+    code: Code;
+    constructor(public literal: string) {
+        super();
+        this.code = [
+            ['push', [this.literal]],
+            ['bare', 'Symbol'],
+            ['push', 'new'],
+            ['call', null],
+            ['invoke', 1],
+        ]
+    }
+    inspect() { return ':' + this.literal; }
 
 }
