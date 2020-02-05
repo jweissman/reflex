@@ -76,11 +76,11 @@ Reflex {
      CoreExpr =
        | ParenExpr
        | StringLit
-       | ArrayLit
        | RangeLit
        | NumberLit
-       | Message CarefulArguments -- funcall
        | ArrayIndex
+       | ArrayLit
+       | Message CarefulArguments -- funcall
        | Bareword
 
     CarefulCall

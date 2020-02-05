@@ -49,6 +49,9 @@ describe('Array', () => {
                 expect(evaluate('arr[3]')).toEqual(4)
                 expect(evaluate('arr[4]')).toEqual(null)
             })
+            it('shorthand index with lit', () => {
+                expect(evaluate('[1,2,3][0]')).toEqual(1)
+            })
         })
 
         describe('set', () => {
