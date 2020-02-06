@@ -24,12 +24,12 @@ export function trace(message: string, instruction: Instruction, frames: Frame[]
 
     let msg: string[] = [
         // ...(message ? [chalk.yellow(message)] : []),
-        // ...(stack.length && stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
+        ...(stack.length && stack !== lastStack ? [chalk.gray("stack: ") + dump(stack)] : []),
         // ...(method !== lastMethod
         //     ? [(chalk.gray("current method: ") + method)]
         //     : []
         // ),
-        // prettyInstruct(instruction),
+        prettyInstruct(instruction),
         // chalk.gray("self: ") + frame.self.inspect(),
     ]//.join("\n");
     lastStack = [...stack];

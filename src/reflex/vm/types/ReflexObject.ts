@@ -1,9 +1,19 @@
 import ReflexClass from "./ReflexClass";
-import { WrappedFunction } from "./ReflexFunction";
-import { debug, log } from "../util/log";
-// import { SuperFacade } from "./SuperFacade";
+import { WrappedFunction, ReflexFunction } from "./ReflexFunction";
 
-class MethodMissing extends Error {}
+function uniq<T>(arr: T[]) {
+    let u: T[]=[];
+    arr.forEach(it => { if (!u.includes(it)) { u.push(it) }})
+    return u;
+}
+
+export class MethodMissing extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype)
+        this.name = MethodMissing.name;
+    }
+}
 type Store = {[key: string]: ReflexObject} 
 export default class ReflexObject {
     static klass: ReflexClass;
@@ -43,7 +53,7 @@ export default class ReflexObject {
     }
 
     listMethods(): string[] {
-        return this.messageSources.flatMap(source => Object.keys(source.members))
+        return uniq(this.messageSources.flatMap(source => Object.keys(source.members)))
     }
 
     send(message: string): ReflexObject {
@@ -60,21 +70,25 @@ export default class ReflexObject {
                     }
                     return src
                 }
+                if (response.className === 'Function') {
+                    (response as ReflexFunction).frame.self = this;
+                }
                 return response
             }
         }
-        return this.methodMissing(message);
-    }
-
-    methodMissing(message: string): ReflexObject {
+        // return this.methodMissing(message);
         throw new MethodMissing(`Method missing: ${message} on ${this.inspect()}`);
     }
+
+    // methodMissing(message: string): ReflexObject {
+    //     throw new MethodMissing(`Method missing: ${message} on ${this.inspect()}`);
+    // }
 
     respondsTo(message: string): boolean {
         if (message === 'self') { return true }
         else if (this.isClass === false && message === 'super') { return true }
         else {
-            let responder = [this, ...this.messageSources].find(source => source.has(message))
+            let responder = [this, ...this.messageSources].find(source => source && source.has(message))
             if (responder) {
                 return true;
             }

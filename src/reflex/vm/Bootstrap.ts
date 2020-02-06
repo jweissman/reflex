@@ -53,6 +53,9 @@ objectMethods.set("methods", new WrappedFunction(`Object.instanceMethods`,
 objectMethods.set("eq", new WrappedFunction(`Object.eq`,
  (machine: Machine, other: ReflexObject) => machine.boundSelf!.isEqual(other)
 ));
+objectMethods.set("instanceVariableGet", new WrappedFunction(`Object.instanceVariableGet`,
+ (machine: Machine, name: string) => machine.boundSelf!.send(name)
+));
 objectMethods.set("send", new WrappedFunction(`Object.send`,
  (machine: Machine, message: string, ...args: ReflexObject[]) => {
    let self = machine.boundSelf!

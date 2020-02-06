@@ -115,4 +115,5 @@ describe('Object', () => {
             expect(evaluate("o.isInstanceOf(Object)")).toEqual(true)
         })
     })
+    
 });

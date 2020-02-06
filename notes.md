@@ -1096,9 +1096,10 @@ rough plan of attack
 - bugs (shadowing)
 - symbol
 - hash/dict structure
+( okay! )
+
 - yield?
 - case?
-
 - tree lit/xml
 - web repl
 
@@ -1107,3 +1108,130 @@ rough plan of attack
 - web component?
 - pkg mgr/hub?
 - clientserver?
+
+--------------------
+
+things maybe before yield/case and tree lit/xml -->
+
+- obj attrs?
+
+i think the idea is that there are 'only' methods??
+
+- method missing??
+
+objects should be able to intercept meth missing!!
+
+- mirror/binding
+
+---
+
+old checklist:
+
+[ ] binding [ ] mirror [ ] throw [ ] yield [ ] iterators [ ] enumerable [ ] modules [ ] hammer (spec framework) / chisel (spec runner?) [ ] tree lit [ ] tuples?
+wand (ffi objs) sketch of programming reference/guide web repl
+files/network/math webserver docs? packages?
+
+- a lot of things kind of working!!
+- maybe it's time to 'flip over' in the sense of we could start doing testing in reflex
+  (hammer, spec dsl?)
+- ffi also seems generally useful
+- bring back yield / figure out throw sounds good too
+- mirror and binding would be great
+- xml as native tree data type sounds great too?
+- lots of good things feel unlocked -- a general pass of cleanup and doc would be nice also??
+
+---
+
+controller impl could be more straightforward if we had a helper that could invoke
+a function AND permit execution to continue, returning the value when done (ie handing
+back the value returned by the function it was asked to execute...)
+
+i guess that's a promise? and i guess it would mean re-architecting parts of the engine
+to be async
+
+honestly maybe that's good, there's things that it feels painful to do without SOME
+async in the architecture (pause between instructions, for instance, which would be nice
+for debugging and maybe visualization)
+
+-------
+
+what if reflex processes on the same machine were 'aware' of each other?
+ie could send messages across without much ceremony??
+(what different kind of tools could we offer -- a heads up dashboard kind of app server...
+something that runs on the machine and monitors all the processes)
+(a 'single' VM for all the processes on the same machine seems kind of interesting)
+(distributed reflex is another use case that should be investigated... drb-over-http is sort of the thought)
+
+---
+
+
+okay, so it seems like our message dispatching infrastructure...
+is not quite ready to handle method missing?
+this is actually kind of a weird aspect of the VM i've wanted to address for awhile
+[i keep thinking there should be some kind of minimal lang the vm understands that we can compile things into...
+(ie instead of) having to write bytecode for everything...!]
+anyway the VM infrastructure for message passing is a little disjointed
+maybe we should just review things a bit
+
+there's a few instructions related to message passing
+first we have `call`, which sends a message to an object but doesn't invoke it or do anything WITH it
+(that asymmetry is a little weird -- i think it's related to object attrs?? )
+i think maybe it pushes the result onto the stack
+(yeah, that's the idea, call the object with the message, and push the result)
+
+okay, then SEPARATELY we have `invoke` which takes a function, constructs a new activation record and pushes it onto the list of frames
+(putting the execution pointer at the function head, with args assigned to params as locals)
+
+we tried merging these at one point with `dispatch` -- the idea being we want to send a message to an object
+and assume it returns a function, then invoke that function without arguments -- i think this originated roughly
+from when we needed to do conditional statements, and being able to have one instruction to call `true()/false()` was nice?
+
+i think all this is pointing to: we want a more general message passing mechanism, that more cleanly handles things
+like method missing
+
+basically, in the object send logic, we've already lost track of the arguments
+
+i think that needs to be an 'atomic' operation, sending a message to an object
+(attrs are just a method that returns the value of the attribute...)
+
+okay, so that means we have a single method invocation strategy --
+or i guess effectively a new one alongside the old ones but maybe they can be realigned --
+the semantics of this new strategy are like:
+take an object, a message, args + block and dispatch it -- get the member, invoke it with the args
+(handle special cases like method missing etc)
+do all that, then run the machine til that function returns??
+i'm not sure we need to recurse over that, just prepping for the call is enough
+okay, so the idea is that we replace all the `call`/`invoke` methods with a more general `invoke_dynamic` (?)
+it expects stack structure like args,method,object -- ??
+
+okay, so one structural issue
+namely that in order to do the full dispatch dance, we need to be able to invoke functions 'synchronously'
+or wait for them to return
+this is most clear with respondsTo but methodMissing is the same problem really... 
+ie we need to call user-defined respondsTo
+
+jeez could we write object.send in reflex at this point??
+maybe we need some binding tricks to tie it together but
+ultimately that's good but simplifying/improving the vm seems good too?
+i'm not sure i want to rewrite the thing to be async right away, it seems like a lot?
+basically, the idea would be that we could 'call and follow' an invocation, waiting for it to return
+i'm not sure writing in reflex 'purely' even makes that much sense, although we could try to do it ofc??
+
+we need to run the machine, checking if our execution frame has been returned from yet
+it's like execute until with the predicate that the instruction is return and frame is current frame...
+
+
+    private dynamicInvoke(receiver: ReflexObject, method: string, ...args: Value[]): Value {
+        this.push(args);
+        this.push(receiver);
+        this.push(method);
+        this.call();
+        this.invoke(args.length, false)
+        let watchedFrame = this.frame;
+        this.machine.executeLoop((instruction: Instruction) => {
+            let [op] = instruction;
+            return op === 'ret' && this.frame === watchedFrame
+        });
+        let result = this.stack[this.stack.length - 1]
+        return result
+    }

@@ -3,7 +3,7 @@ import Machine from './Machine';
 import { Instruction, indexForLabel, Code, prettyValue } from './instruction/Instruction';
 import { Stone } from './instruction/Stone';
 import { log, debug } from './util/log';
-import ReflexObject from './types/ReflexObject';
+import ReflexObject, { MethodMissing } from './types/ReflexObject';
 import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
 import { dump } from './util/dump';
 import { ReflexNihil } from './types/ReflexNihil';
@@ -110,8 +110,8 @@ export class Controller {
                 break;
             case 'send':
                 let val: string = value as string;
-                let result = this.frame.self.send(val);
-                this.push(result);
+                this.trySend(this.frame.self, val); // this.frame.self.send(val);
+                // this.push(result);
                 break;
             case 'send_or_eq':
                 let theKey = value as string;
@@ -232,7 +232,7 @@ export class Controller {
             }
         } else if (top instanceof ReflexObject) {
             let call = top.send('call');
-            this.push(args)
+            this.push(args);
             if (call instanceof WrappedFunction) { call.bind(top) }
             if (call instanceof ReflexFunction) { call.frame.self = top }
             this.push(call);
@@ -301,12 +301,13 @@ export class Controller {
             this.pop();
             let receiver = second;
             let method = top;
-            let result;
-            result = receiver.send(method);
-            if (result instanceof ReflexFunction) {
-                result.frame.self = receiver;
-            }
-            this.push(result);
+            this.trySend(receiver, method)
+            // let result;
+            // result = receiver.send(method); //this.trySend(receiver, method); //.send(method);
+            // if (result instanceof ReflexFunction) {
+            //     result.frame.self = receiver;
+            // }
+            // this.push(result);
         } else {
             dump(this.stack);
             throw new Error("call expects top to be message, second to be recv");
@@ -457,6 +458,59 @@ export class Controller {
         this.push(message);
         this.call();
         this.invoke(0, false)
+    }
+
+    // dynamicInvoke(receiver: ReflexObject, method: string, ...args: Value[]): Value {
+    //     this.push(args);
+    //     this.push(receiver);
+    //     this.push(method);
+    //     this.call();
+    //     this.invoke(args.length, false)
+    //     let watchedFrame = this.frame;
+    //     // this kind of recursion seems basically very dangerous??
+    //     // like it would be easy to smash the stack right?
+    //     this.machine.executeLoop((instruction: Instruction) => {
+    //         let [op] = instruction;
+    //         return op === 'ret' && this.frame === watchedFrame
+    //     });
+    //     let result = this.stack[this.stack.length - 1]
+    //     return result
+    // }
+
+    protected trySend(receiver: ReflexObject, method: string): void {
+        // console.log("TRY SEND " + method + " TO " + receiver)
+        let result: Value = null;
+        // let responsive = this.dynamicInvoke(receiver, "respondsTo", [method])
+        // if (receiver.respondsTo(method)) {
+            // console.log("SEND " + method + " TO " + receiver)
+            try {
+                result = receiver.send(method);
+            } catch (e) {
+                if (e instanceof MethodMissing) {
+                    console.log("CAUGHT METHOD MISSING " + method + " on " + receiver)
+                    throw e;
+                    // let onMethodMissing = receiver.send('onMethodMissing') as ReflexFunction
+                    // result = this.dynamicInvoke(receiver, 'onMethodMissing', [method])
+                    // // // if (onMethodMissing) {
+                    // console.log("CALL onMethodMissing -- " + onMethodMissing)
+                    // // onMethodMissing.frame.self = receiver
+                    // // at this point we need the args!!!
+                    // this.invokeReflex(onMethodMissing, [method], false);
+                    // return;
+                    // result = this.stack[this.stack.length-1]
+                } else {
+                    console.log("Caught error: " + e)
+                    throw e;
+                }
+            }
+            // if (result instanceof ReflexFunction) {
+            //     result.frame.self = receiver;
+            // }
+            this.push(result);
+        // } else {
+        //     console.log("OBJ DOES NOT RESPOND!!")
+        //     throw new MethodMissing(`Method missing: ${method} on ${receiver.inspect()}`);
+        // }
     }
 
     private stackIsEmpty() { return this.stack.length === 0 }

@@ -12,6 +12,26 @@ class Object
     true() { true }
     false() { Boolean.negate(self.true()) }
     toString() { self.inspect() }
+
+    onMethodMissing(sym) { //}, ...args, &block) {
+        puts "Object.onMethodMissing -- " + sym
+        fail "Missing method " + sym + " on " + self.inspect()
+    }
+
+    // respondsTo(sym) { self.methods().includes(sym.toString()) }
+
+    // send(sym, .args, &block) {
+    //     if (self.respondsTo(sym)) {
+    //         method = self.instanceVariableGet(sym)
+    //         if (block_given) {
+    //             method(...args, &block)
+    //         } else {
+    //             method(...args)
+    //         }
+    //     } else {
+    //         self.onMethodMissing(sym, ...args, &block)
+    //     }
+    // }
 end
 
 /*
@@ -637,7 +657,6 @@ class Range {
  */
 class Tuple {
     init(key, value) {
-        puts "NEW TUPLE: " + key + " = " + value
         self.key = key
         self.value = value
     }
@@ -655,7 +674,6 @@ class Tuple {
  */
 class Hash {
     init(its) {
-        puts "NEW HASH: " + its
         self.items = its || []
     }
     put(k,v) {

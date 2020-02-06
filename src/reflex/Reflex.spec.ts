@@ -539,7 +539,16 @@ describe('Reflex', () => {
 
     })
 
-
+    describe('message dispatch', () => {
+        describe('#onMethodMissing', () => {
+            xit('is invoked when a method is missing', () => {
+                evaluate("class Foo { onMethodMissing(sym) { true if sym == 'ok' else false }}")
+                evaluate("foo = Foo.new()")
+                expect(evaluate("foo.ok()")).toEqual(true)
+                expect(evaluate("foo.nope()")).toEqual(false)
+            })
+        })
+    })
     describe('main', () => {
         it('is an object', () => {
             expect(evaluate("self")).toEqual("Main")

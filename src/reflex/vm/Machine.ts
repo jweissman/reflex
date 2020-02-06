@@ -93,7 +93,7 @@ export default class Machine {
             let labelIndex = indexForLabel(code, label)
             this.frame.ip = labelIndex
             debug(prettyCode(code.slice(this.frame.ip+1,code.length-1)), this.frames)
-            this.executeLoop();
+            this.executeLoop(()=>false);
         } else {
             fail("Could not find label " + label)
         }
@@ -102,9 +102,9 @@ export default class Machine {
     halt() { this.halted = true; }
     halted = false;
     // delaySecs: number = Reflex.config.delay
-    executeLoop() {
+    executeLoop(haltPredicate: Function) {
         this.halted = false;
-        while (!this.halted) {
+        while (!this.halted && !haltPredicate(this.currentInstruction)) {
             this.execute(this.currentInstruction)
             this.frame.ip++;
         }
