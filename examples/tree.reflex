@@ -1,0 +1,10 @@
+class Tree
+  init(val,l,r) {
+      self.val=val; self.left=l; self.right = r;
+  }
+  visit() {
+      left = self.left.nil() ? [] : self.left.visit()
+      right = self.right.nil() ? [] : self.right.visit()
+      [ self.val, ...left, ...right ]
+  }
+end

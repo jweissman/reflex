@@ -709,6 +709,7 @@ using = Kernel.import
 prints = Kernel.println
 fail = Kernel.throw
 noop = ->{}
+cons = ...as=>as
 
 // old ways die hard
 require = Kernel.import

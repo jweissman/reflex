@@ -50,6 +50,60 @@ A few things to be aware of:
   reference to the (possibly function-valued member) of `Class(Foo)`.)
 * The standard library API, especially collections/enumerables, is heavily influenced by the languages that us inspire us; but keep in mind the implementation is black box -- and from memory -- and definitely not close to one-to-one. Even remotely precise equivalence or running actual Ruby code is not at all a design goal. Rather we want to build a rich reflective language with lots of suitable helpers to accelerate webdev (this is much closer to our target than mirroring Ruby's API in any sort of depth). This is not to say there isn't considerable inspiration taken of course!
 
+## Learn by Doing
+Some interactive Reflex sessions that might help communicate the feel, or be instructive to work through.
+
+### Extend classes live
+```
+> 1.upto(10).collect(&:double)
+Thrown:
+MethodMissing: Method missing: double on Integer(1)
+> class Integer { double() { self * 2 }}
+->self*2
+> 1.upto(10).collect(&:double)
+[2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+> 1.upto(10).collect(&:square)
+Thrown:
+MethodMissing: Method missing: square on Integer(1)
+> class Integer { square() { self * self }}
+->self*self
+> 1.upto(10).collect(&:square)
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+> 1.upto(10).collect(&:square).select { |x| x.toString().isPalindrome() }
+[1, 4, 9]
+> 1.upto(100).collect(&:square).select { |x| x.toString().isPalindrome() }
+[1, 4, 9, 121, 484, 676]
+> 1.upto(1000).collect(&:square).select { |x| x.toString().isPalindrome() }
+[1, 4, 9, 121, 484, 676, 10201, 12321, 14641, 40804, 44944, 69696, 94249, 698896]
+> class Integer { cube() { self ^ 3 }}
+->self^3
+> 1.upto(10000).collect(&:cube).select { |x| x.toString().isPalindrome() }
+...
+```
+
+### Explore the object model
+
+```
+> o=Object.new()
+Object
+> o.class
+Object
+> o.class.class
+Class
+> o.meta
+Meta(Object instance)
+> o.meta.super
+Meta(Object)
+> o.class.meta
+Meta(Object)
+> o.class.meta.super
+Metaclass
+> o.class.class
+Class
+> o.class.class.meta
+Metaclass
+```
+
 ## Execution Model
 
 - Message dispatch is central. Messages are delivered to objects which respond to them.

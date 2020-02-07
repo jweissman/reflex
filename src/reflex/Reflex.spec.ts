@@ -552,6 +552,9 @@ describe('Reflex', () => {
                 expect(evaluate('cons ...[1,2,3]')).toEqual([1,2,3])
                 expect(evaluate('cons 1,2,...[3,4,5],6,7,...[8,9,10]')).toEqual([1,2,3,4,5,6,7,8,9,10])
             })
+            xit('destructures empty array', () => {
+                expect(evaluate('cons ...[]')).toEqual([])
+            })
         })
     })
 
