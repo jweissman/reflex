@@ -218,4 +218,9 @@ describe('Array', () => {
         expect(evaluate("[1,2,4,8,16,32,64,128,256]")).toEqual([1,2,4,8,16,32,64,128,256])
     })
 
+    it('literals with destructuring', () => {
+        evaluate('a=[1,2,3]')
+        expect(evaluate('[...a,...a]')).toEqual([1,2,3,1,2,3])
+    })
+
 })

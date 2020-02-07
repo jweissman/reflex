@@ -24,7 +24,7 @@ import { Negate } from "./Negate";
 import { Binary } from "./Binary";
 import { Loop } from "./Loop";
 import { LogicalNot } from './LogicalNot';
-import { ArrayLiteral } from './ArrayLiteral';
+import { ArrayLiteral, DeconstructItem } from './ArrayLiteral';
 import { RangeLiteral } from './RangeLiteral';
 import { ArrayIndex } from './ArrayIndex';
 import { ArrayIndexEq } from './ArrayIndexEq';
@@ -170,6 +170,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
   HashLit: (_lb: Node, tupleSeq: Node, _rb: Node) => new HashLiteral(tupleSeq.tree),
   Tuple_kv: (key: Node, colon: Node, value: Node) => new TupleLit(key.sourceString, value.tree),
   ArrayLit: (_lq: Node, seq: Node, _rq: Node) => new ArrayLiteral(seq.tree),
+  ArrayItem: (it: Node) => it.tree,
+  ArrayItem_deconstruct: (_ellipsis: Node, it: Node) => new DeconstructItem(it.tree),
   ArrayIndex: (array: Node, _lb: Node, index: Node, _rb: Node) => new ArrayIndex(array.tree, index.tree),
   NonemptyListOf: (eFirst: Node, _sep: any, eRest: Node) => new Sequence([eFirst.tree, ...eRest.tree]),
   EmptyListOf: () => new Sequence([]),

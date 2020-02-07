@@ -271,7 +271,11 @@ Reflex {
     HashKey = alnum+
 
     ArrayLit
-      = "[" ListOf<Expr, ","> "]"
+      = "[" ListOf<ArrayItem, ","> "]"
+    
+    ArrayItem
+      = "..." Expr -- deconstruct
+      | Expr
 
     ArrayIndex
       = CoreExpr "[" Expr "]"

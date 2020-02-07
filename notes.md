@@ -1253,3 +1253,8 @@ anyway currently working through destructuring, which should unlock some of thos
 method missing/send kind of logic in pure reflex...
 
 ----------------------------------------------------------------
+
+circling back to thinking about low-cost typechecks at function boundaries
+just something you could turn on in test and get warnings about in prod
+low-drama, just semicolon and the expected class expression? `reverse(): String { self.collect().reverse().join() }`
+
