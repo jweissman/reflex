@@ -28,7 +28,7 @@ import { ArrayLiteral, DeconstructItem } from './ArrayLiteral';
 import { RangeLiteral } from './RangeLiteral';
 import { ArrayIndex } from './ArrayIndex';
 import { ArrayIndexEq } from './ArrayIndexEq';
-import { TupleLit } from "./TupleLit";
+import { TupleLit, DeconstructHash } from "./TupleLit";
 import { HashLiteral } from "./HashLiteral";
 
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
@@ -169,6 +169,7 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
     Number(`${whole.sourceString}.${fraction.sourceString}`), true),
   HashLit: (_lb: Node, tupleSeq: Node, _rb: Node) => new HashLiteral(tupleSeq.tree),
   Tuple_kv: (key: Node, colon: Node, value: Node) => new TupleLit(key.sourceString, value.tree),
+  Tuple_deconstruct: (_ellipsis: Node, value: Node) => new DeconstructHash(value.tree),
   ArrayLit: (_lq: Node, seq: Node, _rq: Node) => new ArrayLiteral(seq.tree),
   ArrayItem: (it: Node) => it.tree,
   ArrayItem_deconstruct: (_ellipsis: Node, it: Node) => new DeconstructItem(it.tree),

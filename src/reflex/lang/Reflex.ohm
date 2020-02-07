@@ -266,7 +266,8 @@ Reflex {
     
     Tuple
       = HashKey ":" Expr -- kv
-      | CoreExpr "=>" Expr -- obj
+      | "..." Expr -- deconstruct
+      // | CoreExpr "=>" Expr -- obj
 
     HashKey = alnum+
 

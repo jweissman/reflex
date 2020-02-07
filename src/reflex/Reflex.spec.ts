@@ -81,6 +81,12 @@ describe('Reflex', () => {
                    expect(evaluate("h.get('a')")).toEqual(1)
                    expect(evaluate("h[:a]")).toEqual(1)
                })
+               it('destructure', () => {
+                   evaluate("h={a:1}")
+                   evaluate("g={...h,b:2}")
+                   expect(evaluate("g[:a]")).toEqual(1)
+                   expect(evaluate("g[:b]")).toEqual(2)
+               })
            })
        })
         test.todo("tree")
@@ -235,9 +241,9 @@ describe('Reflex', () => {
                     it('passes functions as blocks', () => {
                         evaluate('x=nil')
                         evaluate('f(val){x=val}')
-                        evaluate('g(&b){b(Object)}')
+                        evaluate('giveObject(&b){b(Object)}')
                         expect(evaluate("x")).toEqual(null)
-                        evaluate('g(&f)')
+                        evaluate('giveObject(&f)')
                         expect(evaluate("x")).toEqual("Class(Object)")
                     })
 
