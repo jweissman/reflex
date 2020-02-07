@@ -9,47 +9,28 @@ import ReflexClass from './types/ReflexClass';
 import { ReflexString } from './types/ReflexString';
 import { ReflexArray } from './types/ReflexArray';
 import { ReflexSymbol } from './types/ReflexSymbol';
-// do conversions/casting?
 export class Converter {
     constructor(private ctrl: Controller) { }
+    static simpleMappings: { [key: string]: any } = {
+        Truth: true,
+        Falsity: false,
+        Nihil: null,
+        Indeterminate: NaN,
+        PositiveApeiron: Infinity,
+        NegativeApeiron: -Infinity,
+    }
     static castReflexToJavascript(object: ReflexObject, depth: number = 0): any {
-        // console.log("CAST REFLEX TO JS: " + object.inspect())
         if (depth > 8) { console.log("warning, truncating reflex obj: " + object); return null; }
-        if (object.className === 'Truth') {
-            return true;
-        }
-        else if (object.className === 'Nihil') {
-            return null;
-        }
-        else if (object.className === 'Falsity') {
-            return false;
-        }
-        else if (object.className === 'Indeterminate') {
-            return NaN;
-        }
-        else if (object.className === 'PositiveApeiron') {
-            return Infinity;
-        }
-        else if (object.className === 'NegativeApeiron') {
-            return -Infinity;
-        }
-        // else if (object.className === 'Unpack') {
-        //     return (object as ReflexObject).get('val');
-        // }
-        else if (object instanceof ReflexNumber) {
-            return object.value;
-        }
-        else if (object instanceof ReflexString) {
-            return object.value;
-        }
-        else if (object instanceof ReflexSymbol) {
-            return object.value;
-        }
+        if (Object.keys(Converter.simpleMappings).includes(object.className)) {
+            return Converter.simpleMappings[object.className];
+        } 
+        else if (object instanceof ReflexNumber) { return object.value; }
+        else if (object instanceof ReflexString) { return object.value; }
+        else if (object instanceof ReflexSymbol) { return object.value; }
         else if (object instanceof ReflexArray) {
-            // console.log("CONVERT ARRAY: " + object.items)
             return object.items.map(it => Converter.castReflexToJavascript(it, depth+1));
         } else {
-            return object; //.toString()
+            return object;
         }
         // return object;
     }

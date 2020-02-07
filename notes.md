@@ -1235,3 +1235,21 @@ it's like execute until with the predicate that the instruction is return and fr
         let result = this.stack[this.stack.length - 1]
         return result
     }
+
+------------------------
+
+considering hash to obj
+(makes sense but we'd need hash to have native impl of hash, which we want anyway)
+
+------------------------
+
+kind of thinking better of the dynamic invoke thing btw
+thinking now it makes more sense to push as much dispatch logic INTO reflex as possible
+and fight through that a little bit?
+anyway, method missing / yield and any additional things around blocks, destructuring and calling methods
+i want to make sure all this is super solid, and that the basic data structures are working correctly
+at that point!! we can push towards web
+anyway currently working through destructuring, which should unlock some of those abilities to write the
+method missing/send kind of logic in pure reflex...
+
+----------------------------------------------------------------

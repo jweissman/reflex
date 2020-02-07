@@ -1,10 +1,10 @@
-import { Value, Reference } from './instruction/Value';
+import { Value, Reference, Destructure } from './instruction/Value';
 import Machine from './Machine';
 import { Instruction, indexForLabel, Code, prettyValue } from './instruction/Instruction';
 import { Stone } from './instruction/Stone';
-import { log, debug } from './util/log';
+import { debug } from './util/log';
 import ReflexObject, { MethodMissing } from './types/ReflexObject';
-import { ReflexFunction, WrappedFunction } from './types/ReflexFunction';
+import { ReflexFunction, WrappedFunction, ReflexParam } from './types/ReflexFunction';
 import { dump } from './util/dump';
 import { ReflexNihil } from './types/ReflexNihil';
 import ReflexClass from './types/ReflexClass';
@@ -16,13 +16,14 @@ import { findFrameWithLocal } from './instruction/findFrameWithLocal';
 import assertNever from 'assert-never';
 import { Defun } from '../lang/ast/Defun';
 import { FunctionLiteral } from '../lang/ast/FunctionLiteral';
-import { Parameter } from '../lang/ast/Parameter';
+import { Parameter, ParameterDestructuring, ParameterReference } from '../lang/ast/Parameter';
 import { zip } from './util/zip';
 import { makeReflexObject } from './types/makeReflexObject';
 import { Converter } from './Converter';
 import chalk from 'chalk';
 import { prettyObject } from '../prettyObject';
 import { ReflexArray } from './types/ReflexArray';
+
 
 export class Controller {
     private converter: Converter = new Converter(this);
@@ -37,6 +38,7 @@ export class Controller {
     public makeObject(klass: ReflexClass, args: any[]) { return makeReflexObject(this.machine, klass, args) }
     public makeNil(): ReflexNihil { return this.makeObject(ReflexNihil.klass, []) as ReflexNihil; }
     public makeFunction(): ReflexFunction { return this.makeObject(ReflexFunction.klass, []) as ReflexFunction; }
+    public makeArray(items: ReflexObject[]): ReflexFunction { return this.makeObject(ReflexArray.klass, items) as ReflexFunction; }
 
     execute(instruction: Instruction) {
         let [op, value] = instruction;
@@ -55,6 +57,7 @@ export class Controller {
             case 'invoke': this.invoke(value as number, false); break;
             case 'deconstruct': 
                 let list = this.stack[this.stack.length - 1];
+                this.pop()
                 if (list instanceof ReflexArray) {
                     // console.log("DECONSTRUCT " + list.inspect());
                     [...list.items].reverse().forEach(it =>{
@@ -355,16 +358,18 @@ export class Controller {
             fn.label = label;
             fn.source = ast.inspect()
             fn.params = ast.params.items.flatMap((param: Parameter) => {
+                let reflexParam: ReflexParam[] = [param.name];
                 if (param instanceof Parameter) {
-                    if (param.reference) {
+                    if (param instanceof ParameterReference) {
                         if (fn.blockParamName) {
                             throw new Error("should only have one block param, found " + param.name + " and " + fn.blockParamName)
                         }
                         fn.blockParamName = param.name;
-                        return [];
-                    } else {
-                        return [param.name];
+                        reflexParam = [];
+                    } else if (param instanceof ParameterDestructuring) {
+                        reflexParam = [new Destructure(param.name)];
                     }
+                    return reflexParam;
                 } else {
                     throw new Error("expected parameter, got " + param);
                 }
@@ -401,6 +406,26 @@ export class Controller {
                 // debug("Method (" + fn.name + ") did not get block...", this.frames)
             }
         }
+
+        // okay, let's just get things working as before
+        // fnArgs = {}
+        let argCount = 0;
+        fn.params.flatMap((param, index) => {
+            if (param !== null) {
+                if (param instanceof Destructure) {
+                    // we need to make an array, but how many to pick
+                    // okay, we are at index, len of params is fn.params.length-1
+                    // we we need to grab remaining args (args.length-1 - argCount) - (fn.params.length-1-index)
+                    let toGather = (args.length - argCount) - (fn.params.length-1-index)
+                    fnArgs[param.name] = this.makeArray(args.slice(argCount,toGather) as ReflexObject[])
+                    argCount += toGather;
+                } else {
+                    let name: string = param;
+                    fnArgs[name] = args[argCount] as ReflexObject;
+                    argCount++;
+                }
+            }
+        })
 
         fnArgs = {...fnArgs, ...Object.fromEntries(zip(fn.params, args))} //.reverse()))
         if (!foundBlock && hasLocal('false', this.frames)) {

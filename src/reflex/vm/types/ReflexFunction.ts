@@ -1,12 +1,13 @@
 import ReflexObject from "./ReflexObject";
 import { Frame } from "../Frame";
-import ReflexClass from "./ReflexClass";
+import { Destructure } from "../instruction/Value";
 
+export type ReflexParam = string | Destructure;
 export class ReflexFunction extends ReflexObject {
     public name?: string;
     public label!: string;
     public arity!: number
-    public params!: string[]
+    public params!: ReflexParam[]
     public frame!: Frame;
     public blockParamName?: string;
     public source?: string;

@@ -7,7 +7,7 @@ import { fail } from './util/fail';
 import { trace } from './instruction/trace';
 import Reflex from '../Reflex';
 import { State } from './State';
-import { debug, log } from "./util/log";
+import { debug } from "./util/log";
 import Controller from "./Controller";
 import { Loader } from "./Loader";
 

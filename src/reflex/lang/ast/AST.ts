@@ -16,7 +16,7 @@ import LocalVarSet from "./LocalVarSet";
 import { Barecall } from "./Barecall";
 import { PipedBlock } from "./PipedBlock";
 import { Arguments, Argument } from "./Arguments";
-import { Parameter } from "./Parameter";
+import { Parameter, ParameterReference, ParameterDestructuring } from "./Parameter";
 import { Compare } from "./Compare";
 import { Conditional } from "./Conditional";
 import { NumberLiteral } from "./NumberLiteral";
@@ -28,56 +28,9 @@ import { ArrayLiteral } from './ArrayLiteral';
 import { RangeLiteral } from './RangeLiteral';
 import { ArrayIndex } from './ArrayIndex';
 import { ArrayIndexEq } from './ArrayIndexEq';
-import { Code } from '../../vm/instruction/Instruction';
+import { TupleLit } from "./TupleLit";
+import { HashLiteral } from "./HashLiteral";
 
-class TupleLit extends Tree {
-  code: Code;
- constructor(public key: string, public value: Tree) { super();
-    this.code = [
-      ['mark', 'tuple-args'],
-      ...this.value.code,
-      // ['mark', 'sym-arg'],
-      ['push', [this.key]],
-      // ['gather', 'sym-arg'],
-      ['bare', 'Symbol'],
-      ['push', 'new'],
-      ['call', null],
-      ['invoke', 1],
-      ['gather', 'tuple-args'],
-      ['bare', 'Tuple'],
-      ['push', 'new'],
-      ['call', null],
-      ['invoke', 2],
-    ];
-
-  }
-  inspect(): string { return this.key + " => " + this.value.inspect(); }
-}
-
-export class HashLiteral extends Tree {
-  seq: Sequence<Tree>;
-  code: Code;
-  inspect(): string { return "[" + this.seq.inspect() + "]"; }
-  constructor(sequence: Sequence<Tree>) {
-    super();
-    this.seq = sequence;
-    this.code = [
-      ['mark', 'hsh-args'],
-      ['mark', 'arr-args'],
-      ...this.seq.items.reverse().flatMap(it => it.code),
-      ['gather', 'arr-args'],
-      ['bare', 'Array'],
-      ['push', 'new'],
-      ['call', null],
-      ['invoke', this.seq.items.length],
-      ['gather', 'hsh-args'],
-      ['bare', 'Hash'],
-      ['push', 'new'],
-      ['call', null],
-      ['invoke', this.seq.items.length],
-    ];
-  }
-}
 function capitalize(str: string) { return str.charAt(0).toUpperCase() + str.slice(1) }
 
 export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
@@ -128,7 +81,8 @@ export const ast: { [key: string]: (...args: any[]) => Tree | string } = {
       throw new Error('Invalid parameter type: ' + parameter.tree)
     }
   },
-  Param_ref: (_amp: Node, word: Node) => new Parameter((word.tree as Bareword).word, true),
+  Param_ref: (_amp: Node, word: Node) => new ParameterReference((word.tree as Bareword).word),
+  Param_ellipsis: (_amp: Node, word: Node) => new ParameterDestructuring((word.tree as Bareword).word),
   EqExpr_local_eq: (message: Node, _eq: Node, expr: Node) => new LocalVarSet(message.tree, expr.tree),
   Message: (contents: Node) => new Message(contents.sourceString),
   Name: (contents: Node) => new Message(contents.sourceString),

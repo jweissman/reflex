@@ -5,11 +5,62 @@
 This document describes the structure of the Reflex programming language. 
 (Note the "official spec" for now is just the reference implementation contained in this repository.)
 
+## Coming from Ruby?
+
+A lot of things will be familiar! In particular, the object-class-metaclass model will be familiar:
+
+```
+                          .super                               .super
+            Meta(o) -------------------------> Meta(object) --------------> Metaclass
+           ^                                    ^                             ^
+          /                                    /                             /
+         /  .meta                             /   .meta                     /
+        /                                    /                             /
+       /          .class                    /            .class           /
+      o  -----------------------------> Object ----------------------> Class
+      (instance)
+
+```
+(I suspect this repeating 'trapezoidal' structure is where the 'jewel-like' clarity and purity of reflecting languages comes from!)
+
+On an object you have members like `self`, `super` and `meta`.
+`self` is the object's own reference to itself.
+`super` is the object 'seen as' its superclass (you can invoke superclass implementation of methods as super; chains)
+`meta` is the object's metaclass ("eigenclass") 
+
+Calling `meta.instanceEval { ... }` evaluates the block in the context of the metaclass.
+You can use this construction to define class methods.
+A helper for this idiom is defined in the preamble as `Class.auto`, used like:
+
+```
+class Foo {
+  auto { bar() { 0 }}
+}
+
+Foo.bar() # => 0
+```
+
+In general, do/end is interchangeable with block structures. Ultimately, you can write very Ruby-ish code!
+A few things to be aware of:
+
+* You can omit parentheses in a lot of places, except for function calls without arguments. You must explicitly give
+  parentheses to disambiguate this case from member access.
+  (We want to permit simple object member access in many cases -- to be able to refer
+  to an object's member functions as first class functions. So `Foo.bar` is always just going to return a 
+  reference to the (possibly function-valued member) of `Class(Foo)`.)
+* The standard library API, especially collections/enumerables, is heavily influenced by the languages that us inspire us; but keep in mind the implementation is black box -- and from memory -- and definitely not close to one-to-one. Even remotely precise equivalence or running actual Ruby code is not at all a design goal. Rather we want to build a rich reflective language with lots of suitable helpers to accelerate webdev (this is much closer to our target than mirroring Ruby's API in any sort of depth). This is not to say there isn't considerable inspiration taken of course!
+
 ## Execution Model
 
-- Message dispatch is central to the concept. Messages are delivered to objects which respond to them.
+- Message dispatch is central. Messages are delivered to objects which respond to them.
   From the outside, in principle there's way to know how it may respond to the message.
   (without 'hard' reflection through the encapsulated objects' implementation.)
+- An object receiving a message may have a member that responds to it, in which case that 
+  function is executed. Otherwise, a MethodMissing exception is thrown.
+- Objects can intercept these missing method exceptions by implementing an `onMethodMissing`
+  member with a signature like `onMethodMissing(sym, ...args, &block)`. This method
+  tells Reflex what to do with the message instead of throwing the exception.
+
 ## Core Types
 ### Object
 Every entity in the system descends from `Object`.

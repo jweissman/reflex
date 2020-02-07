@@ -537,6 +537,16 @@ describe('Reflex', () => {
             })
         })
 
+        describe('destructuring', () => {
+            beforeEach(() => evaluate('cons=...as=>as'))
+            it('destructures positional params', () => {
+                expect(evaluate('cons 1,2,3')).toEqual([1,2,3])
+            })
+            it('destructures args and params', () => {
+                expect(evaluate('cons ...[1,2,3]')).toEqual([1,2,3])
+                expect(evaluate('cons 1,2,...[3,4,5],6,7,...[8,9,10]')).toEqual([1,2,3,4,5,6,7,8,9,10])
+            })
+        })
     })
 
     describe('message dispatch', () => {

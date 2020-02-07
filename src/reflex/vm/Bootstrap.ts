@@ -11,7 +11,7 @@ import { Boots } from "./Boots";
 import { ReflexArray } from "./types/ReflexArray";
 import { ReflexString } from "./types/ReflexString";
 import { ReflexSymbol } from "./types/ReflexSymbol";
-import { debug, log } from "./util/log";
+import { log } from "./util/log";
 
 let boots: Boots = new Boots();
 boots.lace();

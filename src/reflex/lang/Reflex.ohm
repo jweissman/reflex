@@ -246,6 +246,7 @@ Reflex {
 
     Param
       = "&" Bareword -- ref
+      | "..." Bareword -- ellipsis
       | Bareword
 
     FunctionLit
